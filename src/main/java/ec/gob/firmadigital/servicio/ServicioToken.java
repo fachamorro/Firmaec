@@ -40,6 +40,8 @@ public class ServicioToken {
      */
     private static final Key KEY = TokenPrivateKey.generarKey();
 
+    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = TokenPrivateKey.getSignatureAlgorithm();
+
     /**
      * Generar un token JWT
      * 
@@ -58,8 +60,7 @@ public class ServicioToken {
      * @return
      */
     public String generarToken(long id, Date expiracion) {
-        return Jwts.builder().claim("id", id).signWith(SignatureAlgorithm.HS512, KEY).setExpiration(expiracion)
-                .compact();
+        return Jwts.builder().claim("id", id).signWith(SIGNATURE_ALGORITHM, KEY).setExpiration(expiracion).compact();
     }
 
     /**
