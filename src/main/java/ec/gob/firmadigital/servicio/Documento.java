@@ -19,13 +19,12 @@
 package ec.gob.firmadigital.servicio;
 
 import java.io.Serializable;
-import java.util.Base64;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Representa un documento almacenado en la base de datos.
@@ -33,6 +32,7 @@ import javax.persistence.Transient;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity
+@XmlRootElement
 public class Documento implements Serializable {
 
     private static final long serialVersionUID = -8995191478984459392L;
@@ -41,14 +41,11 @@ public class Documento implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    /** Contenido del documento, representado en Base64 */
-    private String contenido;
+    private String cedula;
+
+    private byte[] archivo;
 
     public Documento() {
-    }
-
-    public Documento(String contenido) {
-        this.contenido = contenido;
     }
 
     public long getId() {
@@ -59,16 +56,19 @@ public class Documento implements Serializable {
         this.id = id;
     }
 
-    public String getContenido() {
-        return contenido;
+    public String getCedula() {
+        return cedula;
     }
 
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
     }
 
-    @Transient
     public byte[] getArchivo() {
-        return Base64.getDecoder().decode(contenido);
+        return archivo;
+    }
+
+    public void setArchivo(byte[] archivo) {
+        this.archivo = archivo;
     }
 }

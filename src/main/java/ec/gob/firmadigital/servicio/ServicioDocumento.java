@@ -18,18 +18,26 @@
 
 package ec.gob.firmadigital.servicio;
 
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 import java.util.Date;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -53,34 +61,46 @@ public class ServicioDocumento {
     @PersistenceContext(unitName = "FirmaDigitalDS")
     private EntityManager entityManager;
 
+    private static final Decoder BASE64_DECODER = Base64.getDecoder();
+
+    private static final Encoder BASE64_ENCODER = Base64.getEncoder();
+
     /**
      * Minutos antes de que el Token expire
      */
     private static int MINUTOS_EXPIRACION = 5; // FIXME: Sacar esto de aqui:
 
-    /***
+    /**
      * Almacena un documento desde un Sistema Transversal.
      * 
-     * @param base64
-     *            el documento en Base64
+     * @param cedula
+     * @param archivoBase64
      * @return el token para poder buscar el documento
      */
     @POST
+    @QueryParam("cedula")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public String crearDocumento(String base64) {
+    public String crearDocumento(@NotNull @QueryParam("cedula") String cedula, @Size(min = 1) String archivoBase64) {
         // Crear nuevo documento
-        Documento archivo = new Documento();
-        archivo.setContenido(base64);
+        Documento documento = new Documento();
+        documento.setCedula(cedula);
+
+        try {
+            byte[] archivo = BASE64_DECODER.decode(archivoBase64);
+            documento.setArchivo(archivo);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Error al decodificar Base64");
+        }
 
         // Almacenar
-        entityManager.persist(archivo);
+        entityManager.persist(documento);
 
         // Expiracion del Token en 5 minutos
         Date expiracion = addMinutes(new Date(), MINUTOS_EXPIRACION);
 
-        // Retorna el JWT
-        return servicioToken.generarToken(archivo.getId(), expiracion);
+        // Retorna el Token
+        return servicioToken.generarToken(documento.getId(), expiracion);
     }
 
     /**
@@ -95,30 +115,35 @@ public class ServicioDocumento {
     public String obtenerDocumento(@PathParam("token") String token) {
         try {
             long id = servicioToken.parseToken(token);
-            Documento archivo = entityManager.find(Documento.class, id);
-
-            return archivo.getContenido();
-        } catch (TokenInvalidoException | TokenExpiradoException e) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            Documento documento = entityManager.find(Documento.class, id);
+            return BASE64_ENCODER.encodeToString(documento.getArchivo());
+        } catch (TokenInvalidoException e) {
+            throw new NotFoundException("Token invalido");
+        } catch (TokenExpiradoException e) {
+            throw new NotFoundException("Token expirado");
         }
     }
 
     /**
-     * Almacenar el documento firmado.
      * 
-     * @param id
-     *            el identificador del
-     * @param base64
+     * @param token
+     * @param archivoBase64
      * @return
      */
     @PUT
     @Path("{token}")
     @Consumes(MediaType.TEXT_PLAIN)
-    public Response actualizarDocumento(@PathParam("token") String token, String base64) {
+    public Response actualizarDocumento(@PathParam("token") String token, String archivoBase64) {
         try {
             long id = servicioToken.parseToken(token);
-            Documento archivo = entityManager.find(Documento.class, id);
-            archivo.setContenido(base64);
+            Documento documento = entityManager.find(Documento.class, id);
+
+            try {
+                byte[] archivo = BASE64_DECODER.decode(archivoBase64);
+                documento.setArchivo(archivo);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Error al decodificar Base64");
+            }
 
             return Response.status(Status.OK).build();
         } catch (TokenInvalidoException | TokenExpiradoException e) {
