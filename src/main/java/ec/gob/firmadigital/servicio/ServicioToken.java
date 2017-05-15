@@ -26,6 +26,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.impl.crypto.MacProvider;
 
 /**
  * Servicio para trabajar con tokens tipo JWT (https://jwt.io)
@@ -38,9 +39,10 @@ public class ServicioToken {
      * Llave privada para firmar los tokens, se genera cada vez que inicia la
      * aplicacion
      */
-    private static final Key KEY = TokenPrivateKey.generarKey();
+    private static final Key KEY = MacProvider.generateKey();
 
-    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = TokenPrivateKey.getSignatureAlgorithm();
+    /** Algoritmo de firma HMAC por defecto */
+    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
     /**
      * Generar un token JWT
