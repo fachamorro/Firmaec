@@ -18,18 +18,15 @@
 
 package ec.gob.firmadigital.servicio;
 
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -45,6 +42,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.jboss.logging.Logger;
+
 /**
  * Servicio REST para almacenar, actualizar y obtener documentos desde los
  * sistemas transversales y la aplicación en api.firmadigital.gob.ec
@@ -57,6 +56,8 @@ public class ServicioDocumentoRest {
 
     @EJB
     private ServicioDocumento servicioDocumento;
+
+    private static final Logger logger = Logger.getLogger(ServicioDocumentoRest.class.getName());
 
     /**
      * Almacena un documento desde un Sistema Transversal.
@@ -90,16 +91,16 @@ public class ServicioDocumentoRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String crearDocumentos(JsonObject json) {
         Map<String, String> documentos = new HashMap<>();
+        List<JsonObject> array = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
 
-        String cedula = json.getString("cedula");
-        String sistema = json.getString("sistema");
-        List<JsonObject> documentosJson = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
-
-        for (JsonObject documentoJson : documentosJson) {
+        for (JsonObject documentoJson : array) {
             String nombre = documentoJson.getString("nombre");
             String documento = documentoJson.getString("documento");
             documentos.put(nombre, documento);
         }
+
+        String cedula = json.getString("cedula");
+        String sistema = json.getString("sistema");
 
         try {
             return servicioDocumento.crearDocumentos(cedula, sistema, documentos);
@@ -117,6 +118,7 @@ public class ServicioDocumentoRest {
     @GET
     @Path("{token}")
     @Produces(MediaType.TEXT_PLAIN)
+    @Deprecated
     public String obtenerDocumento(@PathParam("token") String token) {
         try {
             return servicioDocumento.obtenerDocumento(token);
@@ -148,17 +150,14 @@ public class ServicioDocumentoRest {
             throw new NotFoundException("Token expirado");
         }
 
-        // Para construir un array de documentos
-        JsonObjectBuilder builder = Json.createObjectBuilder();
-        Set<Long> keySet = documentos.keySet();
+        JsonArrayBuilder array = Json.createArrayBuilder();
 
-        for (Long id : keySet) {
+        for (Long id : documentos.keySet()) {
             String documento = documentos.get(id);
-            builder.add("documentos", Json.createArrayBuilder()
-                    .add(Json.createObjectBuilder().add("id", id).add("documento", documento)));
+            array.add(Json.createObjectBuilder().add("id", id).add("documento", documento));
         }
 
-        return builder.build();
+        return Json.createObjectBuilder().add("documentos", array).build();
     }
 
     /**
@@ -170,6 +169,7 @@ public class ServicioDocumentoRest {
     @PUT
     @Path("{token}")
     @Consumes(MediaType.TEXT_PLAIN)
+    @Deprecated
     public Response actualizarDocumento(@PathParam("token") String token, String archivoBase64) {
         try {
             servicioDocumento.actualizarDocumento(token, archivoBase64);
@@ -191,18 +191,16 @@ public class ServicioDocumentoRest {
     @Path("{token}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    //DAMN
     public Response actualizarDocumentos(@PathParam("token") String token, JsonObject json) {
-        System.out.println("JSON from SDR="+ json);
-        
-        
-        Map<Long, String> documentos = new HashMap<>();
-        List<JsonObject> documentosJson = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
+        logger.info("json=" + json);
 
-        for (JsonObject documentoJson : documentosJson) {
+        Map<Long, String> documentos = new HashMap<>();
+        List<JsonObject> array = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
+
+        for (JsonObject documentoJson : array) {
             Integer id = documentoJson.getInt("id");
             String documento = documentoJson.getString("documento");
-            documentos.put((long) id, documento);
+            documentos.put(id.longValue(), documento);
         }
 
         try {
