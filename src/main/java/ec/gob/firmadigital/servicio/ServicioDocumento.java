@@ -79,6 +79,7 @@ public class ServicioDocumento {
      * @param archivoBase64
      * @return el token para poder buscar el documento
      */
+    @Deprecated
     public String crearDocumento(@NotNull String cedula, @NotNull String sistema, @NotNull String nombre,
             @Size(min = 1) String archivoBase64) throws IllegalArgumentException {
 
@@ -101,7 +102,7 @@ public class ServicioDocumento {
         parametros.put("cedula", cedula);
         parametros.put("sistema", sistema);
 
-        // Expiracion del Token en 5 minutos
+        // Expiracion del Token
         Date expiracion = Timeout.addMinutes(new Date(), Timeout.DEFAULT_TIMEOUT);
 
         // Retorna el Token
@@ -132,7 +133,7 @@ public class ServicioDocumento {
             entityManager.persist(documento);
 
             // Agregar a la lista de Ids
-            ids.add(String.valueOf(documento.getId()));
+            ids.add(documento.getId().toString());
         }
 
         Map<String, Object> parametros = new HashMap<>();
@@ -153,6 +154,7 @@ public class ServicioDocumento {
      * @param token
      * @return el documento en Base64
      */
+    @Deprecated
     public String obtenerDocumento(String token) throws TokenInvalidoException, TokenExpiradoException {
         Long id = Long.parseLong((String) servicioToken.parseTokenParameter(token, "id"));
         Documento documento = entityManager.find(Documento.class, id);
@@ -168,10 +170,9 @@ public class ServicioDocumento {
     public Map<Long, String> obtenerDocumentos(String token) throws TokenInvalidoException, TokenExpiradoException {
         Map<Long, String> documentos = new HashMap<>();
         String ids = (String) servicioToken.parseTokenParameter(token, "ids");
-        System.out.println("ids=" + ids);
-        List<String> idList = Arrays.asList(ids.split("\\s*,\\s*"));
+        logger.info("ids=" + ids);
 
-        for (String id : idList) {
+        for (String id : convertirEnList(ids)) {
             Long pk = Long.parseLong(id);
             Documento documento = entityManager.find(Documento.class, pk);
             String base64 = BASE64_ENCODER.encodeToString(documento.getArchivo());
@@ -187,6 +188,7 @@ public class ServicioDocumento {
      * @param documentoBase64
      * @return
      */
+    @Deprecated
     public void actualizarDocumento(String token, String documentoBase64)
             throws IllegalArgumentException, TokenInvalidoException, TokenExpiradoException {
         long id = (int) servicioToken.parseTokenParameter(token, "id");
@@ -227,12 +229,10 @@ public class ServicioDocumento {
      */
     public void actualizarDocumentos(String token, Map<Long, String> documentos)
             throws IllegalArgumentException, TokenInvalidoException, TokenExpiradoException {
-
         String ids = (String) servicioToken.parseTokenParameter(token, "ids");
-        System.out.println("ids=" + ids);
-        List<String> idList = Arrays.asList(ids.split("\\s*,\\s*"));
+        logger.info("ids=" + ids);
 
-        for (String id : idList) {
+        for (String id : convertirEnList(ids)) {
             Long pk = Long.parseLong(id);
             String documentoBase64 = documentos.get(pk);
 
@@ -242,6 +242,7 @@ public class ServicioDocumento {
             documento.setArchivo(archivo);
 
             String nombreFirmante;
+
             try {
                 nombreFirmante = ServicioValidacionPdf.getNombre(archivo);
             } catch (SignatureException e) {
@@ -272,5 +273,16 @@ public class ServicioDocumento {
         String url = servicioSistema.buscarUrlSistema(documento.getSistema());
         return servicioSistemaTransversal.almacenarDocumento(url, documento.getCedula(), documento.getNombre(),
                 BASE64_ENCODER.encodeToString(documento.getArchivo()), nombreFirmante);
+    }
+
+    /**
+     * Convierte una cadena de texto con una lista separada por comas de ints en
+     * una List.
+     * 
+     * @param ids
+     * @return
+     */
+    private List<String> convertirEnList(String ids) {
+        return Arrays.asList(ids.split("\\s*,\\s*"));
     }
 }
