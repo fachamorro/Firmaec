@@ -1,6 +1,6 @@
 /*
  * Firma Digital: Servicio
- * Copyright (C) 2017 Secretaría Nacional de la Administración Pública
+ * Copyright 2017 Secretaría Nacional de la Administración Pública
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,57 +18,59 @@
 
 package ec.gob.firmadigital.servicio;
 
+import java.security.KeyStoreException;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import javax.xml.soap.SOAPException;
+
+import org.jboss.logging.Logger;
+
+import io.rubrica.ocsp.OcspValidationException;
 
 /**
- * Servicio REST para almacenar, actualizar y obtener documentos desde los
- * sistemas transversales y la aplicación en api.firmadigital.gob.ec
- * 
- * FIXME: Proteger este metodo con usuario/password para cada sistema
- * transversal
+ * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
+ * transversales y la aplicación en api.firmadigital.gob.ec
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless
-@Path("/documentos")
 public class ServicioDocumento {
 
-    private ServicioToken servicioToken = new ServicioToken();
+    @EJB
+    private ServicioToken servicioToken;
+
+    @EJB
+    private ServicioSistema servicioSistema;
+
+    @EJB
+    private ServicioSistemaTransversal servicioSistemaTransversal;
 
     @PersistenceContext(unitName = "FirmaDigitalDS")
     private EntityManager entityManager;
 
+    /** Base 64 decoder */
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
 
+    /** Base 64 encoder */
     private static final Encoder BASE64_ENCODER = Base64.getEncoder();
 
-    /**
-     * Minutos antes de que el Token expire
-     */
-    private static int MINUTOS_EXPIRACION = 5; // FIXME: Sacar esto de aqui:
+    private static final Logger logger = Logger.getLogger(ServicioDocumento.class.getName());
 
     /**
      * Almacena un documento desde un Sistema Transversal.
@@ -77,30 +79,72 @@ public class ServicioDocumento {
      * @param archivoBase64
      * @return el token para poder buscar el documento
      */
-    @POST
-    @QueryParam("cedula")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String crearDocumento(@NotNull @QueryParam("cedula") String cedula, @Size(min = 1) String archivoBase64) {
+    public String crearDocumento(@NotNull String cedula, @NotNull String sistema, @NotNull String nombre,
+            @Size(min = 1) String archivoBase64) throws IllegalArgumentException {
+
+        // Decodificar el archivo
+        byte[] archivo = BASE64_DECODER.decode(archivoBase64);
+
         // Crear nuevo documento
         Documento documento = new Documento();
         documento.setCedula(cedula);
-
-        try {
-            byte[] archivo = BASE64_DECODER.decode(archivoBase64);
-            documento.setArchivo(archivo);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Error al decodificar Base64");
-        }
+        documento.setSistema(sistema);
+        documento.setNombre(nombre);
+        documento.setFecha(new Date());
+        documento.setArchivo(archivo);
 
         // Almacenar
         entityManager.persist(documento);
 
+        Map<String, Object> parametros = new HashMap<>();
+        parametros.put("id", documento.getId().toString());
+        parametros.put("cedula", cedula);
+        parametros.put("sistema", sistema);
+
         // Expiracion del Token en 5 minutos
-        Date expiracion = addMinutes(new Date(), MINUTOS_EXPIRACION);
+        Date expiracion = Timeout.addMinutes(new Date(), Timeout.DEFAULT_TIMEOUT);
 
         // Retorna el Token
-        return servicioToken.generarToken(documento.getId(), expiracion);
+        return servicioToken.generarToken(parametros, expiracion);
+    }
+
+    public String crearDocumentos(@NotNull String cedula, @NotNull String sistema, Map<String, String> documentos)
+            throws IllegalArgumentException {
+
+        List<String> ids = new ArrayList<>();
+        Set<String> nombres = documentos.keySet();
+
+        for (String nombre : nombres) {
+            String base64 = documentos.get(nombre);
+
+            // Decodificar el archivo
+            byte[] archivo = BASE64_DECODER.decode(base64);
+
+            // Crear nuevo documento
+            Documento documento = new Documento();
+            documento.setCedula(cedula);
+            documento.setSistema(sistema);
+            documento.setNombre(nombre);
+            documento.setFecha(new Date());
+            documento.setArchivo(archivo);
+
+            // Almacenar
+            entityManager.persist(documento);
+
+            // Agregar a la lista de Ids
+            ids.add(String.valueOf(documento.getId()));
+        }
+
+        Map<String, Object> parametros = new HashMap<>();
+        parametros.put("cedula", cedula);
+        parametros.put("sistema", sistema);
+        parametros.put("ids", String.join(",", ids));
+
+        // Expiracion del Token
+        Date expiracion = Timeout.addMinutes(new Date(), Timeout.DEFAULT_TIMEOUT);
+
+        // Retorna el Token
+        return servicioToken.generarToken(parametros, expiracion);
     }
 
     /**
@@ -109,19 +153,70 @@ public class ServicioDocumento {
      * @param token
      * @return el documento en Base64
      */
-    @GET
-    @Path("{token}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String obtenerDocumento(@PathParam("token") String token) {
-        try {
-            long id = servicioToken.parseToken(token);
-            Documento documento = entityManager.find(Documento.class, id);
-            return BASE64_ENCODER.encodeToString(documento.getArchivo());
-        } catch (TokenInvalidoException e) {
-            throw new NotFoundException("Token invalido");
-        } catch (TokenExpiradoException e) {
-            throw new NotFoundException("Token expirado");
+    public String obtenerDocumento(String token) throws TokenInvalidoException, TokenExpiradoException {
+        Long id = Long.parseLong((String) servicioToken.parseTokenParameter(token, "id"));
+        Documento documento = entityManager.find(Documento.class, id);
+        return BASE64_ENCODER.encodeToString(documento.getArchivo());
+    }
+
+    /**
+     * Obtiene un documento mediante un token.
+     * 
+     * @param token
+     * @return el documento en Base64
+     */
+    public Map<Long, String> obtenerDocumentos(String token) throws TokenInvalidoException, TokenExpiradoException {
+        Map<Long, String> documentos = new HashMap<>();
+        String ids = (String) servicioToken.parseTokenParameter(token, "ids");
+        System.out.println("ids=" + ids);
+        List<String> idList = Arrays.asList(ids.split("\\s*,\\s*"));
+
+        for (String id : idList) {
+            Long pk = Long.parseLong(id);
+            Documento documento = entityManager.find(Documento.class, pk);
+            String base64 = BASE64_ENCODER.encodeToString(documento.getArchivo());
+            documentos.put(pk, base64);
         }
+
+        return documentos;
+    }
+
+    /**
+     * 
+     * @param token
+     * @param documentoBase64
+     * @return
+     */
+    public void actualizarDocumento(String token, String documentoBase64)
+            throws IllegalArgumentException, TokenInvalidoException, TokenExpiradoException {
+        long id = (int) servicioToken.parseTokenParameter(token, "id");
+        Documento documento = entityManager.find(Documento.class, id);
+
+        byte[] archivo = BASE64_DECODER.decode(documentoBase64);
+        documento.setArchivo(archivo);
+
+        String nombreFirmante;
+        try {
+            nombreFirmante = ServicioValidacionPdf.getNombre(archivo);
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        } catch (OcspValidationException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Actualizar el documento en el sistema transversal
+        try {
+            String resultado = actualizarSistemaTransversal(documento, nombreFirmante);
+        } catch (SistemaNoEncontradoException e) {
+            throw new RuntimeException(e);
+        } catch (SOAPException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Borrar documento
+        entityManager.remove(documento);
     }
 
     /**
@@ -130,36 +225,52 @@ public class ServicioDocumento {
      * @param archivoBase64
      * @return
      */
-    @PUT
-    @Path("{token}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    public Response actualizarDocumento(@PathParam("token") String token, String archivoBase64) {
-        try {
-            long id = servicioToken.parseToken(token);
-            Documento documento = entityManager.find(Documento.class, id);
+    public void actualizarDocumentos(String token, Map<Long, String> documentos)
+            throws IllegalArgumentException, TokenInvalidoException, TokenExpiradoException {
 
+        String ids = (String) servicioToken.parseTokenParameter(token, "ids");
+        System.out.println("ids=" + ids);
+        List<String> idList = Arrays.asList(ids.split("\\s*,\\s*"));
+
+        for (String id : idList) {
+            Long pk = Long.parseLong(id);
+            String documentoBase64 = documentos.get(pk);
+
+            // Actualizar el archivo
+            Documento documento = entityManager.find(Documento.class, pk);
+            byte[] archivo = BASE64_DECODER.decode(documentoBase64);
+            documento.setArchivo(archivo);
+
+            String nombreFirmante;
             try {
-                byte[] archivo = BASE64_DECODER.decode(archivoBase64);
-                documento.setArchivo(archivo);
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Error al decodificar Base64");
+                nombreFirmante = ServicioValidacionPdf.getNombre(archivo);
+            } catch (SignatureException e) {
+                throw new RuntimeException(e);
+            } catch (KeyStoreException e) {
+                throw new RuntimeException(e);
+            } catch (OcspValidationException e) {
+                throw new RuntimeException(e);
             }
 
-            return Response.status(Status.OK).build();
-        } catch (TokenInvalidoException | TokenExpiradoException e) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            // Actualizar el documento en el sistema transversal
+            try {
+                String resultado = actualizarSistemaTransversal(documento, nombreFirmante);
+                logger.info("Resultado de actualizar en el sistema transversal:" + resultado);
+            } catch (SistemaNoEncontradoException e) {
+                throw new RuntimeException(e);
+            } catch (SOAPException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Borrar documento
+            entityManager.remove(documento);
         }
     }
 
-    /**
-     * Agregar una cantidad de minutos a una hora dada.
-     * 
-     * @param date
-     * @param minutes
-     * @return
-     */
-    private Date addMinutes(Date date, int minutes) {
-        long time = date.getTime() + (minutes * 60 * 1000);
-        return new Date(time);
+    private String actualizarSistemaTransversal(Documento documento, String nombreFirmante)
+            throws SistemaNoEncontradoException, SOAPException {
+        String url = servicioSistema.buscarUrlSistema(documento.getSistema());
+        return servicioSistemaTransversal.almacenarDocumento(url, documento.getCedula(), documento.getNombre(),
+                BASE64_ENCODER.encodeToString(documento.getArchivo()), nombreFirmante);
     }
 }

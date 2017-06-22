@@ -18,14 +18,11 @@
 
 package ec.gob.firmadigital.servicio;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+public class SistemaNoEncontradoException extends Exception {
 
-/**
- * Configuración de la aplicacion REST
- * 
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
- */
-@ApplicationPath("")
-public class RestApplication extends Application {
+    private static final long serialVersionUID = 3362068730837543172L;
+
+    public SistemaNoEncontradoException() {
+        super();
+    }
 }

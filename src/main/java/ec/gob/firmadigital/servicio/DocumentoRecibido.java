@@ -18,14 +18,29 @@
 
 package ec.gob.firmadigital.servicio;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+public class DocumentoRecibido {
 
-/**
- * Configuración de la aplicacion REST
- * 
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
- */
-@ApplicationPath("")
-public class RestApplication extends Application {
+    private String nombre;
+    private String documento;
+
+    public DocumentoRecibido(String nombre, String documento) {
+        this.nombre = nombre;
+        this.documento = documento;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDocumento() {
+        return documento;
+    }
+
+    public void setDocumento(String documento) {
+        this.documento = documento;
+    }
 }

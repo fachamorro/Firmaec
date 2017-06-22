@@ -1,6 +1,6 @@
 /*
  * Firma Digital: Servicio
- * Copyright (C) 2017 Secretaría Nacional de la Administración Pública
+ * Copyright 2017 Secretaría Nacional de la Administración Pública
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 package ec.gob.firmadigital.servicio;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -39,20 +40,35 @@ public class Documento implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String cedula;
 
+    // FIXME: Relation
+    private String sistema;
+
+    private String nombre;
+
     private byte[] archivo;
 
+    private Date fecha;
+    
     public Documento() {
     }
 
-    public long getId() {
+    public Documento(String cedula, String sistema, String nombre, byte[] archivo, Date fecha) {
+        this.cedula = cedula;
+        this.sistema = sistema;
+        this.nombre = nombre;
+        this.archivo = archivo;
+        this.fecha = fecha;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -64,11 +80,41 @@ public class Documento implements Serializable {
         this.cedula = cedula;
     }
 
+    public String getSistema() {
+        return sistema;
+    }
+
+    public void setSistema(String sistema) {
+        this.sistema = sistema;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
     public byte[] getArchivo() {
         return archivo;
     }
 
     public void setArchivo(byte[] archivo) {
         this.archivo = archivo;
+    }
+
+    public Date getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
+    }
+
+    @Override
+    public String toString() {
+        return "Documento [id=" + id + ", cedula=" + cedula + ", sistema=" + sistema + ", nombre=" + nombre + ", fecha="
+                + fecha + "]";
     }
 }

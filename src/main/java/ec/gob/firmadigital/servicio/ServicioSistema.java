@@ -18,14 +18,26 @@
 
 package ec.gob.firmadigital.servicio;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
-/**
- * Configuración de la aplicacion REST
- * 
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
- */
-@ApplicationPath("")
-public class RestApplication extends Application {
+@Stateless
+public class ServicioSistema {
+
+    @PersistenceContext(unitName = "FirmaDigitalDS")
+    private EntityManager em;
+
+    public String buscarUrlSistema(String nombre) throws SistemaNoEncontradoException {
+        try {
+            TypedQuery<Sistema> q = em.createQuery("SELECT s FROM Sistema s WHERE s.nombre = :nombre", Sistema.class);
+            q.setParameter("nombre", nombre);
+            Sistema sistema = q.getSingleResult();
+            return sistema.getURL();
+        } catch (NoResultException e) {
+            throw new SistemaNoEncontradoException();
+        }
+    }
 }

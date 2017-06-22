@@ -1,6 +1,6 @@
 /*
  * Firma Digital: Servicio
- * Copyright (C) 2017 Secretaría Nacional de la Administración Pública
+ * Copyright 2017 Secretaría Nacional de la Administración Pública
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

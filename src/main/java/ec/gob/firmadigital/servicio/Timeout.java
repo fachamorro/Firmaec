@@ -18,14 +18,24 @@
 
 package ec.gob.firmadigital.servicio;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import java.util.Date;
 
-/**
- * Configuración de la aplicacion REST
- * 
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
- */
-@ApplicationPath("")
-public class RestApplication extends Application {
+public class Timeout {
+
+    /**
+     * Minutos antes de que el Token expire.
+     */
+    public static final int DEFAULT_TIMEOUT = 25;
+
+    /**
+     * Agregar una cantidad de minutos a una hora dada.
+     * 
+     * @param date
+     * @param minutes
+     * @return
+     */
+    public static Date addMinutes(Date date, int minutes) {
+        long time = date.getTime() + (minutes * 60 * 1000);
+        return new Date(time);
+    }
 }

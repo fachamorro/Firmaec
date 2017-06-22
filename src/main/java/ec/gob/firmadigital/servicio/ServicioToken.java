@@ -1,6 +1,6 @@
 /*
  * Firma Digital: Servicio
- * Copyright (C) 2017 Secretaría Nacional de la Administración Pública
+ * Copyright 2017 Secretaría Nacional de la Administración Pública
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,18 @@ package ec.gob.firmadigital.servicio;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
+import javax.ejb.Stateless;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 
 /**
@@ -33,6 +39,7 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
+@Stateless
 public class ServicioToken {
 
     /**
@@ -42,16 +49,16 @@ public class ServicioToken {
     private static final Key KEY = MacProvider.generateKey();
 
     /** Algoritmo de firma HMAC por defecto */
-    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
+    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
     /**
-     * Generar un token JWT
+     * Generar un token JWT sin expiracion.
      * 
      * @param id
      * @return
      */
-    public String generarToken(long id) {
-        return generarToken(id, null);
+    public String generarToken(Map<String, Object> parametros) {
+        return generarToken(parametros, null);
     }
 
     /**
@@ -61,8 +68,9 @@ public class ServicioToken {
      * @param expiracion
      * @return
      */
-    public String generarToken(long id, Date expiracion) {
-        return Jwts.builder().claim("id", id).signWith(SIGNATURE_ALGORITHM, KEY).setExpiration(expiracion).compact();
+    public String generarToken(Map<String, Object> parametros, Date expiracion) {
+        Claims claims = new DefaultClaims(parametros);
+        return Jwts.builder().setClaims(claims).signWith(SIGNATURE_ALGORITHM, KEY).setExpiration(expiracion).compact();
     }
 
     /**
@@ -74,9 +82,9 @@ public class ServicioToken {
      * @throws TokenInvalidoException
      * @throws TokenExpiradoException
      */
-    public int parseToken(String token) throws TokenInvalidoException, TokenExpiradoException {
+    public Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException {
         try {
-            return (int) Jwts.parser().setSigningKey(KEY).parseClaimsJws(token).getBody().get("id");
+            return Jwts.parser().setSigningKey(KEY).parseClaimsJws(token).getBody();
         } catch (SignatureException e) {
             throw new TokenInvalidoException(e);
         } catch (MissingClaimException e) {
@@ -84,5 +92,11 @@ public class ServicioToken {
         } catch (ExpiredJwtException e) {
             throw new TokenExpiradoException(e);
         }
+    }
+
+    public Object parseTokenParameter(String token, String parametro)
+            throws TokenInvalidoException, TokenExpiradoException {
+        Map<String, Object> parametros = parseToken(token);
+        return parametros.get(parametro);
     }
 }
