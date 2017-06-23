@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -38,8 +39,6 @@ import javax.persistence.PersistenceContext;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.soap.SOAPException;
-
-import org.jboss.logging.Logger;
 
 import io.rubrica.ocsp.OcspValidationException;
 

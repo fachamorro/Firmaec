@@ -21,6 +21,7 @@ package ec.gob.firmadigital.servicio;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -41,8 +42,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import org.jboss.logging.Logger;
 
 /**
  * Servicio REST para almacenar, actualizar y obtener documentos desde los
@@ -192,7 +191,7 @@ public class ServicioDocumentoRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response actualizarDocumentos(@PathParam("token") String token, JsonObject json) {
-        logger.info("json=" + json);
+        logger.fine("json=" + json);
 
         Map<Long, String> documentos = new HashMap<>();
         List<JsonObject> array = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
