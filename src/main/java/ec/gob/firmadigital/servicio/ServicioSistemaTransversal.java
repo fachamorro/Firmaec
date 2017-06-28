@@ -18,18 +18,20 @@
 
 package ec.gob.firmadigital.servicio;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
@@ -42,25 +44,68 @@ import javax.xml.soap.SOAPMessage;
 
 import org.w3c.dom.NodeList;
 
+import ec.gob.firmadigital.servicio.model.Sistema;
+
 /**
- * Servicio para invocar Web Services de los sistemas transaccionales.
- * Principalmente utilizado para almacenar el documento ya firmado.
+ * Servicio para invocar Web Services de los sistemas transaccionales, utilizado
+ * para almacenar el documento ya firmado.
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless
 public class ServicioSistemaTransversal {
 
-    private static final Logger logger = Logger.getLogger(ServicioSistemaTransversal.class.getName());
+    @PersistenceContext(unitName = "FirmaDigitalDS")
+    private EntityManager em;
+
+    private static final int PING_TIMEOUT = 5000;
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-    public String almacenarDocumento(String url, String usuario, String documento, String archivo,
-            String nombreFirmante) throws SOAPException {
+    private static final Logger logger = Logger.getLogger(ServicioSistemaTransversal.class.getName());
+
+    /**
+     * Obtiene el URL del Web Service de un sistema transversal, para devolver
+     * el documento firmado por el usuario.
+     * 
+     * @param nombre
+     *            nombre del sistema transversal
+     * @return el URL del sistema traansversal
+     * @throws IllegalArgumentException
+     *             si no se encuentra ese nombre de sistema transversal
+     */
+    public URL buscarUrlSistema(String nombre) throws IllegalArgumentException {
+        try {
+            TypedQuery<Sistema> q = em.createQuery("SELECT s FROM Sistema s WHERE s.nombre = :nombre", Sistema.class);
+            q.setParameter("nombre", nombre);
+            Sistema sistema = q.getSingleResult();
+            return new URL(sistema.getURL());
+        } catch (NoResultException e) {
+            throw new IllegalArgumentException("No se encontró el sistema " + nombre);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("El URL no es correcto: " + e.getMessage());
+        }
+    }
+
+    public boolean pingSistemaTransversal(URL url) {
+        try {
+            InetAddress inet = InetAddress.getByName(url.getHost());
+            logger.info("Enviando ping a " + inet);
+            boolean reacheable = inet.isReachable(PING_TIMEOUT);
+            logger.info(reacheable ? "Servidor si responde" : "Servidor NO responde");
+            return reacheable;
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error al tratar de hacer ping al servidor del sistema transversal: " + url, e);
+            return false;
+        }
+    }
+
+    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url)
+            throws SistemaTransversalException {
         try {
             MessageFactory factory = MessageFactory.newInstance();
-            SOAPMessage message = factory.createMessage();
-            SOAPBody body = message.getSOAPBody();
+            SOAPMessage soapMessage = factory.createMessage();
+            SOAPBody body = soapMessage.getSOAPBody();
 
             SOAPFactory soapFactory = SOAPFactory.newInstance();
             Name bodyName = soapFactory.createName("grabar_archivos_firmados", "urn", "urn:soapapiorfeo");
@@ -68,38 +113,30 @@ public class ServicioSistemaTransversal {
             bodyElement.addChildElement("set_var_usuario").addTextNode(usuario);
             bodyElement.addChildElement("set_var_documento").addTextNode(documento);
             bodyElement.addChildElement("set_var_archivo").addTextNode(archivo);
-            bodyElement.addChildElement("set_var_datos_firmante").addTextNode(nombreFirmante);
+            bodyElement.addChildElement("set_var_datos_firmante").addTextNode(datosFirmante);
             bodyElement.addChildElement("set_var_fecha").addTextNode(sdf.format(new Date()));
 
-            SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
-            SOAPConnection connection = soapConnectionFactory.createConnection();
-            URL endpoint = new URL(url);
-            SOAPMessage response = connection.call(message, endpoint);
+            SOAPConnection connection = SOAPConnectionFactory.newInstance().createConnection();
+            SOAPMessage response = connection.call(soapMessage, url);
             connection.close();
 
-            //0 is error, 1 ok
-            
             SOAPBody soapBody = response.getSOAPBody();
             NodeList nl = soapBody.getElementsByTagName("result");
-            System.out.println(nl.item(0).getTextContent());
-            return nl.item(0).getTextContent();
-        } catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, "Error al invocar el servicio web", e);
-            throw new RuntimeException(e);
+
+            // 0 is error, 1 ok
+            String resultado = nl.item(0).getTextContent();
+            logger.fine("Resultado enviado por el sistema transversal: " + resultado);
+
+            if ("1".equals(resultado)) {
+                return;
+            } else if ("0".equals(resultado)) {
+                throw new SistemaTransversalException("Se devuelve error del sistema transversal: " + resultado);
+            } else {
+                throw new SistemaTransversalException("Resultado invalido del sistema transversal: " + resultado);
+            }
+        } catch (SOAPException e) {
+            logger.log(Level.SEVERE, "Error al actualizar el documento en el sistema transversal", e);
+            throw new SistemaTransversalException("Error al invocar Web Service del sistema transversal", e);
         }
-    }
-
-    public static void main(String args[]) throws Exception {
-        // INSERT INTO sistema(url, nombre, descripcion)
-        // values('http://quipuxpruebas.gestiondocumental.gob.ec/interconexion/ws_firma_digital.php?wsdl',
-        // 'quipux', 'Sistema Quipux');
-        String url = "http://quipuxpruebas.gestiondocumental.gob.ec/interconexion/ws_firma_digital.php";
-
-        Path path = Paths.get("/var/tmp/test.pdf");
-        byte[] data = Files.readAllBytes(path);
-        String documento = Base64.getEncoder().encodeToString(data);
-
-        ServicioSistemaTransversal st = new ServicioSistemaTransversal();
-        st.almacenarDocumento(url, "1710803196", "ricardo.pdf", documento, "Juan");
     }
 }

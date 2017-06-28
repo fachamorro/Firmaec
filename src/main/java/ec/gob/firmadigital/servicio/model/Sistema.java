@@ -16,16 +16,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio;
+package ec.gob.firmadigital.servicio.model;
 
-public class DocumentoRecibido {
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+/**
+ * Representa un sistema transversal.
+ * 
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ */
+@Entity
+public class Sistema {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String nombre;
-    private String documento;
 
-    public DocumentoRecibido(String nombre, String documento) {
-        this.nombre = nombre;
-        this.documento = documento;
+    private String descripcion;
+
+    private String URL;
+
+    public Sistema() {
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getNombre() {
@@ -36,11 +60,19 @@ public class DocumentoRecibido {
         this.nombre = nombre;
     }
 
-    public String getDocumento() {
-        return documento;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setDocumento(String documento) {
-        this.documento = documento;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getURL() {
+        return URL;
+    }
+
+    public void setURL(String uRL) {
+        URL = uRL;
     }
 }

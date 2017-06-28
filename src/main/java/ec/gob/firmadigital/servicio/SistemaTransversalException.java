@@ -18,26 +18,28 @@
 
 package ec.gob.firmadigital.servicio;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import javax.ejb.ApplicationException;
 
-@Stateless
-public class ServicioSistema {
+/**
+ * Excepcion arrojada en caso de problemas al almacenar el documento en el
+ * sistema transversal.
+ * 
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ */
+@ApplicationException(rollback = true)
+public class SistemaTransversalException extends Exception {
 
-    @PersistenceContext(unitName = "FirmaDigitalDS")
-    private EntityManager em;
+    private static final long serialVersionUID = -7132855600223954519L;
 
-    public String buscarUrlSistema(String nombre) throws SistemaNoEncontradoException {
-        try {
-            TypedQuery<Sistema> q = em.createQuery("SELECT s FROM Sistema s WHERE s.nombre = :nombre", Sistema.class);
-            q.setParameter("nombre", nombre);
-            Sistema sistema = q.getSingleResult();
-            return sistema.getURL();
-        } catch (NoResultException e) {
-            throw new SistemaNoEncontradoException();
-        }
+    public SistemaTransversalException() {
+        super();
+    }
+
+    public SistemaTransversalException(String message) {
+        super(message);
+    }
+
+    public SistemaTransversalException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

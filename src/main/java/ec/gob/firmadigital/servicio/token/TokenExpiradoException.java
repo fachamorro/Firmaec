@@ -16,13 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio;
+package ec.gob.firmadigital.servicio.token;
 
-public class SistemaNoEncontradoException extends Exception {
+/**
+ * Excepcion lanzada en caso de que el token haya expirado.
+ * 
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ */
+public class TokenExpiradoException extends Exception {
 
-    private static final long serialVersionUID = 3362068730837543172L;
+    private static final long serialVersionUID = 1397436942442917363L;
 
-    public SistemaNoEncontradoException() {
+    public TokenExpiradoException() {
         super();
+    }
+
+    public TokenExpiradoException(String message) {
+        super(message);
+    }
+
+    public TokenExpiradoException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public TokenExpiradoException(Throwable cause) {
+        super(cause);
     }
 }

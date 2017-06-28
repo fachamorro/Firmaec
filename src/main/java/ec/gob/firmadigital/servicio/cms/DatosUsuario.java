@@ -16,8 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio;
+package ec.gob.firmadigital.servicio.cms;
 
+/**
+ * Datos del usuario para contruir la validacion CMS.
+ * 
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ */
 public class DatosUsuario {
 
     private String nombre;

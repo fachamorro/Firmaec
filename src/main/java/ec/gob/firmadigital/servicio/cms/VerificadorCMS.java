@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio.util;
+package ec.gob.firmadigital.servicio.cms;
 
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
@@ -44,7 +44,6 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
 
-import ec.gob.firmadigital.servicio.DatosUsuario;
 import io.rubrica.certificate.ec.CertificadoFuncionarioPublico;
 import io.rubrica.certificate.ec.CertificadoMiembroEmpresa;
 import io.rubrica.certificate.ec.CertificadoPersonaJuridica;
@@ -54,6 +53,11 @@ import io.rubrica.certificate.ec.bce.CertificadoBancoCentral;
 import io.rubrica.certificate.ec.bce.CertificadoBancoCentralFactory;
 import io.rubrica.core.SignatureVerificationException;
 
+/**
+ * Verifica datos CMS.
+ * 
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ */
 public class VerificadorCMS {
 
     public List<DatosUsuario> listaDatosUsuario = new ArrayList<>();

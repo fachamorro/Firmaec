@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio;
+package ec.gob.firmadigital.servicio.util;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import javax.ejb.ApplicationException;
 
 /**
- * Configuración de la aplicacion REST
+ * Excepción lanzada cuando no se puede decodificar un cadena de texto en
+ * Base64.
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
-@ApplicationPath("")
-public class RestApplication extends Application {
+@ApplicationException(rollback = true)
+public class Base64InvalidoException extends Exception {
+
+    private static final long serialVersionUID = 4433183404356913624L;
+
+    public Base64InvalidoException(IllegalArgumentException cause) {
+        super(cause);
+    }
 }

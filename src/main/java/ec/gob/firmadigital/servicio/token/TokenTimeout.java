@@ -16,30 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio;
+package ec.gob.firmadigital.servicio.token;
+
+import java.util.Date;
 
 /**
- * Excepcion lanzada en caso de que el token haya expirado.
+ * Timeout para un token.
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
-public class TokenExpiradoException extends Exception {
+public class TokenTimeout {
 
-    private static final long serialVersionUID = 1397436942442917363L;
+    /**
+     * Minutos antes de que el Token expire.
+     */
+    public static final int DEFAULT_TIMEOUT = 25;
 
-    public TokenExpiradoException() {
-        super();
-    }
-
-    public TokenExpiradoException(String message) {
-        super(message);
-    }
-
-    public TokenExpiradoException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TokenExpiradoException(Throwable cause) {
-        super(cause);
+    /**
+     * Agregar una cantidad de minutos a una hora dada.
+     * 
+     * @param date
+     * @param minutes
+     * @return
+     */
+    public static Date addMinutes(Date date, int minutes) {
+        long time = date.getTime() + (minutes * 60 * 1000);
+        return new Date(time);
     }
 }

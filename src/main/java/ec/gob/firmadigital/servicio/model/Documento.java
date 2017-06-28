@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ec.gob.firmadigital.servicio;
+package ec.gob.firmadigital.servicio.model;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -25,43 +25,36 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Representa un documento almacenado en la base de datos.
+ * Representa un documento recibido para ser procesado en el sistema.
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity
-@XmlRootElement
 public class Documento implements Serializable {
 
-    private static final long serialVersionUID = -8995191478984459392L;
+    private static final long serialVersionUID = 7343179092051243779L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String cedula;
-
-    // FIXME: Relation
-    private String sistema;
-
     private String nombre;
-
+    private Date fecha;
+    private String sistema;
     private byte[] archivo;
 
-    private Date fecha;
-    
     public Documento() {
     }
 
-    public Documento(String cedula, String sistema, String nombre, byte[] archivo, Date fecha) {
+    public Documento(String cedula, String nombre, Date fecha, String sistema, byte[] archivo) {
         this.cedula = cedula;
-        this.sistema = sistema;
         this.nombre = nombre;
-        this.archivo = archivo;
         this.fecha = fecha;
+        this.sistema = sistema;
+        this.archivo = archivo;
     }
 
     public Long getId() {
@@ -80,28 +73,12 @@ public class Documento implements Serializable {
         this.cedula = cedula;
     }
 
-    public String getSistema() {
-        return sistema;
-    }
-
-    public void setSistema(String sistema) {
-        this.sistema = sistema;
-    }
-
     public String getNombre() {
         return nombre;
     }
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public byte[] getArchivo() {
-        return archivo;
-    }
-
-    public void setArchivo(byte[] archivo) {
-        this.archivo = archivo;
     }
 
     public Date getFecha() {
@@ -112,9 +89,25 @@ public class Documento implements Serializable {
         this.fecha = fecha;
     }
 
+    public String getSistema() {
+        return sistema;
+    }
+
+    public void setSistema(String sistema) {
+        this.sistema = sistema;
+    }
+
+    public byte[] getArchivo() {
+        return archivo;
+    }
+
+    public void setArchivo(byte[] archivo) {
+        this.archivo = archivo;
+    }
+
     @Override
     public String toString() {
-        return "Documento [id=" + id + ", cedula=" + cedula + ", sistema=" + sistema + ", nombre=" + nombre + ", fecha="
-                + fecha + "]";
+        return "Documento [id=" + id + ", cedula=" + cedula + ", nombre=" + nombre + ", fecha=" + fecha + ", sistema="
+                + sistema + "]";
     }
 }
