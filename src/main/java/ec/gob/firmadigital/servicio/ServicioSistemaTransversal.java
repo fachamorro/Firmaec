@@ -65,6 +65,23 @@ public class ServicioSistemaTransversal {
     private static final Logger logger = Logger.getLogger(ServicioSistemaTransversal.class.getName());
 
     /**
+     * Buscar un sistema transversal.
+     * 
+     * @param nombre
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public Sistema buscarSistema(String nombre) throws IllegalArgumentException {
+        try {
+            TypedQuery<Sistema> q = em.createQuery("SELECT s FROM Sistema s WHERE s.nombre = :nombre", Sistema.class);
+            q.setParameter("nombre", nombre);
+            return q.getSingleResult();
+        } catch (NoResultException e) {
+            throw new IllegalArgumentException("No se encontro el sistema " + nombre);
+        }
+    }
+
+    /**
      * Obtiene el URL del Web Service de un sistema transversal, para devolver
      * el documento firmado por el usuario.
      * 
@@ -76,12 +93,8 @@ public class ServicioSistemaTransversal {
      */
     public URL buscarUrlSistema(String nombre) throws IllegalArgumentException {
         try {
-            TypedQuery<Sistema> q = em.createQuery("SELECT s FROM Sistema s WHERE s.nombre = :nombre", Sistema.class);
-            q.setParameter("nombre", nombre);
-            Sistema sistema = q.getSingleResult();
+            Sistema sistema = buscarSistema(nombre);
             return new URL(sistema.getURL());
-        } catch (NoResultException e) {
-            throw new IllegalArgumentException("No se encontró el sistema " + nombre);
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("El URL no es correcto: " + e.getMessage());
         }
