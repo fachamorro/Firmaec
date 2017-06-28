@@ -18,6 +18,8 @@
 
 package ec.gob.firmadigital.servicio;
 
+import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT;
+
 import java.net.URL;
 import java.security.KeyStoreException;
 import java.security.SignatureException;
@@ -79,7 +81,8 @@ public class ServicioDocumento {
     public String crearDocumentos(@NotNull String cedula, @NotNull String sistema,
             @NotNull Map<String, String> archivos) throws Base64InvalidoException {
 
-        // TODO: Validar sistema
+        // Verificar si existe el sistema
+        servicioSistemaTransversal.buscarSistema(sistema);
 
         List<String> ids = new ArrayList<>();
 
@@ -107,7 +110,7 @@ public class ServicioDocumento {
         parametros.put("ids", String.join(",", ids));
 
         // Expiracion del Token
-        Date expiracion = TokenTimeout.addMinutes(new Date(), TokenTimeout.DEFAULT_TIMEOUT);
+        Date expiracion = TokenTimeout.addMinutes(new Date(), DEFAULT_TIMEOUT);
 
         // Retorna el Token
         return servicioToken.generarToken(parametros, expiracion);

@@ -119,6 +119,8 @@ public class ServicioDocumentoRest {
         try {
             String token = servicioDocumento.crearDocumentos(cedula, sistema, documentos);
             return Response.status(Status.CREATED).entity(token).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (Base64InvalidoException e) {
             return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
         }
