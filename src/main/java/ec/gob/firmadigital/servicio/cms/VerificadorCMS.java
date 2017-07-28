@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -52,6 +52,7 @@ import io.rubrica.certificate.ec.CertificadoRepresentanteLegal;
 import io.rubrica.certificate.ec.bce.CertificadoBancoCentral;
 import io.rubrica.certificate.ec.bce.CertificadoBancoCentralFactory;
 import io.rubrica.core.SignatureVerificationException;
+import io.rubrica.util.BouncyCastleUtils;
 
 /**
  * Verifica datos CMS.
@@ -62,6 +63,10 @@ public class VerificadorCMS {
 
     public List<DatosUsuario> listaDatosUsuario = new ArrayList<>();
 
+    static {
+        BouncyCastleUtils.initializeBouncyCastle();
+    }
+
     public VerificadorCMS() {
     }
 
@@ -69,18 +74,17 @@ public class VerificadorCMS {
         try {
             CMSSignedData signedData = new CMSSignedData(signedBytes);
 
-            Store certStore = signedData.getCertificates();
+            Store<X509CertificateHolder> certStore = signedData.getCertificates();
             SignerInformationStore signerInformationStore = signedData.getSignerInfos();
-            Collection collection = signerInformationStore.getSigners();
-            Iterator iterator = collection.iterator();
+            Collection<SignerInformation> collection = signerInformationStore.getSigners();
             String fechaFirma = "";
 
-            while (iterator.hasNext()) {
-                SignerInformation signer = (SignerInformation) iterator.next();
-                Collection certCollection = certStore.getMatches(signer.getSID());
+            for (SignerInformation signer : collection) {
+                @SuppressWarnings("unchecked")
+                Collection<X509CertificateHolder> certCollection = certStore.getMatches(signer.getSID());
 
-                Iterator certIt = certCollection.iterator();
-                X509CertificateHolder certificateHolder = (X509CertificateHolder) certIt.next();
+                Iterator<X509CertificateHolder> certIt = certCollection.iterator();
+                X509CertificateHolder certificateHolder = certIt.next();
 
                 JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
                 X509Certificate x509Certificate = jcaX509CertificateConverter.setProvider("BC")
@@ -90,9 +94,7 @@ public class VerificadorCMS {
 
                 if (attributes != null) {
                     Attribute messageDigestAttribute = attributes.get(CMSAttributes.signingTime);
-                    System.out.println(
-                            "que tiene el attributo: " + messageDigestAttribute.getAttrValues().getObjectAt(0));
-                    DERUTCTime dt = (DERUTCTime) messageDigestAttribute.getAttrValues().getObjectAt(0);
+                    ASN1UTCTime dt = (ASN1UTCTime) messageDigestAttribute.getAttrValues().getObjectAt(0);
 
                     try {
                         SimpleDateFormat f_DateTime = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
