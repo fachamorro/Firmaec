@@ -27,5 +27,5 @@ import javax.ws.rs.core.Application;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @ApplicationPath("")
-public class RestApplication extends Application {
+public class JAXRSConfiguration extends Application {
 }
