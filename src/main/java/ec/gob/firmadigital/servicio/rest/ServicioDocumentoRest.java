@@ -43,7 +43,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.ServicioDocumento;
-import ec.gob.firmadigital.servicio.SistemaTransversalException;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
@@ -181,9 +180,6 @@ public class ServicioDocumentoRest {
             return Response.status(Status.BAD_REQUEST).entity("Token expirado").build();
         } catch (Base64InvalidoException e) {
             return Response.status(Status.BAD_REQUEST).entity("Base 64 invalido").build();
-        } catch (SistemaTransversalException e) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity("Error al guardar documento en sistema transversal: " + e.getMessage()).build();
         }
     }
 }

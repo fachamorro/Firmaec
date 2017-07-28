@@ -20,9 +20,8 @@ package ec.gob.firmadigital.servicio;
 
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT;
 
+import java.io.IOException;
 import java.net.URL;
-import java.security.KeyStoreException;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -30,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.EJB;
@@ -46,6 +46,7 @@ import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import io.rubrica.ocsp.OcspValidationException;
+import io.rubrica.sign.InvalidFormatException;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -95,6 +96,7 @@ public class ServicioDocumento {
             documento.setNombre(nombre);
             documento.setFecha(new Date());
             documento.setSistema(sistema);
+            documento.setStatus("R");
             documento.setArchivo(decodificarBase64(archivo));
 
             // Almacenar
@@ -148,8 +150,8 @@ public class ServicioDocumento {
      * @return
      * @throws SistemaTransversalException
      */
-    public void actualizarDocumentos(String token, Map<Long, String> archivos) throws TokenInvalidoException,
-            TokenExpiradoException, Base64InvalidoException, SistemaTransversalException {
+    public void actualizarDocumentos(String token, Map<Long, String> archivos)
+            throws TokenInvalidoException, TokenExpiradoException, Base64InvalidoException {
 
         Map<String, Object> parametros = servicioToken.parseToken(token);
 
@@ -160,11 +162,8 @@ public class ServicioDocumento {
         URL url = servicioSistemaTransversal.buscarUrlSistema(sistema);
         logger.info("sistema=" + sistema + "; url=" + url);
 
+        // Verificar si el sistema transversal está disponible
         boolean sistemaTransversalDisponible = servicioSistemaTransversal.pingSistemaTransversal(url);
-
-        if (!sistemaTransversalDisponible) {
-            throw new SistemaTransversalException("El sistema transversal no responde");
-        }
 
         List<String> idList = convertirEnList(ids);
 
@@ -200,16 +199,32 @@ public class ServicioDocumento {
 
             try {
                 datosFirmante = servicioValidacionPdf.getNombre(archivo);
-            } catch (SignatureException | KeyStoreException | OcspValidationException e) {
-                throw new IllegalArgumentException("Error en la verificacion de firma");
+            } catch (InvalidFormatException e) {
+                throw new IllegalArgumentException("Error en la verificacion de firma", e);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error en la verificacion de firma", e);
+            } catch (OcspValidationException e) {
+                throw new IllegalArgumentException("Error en la verificacion de firma", e);
             }
 
             // Actualizar el documento en el sistema transversal
-            servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(), archivoBase64,
-                    datosFirmante, url);
+            if (sistemaTransversalDisponible) {
+                try {
+                    servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
+                            archivoBase64, datosFirmante, url);
 
-            // Borrar documento
-            entityManager.remove(documento);
+                    // Eliminar el documento porque ya fue recibido por el
+                    // sistema transversal
+                    entityManager.remove(documento);
+                } catch (SistemaTransversalException e) {
+                    logger.log(Level.SEVERE,
+                            "El sistema transversal está disponible, pero no se pudo enviar el documento " + documento.getId() + ", se deja con status de error", e);
+                    documento.setStatus("E");
+                }
+            } else {
+                logger.warning("El sistema transversal NO está disponible, el documento " + documento.getId() + " no fue eliminado, se deja con status de error");
+                documento.setStatus("E");
+            }
         }
     }
 
@@ -221,6 +236,7 @@ public class ServicioDocumento {
      * @return
      */
     private List<String> convertirEnList(String ids) {
+        // Separar por "espacio en blanco, coma, espacio en blanco":
         return Arrays.asList(ids.split("\\s*,\\s*"));
     }
 

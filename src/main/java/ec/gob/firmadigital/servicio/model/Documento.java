@@ -34,7 +34,7 @@ import javax.persistence.Id;
 @Entity
 public class Documento implements Serializable {
 
-    private static final long serialVersionUID = 7343179092051243779L;
+    private static final long serialVersionUID = -560645897559660865L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,16 +45,18 @@ public class Documento implements Serializable {
     private Date fecha;
     private String sistema;
     private byte[] archivo;
+    private String status;
 
     public Documento() {
     }
 
-    public Documento(String cedula, String nombre, Date fecha, String sistema, byte[] archivo) {
+    public Documento(String cedula, String nombre, Date fecha, String sistema, byte[] archivo, String status) {
         this.cedula = cedula;
         this.nombre = nombre;
         this.fecha = fecha;
         this.sistema = sistema;
         this.archivo = archivo;
+        this.status = status;
     }
 
     public Long getId() {
@@ -97,6 +99,14 @@ public class Documento implements Serializable {
         this.sistema = sistema;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public byte[] getArchivo() {
         return archivo;
     }
@@ -108,6 +118,6 @@ public class Documento implements Serializable {
     @Override
     public String toString() {
         return "Documento [id=" + id + ", cedula=" + cedula + ", nombre=" + nombre + ", fecha=" + fecha + ", sistema="
-                + sistema + "]";
+                + sistema + ", status=" + status + "]";
     }
 }
