@@ -218,11 +218,14 @@ public class ServicioDocumento {
                     entityManager.remove(documento);
                 } catch (SistemaTransversalException e) {
                     logger.log(Level.SEVERE,
-                            "El sistema transversal está disponible, pero no se pudo enviar el documento " + documento.getId() + ", se deja con status de error", e);
+                            "El sistema transversal está disponible, pero no se pudo enviar el documento "
+                                    + documento.getId() + ", se deja con status de error",
+                            e);
                     documento.setStatus("E");
                 }
             } else {
-                logger.warning("El sistema transversal NO está disponible, el documento " + documento.getId() + " no fue eliminado, se deja con status de error");
+                logger.warning("El sistema transversal NO está disponible, el documento " + documento.getId()
+                        + " no fue eliminado, se deja con status de error");
                 documento.setStatus("E");
             }
         }
