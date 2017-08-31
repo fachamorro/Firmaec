@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
@@ -32,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
@@ -113,6 +115,17 @@ public class ServicioSistemaTransversal {
         }
     }
 
+    /**
+     * Almacena el documento firmado en el sistema tranversarl, mediante la
+     * invocación de un Web Service (SOAP).
+     * 
+     * @param usuario
+     * @param documento
+     * @param archivo
+     * @param datosFirmante
+     * @param url
+     * @throws SistemaTransversalException
+     */
     public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url)
             throws SistemaTransversalException {
         try {
@@ -150,6 +163,44 @@ public class ServicioSistemaTransversal {
         } catch (SOAPException e) {
             logger.log(Level.SEVERE, "Error al actualizar el documento en el sistema transversal", e);
             throw new SistemaTransversalException("Error al invocar Web Service del sistema transversal", e);
+        }
+    }
+
+    public boolean verificarApiKey(String nombre, String apiKey) {
+        // Verificar si existe el Sistema
+        Sistema sistema;
+
+        try {
+            sistema = buscarSistema(nombre);
+        } catch (IllegalArgumentException e) {
+            logger.severe("No existe el sistema: " + nombre);
+            return false;
+        }
+
+        String apiKeySistema = sistema.getApiKey();
+        logger.fine("apiKeySistema=" + apiKey);
+
+        if (apiKeySistema == null) {
+            logger.warning("API KEY is null, sistema=" + nombre);
+            // TODO: return false
+            return true;
+        }
+
+        String hash = hashSha256(apiKey);
+        return apiKeySistema.equals(hash);
+    }
+
+    private String hashSha256(String apiKey) {
+        try {
+            //logger.info("Hashing " + apiKey);
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(apiKey.getBytes("UTF-8"));
+            byte[] digest = md.digest();
+            String hash = DatatypeConverter.printHexBinary(digest).toLowerCase();
+            //logger.info("hash=" + hash);
+            return hash;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

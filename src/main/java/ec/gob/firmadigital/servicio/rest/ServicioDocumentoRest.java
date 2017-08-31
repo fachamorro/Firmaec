@@ -19,9 +19,13 @@
 package ec.gob.firmadigital.servicio.rest;
 
 import java.io.StringReader;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -33,6 +37,7 @@ import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -43,6 +48,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.ServicioDocumento;
+import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
@@ -60,6 +66,13 @@ public class ServicioDocumentoRest {
     @EJB
     private ServicioDocumento servicioDocumento;
 
+    @EJB
+    private ServicioSistemaTransversal servicioSistemaTransversal;
+
+    private static final String API_KEY_HEADER_PARAMETER = "X-API-KEY";
+
+    private static final Logger logger = Logger.getLogger(ServicioDocumentoRest.class.getName());
+
     /**
      * Almacena varios documentos desde un Sistema Transversal.
      * 
@@ -71,7 +84,7 @@ public class ServicioDocumentoRest {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response crearDocumentos(String jsonParameter) {
+    public Response crearDocumentos(@HeaderParam(API_KEY_HEADER_PARAMETER) String apiKey, String jsonParameter) {
         JsonReader jsonReader = Json.createReader(new StringReader(jsonParameter));
         JsonObject json;
 
@@ -99,6 +112,12 @@ public class ServicioDocumentoRest {
                     .build();
         }
 
+        // Verificar API KEY
+        if (!servicioSistemaTransversal.verificarApiKey(sistema, apiKey)) {
+            logger.log(Level.SEVERE, "Error al validar API_KEY para el sistema {0}", sistema);
+            return Response.status(Status.FORBIDDEN).entity("Error al validar API_KEY").build();
+        }
+
         JsonArray array = json.getJsonArray("documentos");
 
         if (array == null) {
@@ -116,7 +135,10 @@ public class ServicioDocumentoRest {
         }
 
         try {
+            // Crear un documento en el sistema, retorna un token JWT
             String token = servicioDocumento.crearDocumentos(cedula, sistema, documentos);
+
+            // Retornar un token JWT
             return Response.status(Status.CREATED).entity(token).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -126,7 +148,7 @@ public class ServicioDocumentoRest {
     }
 
     /**
-     * Obtiene un documento mediante un token.
+     * Obtiene documentos mediante un token JWT.
      * 
      * @param token
      * @return el documento en Base64
@@ -152,7 +174,11 @@ public class ServicioDocumentoRest {
             array.add(Json.createObjectBuilder().add("id", id).add("documento", documento));
         }
 
-        String json = Json.createObjectBuilder().add("documentos", array).build().toString();
+        // La fecha actual en formato ISO-8601 (2017-08-27T17:54:43.562-05:00)
+        String fechaHora = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        String json = Json.createObjectBuilder().add("fecha_hora", fechaHora).add("documentos", array).build()
+                .toString();
         return Response.ok(json).build();
     }
 

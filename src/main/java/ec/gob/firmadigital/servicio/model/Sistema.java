@@ -41,6 +41,8 @@ public class Sistema {
 
     private String URL;
 
+    private String apiKey;
+
     public Sistema() {
     }
 
@@ -74,5 +76,13 @@ public class Sistema {
 
     public void setURL(String uRL) {
         URL = uRL;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 }
