@@ -1,11 +1,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>ec.gob.firmadigital</groupId>
 	<artifactId>servicio</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>Firma Digital Servicio</name>
+
+	<name>firmadigital-servicio</name>
+	<description>Servicio de Firma Digital EC</description>
+	<url>http://www.firmadigital.gob.ec</url>
+	<licenses>
+		<license>
+			<name>GNU General Public License, Version 3</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Ricardo Arguello</name>
+			<email>ricardo.arguello@soportelibre.com</email>
+			<organization>Soporte Libre</organization>
+			<organizationUrl>http://www.soportelibre.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:https://minka.gob.ec/snap/firmadigital-servicio.git</connection>
+		<developerConnection>scm:git:git@minka.gob.ec:snap/firmadigital-servicio.git</developerConnection>
+		<url>https://minka.gob.ec/snap/firmadigital-servicio</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<failOnMissingWebXml>false</failOnMissingWebXml>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>javax</groupId>
@@ -53,10 +87,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<failOnMissingWebXml>false</failOnMissingWebXml>
-	</properties>
 </project>
