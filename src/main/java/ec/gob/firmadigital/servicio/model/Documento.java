@@ -45,18 +45,16 @@ public class Documento implements Serializable {
     private Date fecha;
     private String sistema;
     private byte[] archivo;
-    private String status;
 
     public Documento() {
     }
 
-    public Documento(String cedula, String nombre, Date fecha, String sistema, byte[] archivo, String status) {
+    public Documento(String cedula, String nombre, Date fecha, String sistema, byte[] archivo) {
         this.cedula = cedula;
         this.nombre = nombre;
         this.fecha = fecha;
         this.sistema = sistema;
         this.archivo = archivo;
-        this.status = status;
     }
 
     public Long getId() {
@@ -99,14 +97,6 @@ public class Documento implements Serializable {
         this.sistema = sistema;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public byte[] getArchivo() {
         return archivo;
     }
@@ -118,6 +108,6 @@ public class Documento implements Serializable {
     @Override
     public String toString() {
         return "Documento [id=" + id + ", cedula=" + cedula + ", nombre=" + nombre + ", fecha=" + fecha + ", sistema="
-                + sistema + ", status=" + status + "]";
+                + sistema + "]";
     }
 }
