@@ -18,15 +18,12 @@
 
 package ec.gob.firmadigital.servicio;
 
-import javax.ejb.ApplicationException;
-
 /**
  * Excepcion arrojada en caso de problemas al almacenar el documento en el
  * sistema transversal.
  * 
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
-@ApplicationException(rollback = true)
 public class SistemaTransversalException extends Exception {
 
     private static final long serialVersionUID = -7132855600223954519L;
@@ -41,5 +38,9 @@ public class SistemaTransversalException extends Exception {
 
     public SistemaTransversalException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public SistemaTransversalException(Throwable cause) {
+        super(cause);
     }
 }
