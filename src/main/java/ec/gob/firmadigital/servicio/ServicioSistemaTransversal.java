@@ -19,6 +19,7 @@
 package ec.gob.firmadigital.servicio;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,7 +44,14 @@ import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
@@ -142,15 +150,26 @@ public class ServicioSistemaTransversal {
             bodyElement.addChildElement("set_var_datos_firmante").addTextNode(datosFirmante);
             bodyElement.addChildElement("set_var_fecha").addTextNode(sdf.format(new Date()));
 
+            // FIXME
+            bodyElement.addChildElement("set_var_institucion").addTextNode("INSTUTICION");
+            bodyElement.addChildElement("set_var_cargo").addTextNode("CARGO");
+
             SOAPConnection connection = SOAPConnectionFactory.newInstance().createConnection();
             SOAPMessage response = connection.call(soapMessage, url);
             connection.close();
 
             SOAPBody soapBody = response.getSOAPBody();
+
             NodeList nl = soapBody.getElementsByTagName("result");
+            Node node = nl.item(0);
+
+            if (node == null) {
+                logger.severe("Error al invocar el Web Service: " + convertToString(soapBody));
+                throw new SistemaTransversalException("Error al invocar el Web Service");
+            }
 
             // 0 is error, 1 ok
-            String resultado = nl.item(0).getTextContent();
+            String resultado = node.getTextContent();
             logger.fine("Resultado enviado por el sistema transversal: " + resultado);
 
             if ("1".equals(resultado)) {
@@ -192,15 +211,29 @@ public class ServicioSistemaTransversal {
 
     private String hashSha256(String apiKey) {
         try {
-            //logger.info("Hashing " + apiKey);
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(apiKey.getBytes("UTF-8"));
             byte[] digest = md.digest();
-            String hash = DatatypeConverter.printHexBinary(digest).toLowerCase();
-            //logger.info("hash=" + hash);
-            return hash;
+            return DatatypeConverter.printHexBinary(digest).toLowerCase();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private String convertToString(SOAPBody message) throws SistemaTransversalException {
+        try {
+            Document doc = message.extractContentAsDocument();
+            StringWriter sw = new StringWriter();
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            return sw.toString();
+        } catch (Exception e) {
+            throw new SistemaTransversalException(e.getMessage());
         }
     }
 }
