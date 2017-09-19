@@ -217,7 +217,7 @@ public class ServicioDocumento {
                     String mensajeError = "El sistema transversal está disponible, pero no se pudo enviar el documento "
                             + documento.getId();
                     servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
-                    logger.log(Level.SEVERE, mensajeError, e);
+                    logger.log(Level.SEVERE, mensajeError);
                 }
             } else {
                 String mensajeError = "El sistema transversal NO está disponible, el documento " + documento.getId()
