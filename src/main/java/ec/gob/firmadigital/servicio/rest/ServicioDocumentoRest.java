@@ -48,6 +48,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.ServicioDocumento;
+import ec.gob.firmadigital.servicio.ServicioLog;
 import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
@@ -69,6 +70,9 @@ public class ServicioDocumentoRest {
     @EJB
     private ServicioSistemaTransversal servicioSistemaTransversal;
 
+    @EJB
+    private ServicioLog servicioLog;
+
     private static final String API_KEY_HEADER_PARAMETER = "X-API-KEY";
 
     private static final Logger logger = Logger.getLogger(ServicioDocumentoRest.class.getName());
@@ -85,6 +89,11 @@ public class ServicioDocumentoRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response crearDocumentos(@HeaderParam(API_KEY_HEADER_PARAMETER) String apiKey, String jsonParameter) {
+
+        if (apiKey == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Se debe incluir un API Key!").build();
+        }
+
         JsonReader jsonReader = Json.createReader(new StringReader(jsonParameter));
         JsonObject json;
 
@@ -141,8 +150,10 @@ public class ServicioDocumentoRest {
             // Retornar un token JWT
             return Response.status(Status.CREATED).entity(token).build();
         } catch (IllegalArgumentException e) {
+            servicioLog.error("ServicioDocumentoRest::crearDocumentos", "IllegalArgumentException: " + e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (Base64InvalidoException e) {
+            servicioLog.error("ServicioDocumentoRest::crearDocumentos", "Error al decodificar Base64");
             return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
         }
     }
@@ -162,8 +173,10 @@ public class ServicioDocumentoRest {
         try {
             documentos = servicioDocumento.obtenerDocumentos(token);
         } catch (TokenInvalidoException e) {
+            servicioLog.error("ServicioDocumentoRest::obtenerDocumentos", "Token invalido: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token invalido").build();
         } catch (TokenExpiradoException e) {
+            servicioLog.error("ServicioDocumentoRest::obtenerDocumentos", "Token expirado: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token expirado").build();
         }
 
@@ -199,12 +212,16 @@ public class ServicioDocumentoRest {
             servicioDocumento.actualizarDocumentos(token, documentos);
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TokenInvalidoException e) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Token invalido: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token invalido").build();
         } catch (TokenExpiradoException e) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Token expirado: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token expirado").build();
         } catch (Base64InvalidoException e) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Base 64 invalido");
             return Response.status(Status.BAD_REQUEST).entity("Base 64 invalido").build();
         }
     }

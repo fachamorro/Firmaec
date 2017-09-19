@@ -66,6 +66,9 @@ public class ServicioDocumento {
     @EJB
     private ServicioValidacionPdf servicioValidacionPdf;
 
+    @EJB
+    private ServicioLog servicioLog;
+
     @PersistenceContext(unitName = "FirmaDigitalDS")
     private EntityManager entityManager;
 
@@ -96,7 +99,6 @@ public class ServicioDocumento {
             documento.setNombre(nombre);
             documento.setFecha(new Date());
             documento.setSistema(sistema);
-            documento.setStatus("R");
             documento.setArchivo(decodificarBase64(archivo));
 
             // Almacenar
@@ -191,7 +193,6 @@ public class ServicioDocumento {
             }
 
             byte[] archivo = decodificarBase64(archivoBase64);
-            documento.setArchivo(archivo);
 
             // Obtener el nombre del firmante para almacenar el documento en el
             // sistema transversal
@@ -212,22 +213,21 @@ public class ServicioDocumento {
                 try {
                     servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
                             archivoBase64, datosFirmante, url);
-
-                    // Eliminar el documento porque ya fue recibido por el
-                    // sistema transversal
-                    entityManager.remove(documento);
                 } catch (SistemaTransversalException e) {
-                    logger.log(Level.SEVERE,
-                            "El sistema transversal está disponible, pero no se pudo enviar el documento "
-                                    + documento.getId() + ", se deja con status de error",
-                            e);
-                    documento.setStatus("E");
+                    String mensajeError = "El sistema transversal está disponible, pero no se pudo enviar el documento "
+                            + documento.getId();
+                    servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
+                    logger.log(Level.SEVERE, mensajeError, e);
                 }
             } else {
-                logger.warning("El sistema transversal NO está disponible, el documento " + documento.getId()
-                        + " no fue eliminado, se deja con status de error");
-                documento.setStatus("E");
+                String mensajeError = "El sistema transversal NO está disponible, el documento " + documento.getId()
+                        + " no fue enviado al sistema transversal";
+                servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
+                logger.warning(mensajeError);
             }
+
+            // Eliminar el documento
+            entityManager.remove(documento);
         }
     }
 
