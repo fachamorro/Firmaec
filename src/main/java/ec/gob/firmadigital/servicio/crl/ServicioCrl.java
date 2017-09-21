@@ -71,6 +71,7 @@ public class ServicioCrl {
 
     private static final String BCE_CRL = "http://www.eci.bce.ec/CRL/eci_bce_ec_crlfilecomb.crl";
     private static final String SD_CRL = "https://direct.securitydata.net.ec/~crl/autoridad_de_certificacion_sub_security_data_entidad_de_certificacion_de_informacion_curity_data_s.a._c_ec_crlfile.crl";
+    private static final String CJ_CRL = "https://www.icert.fje.gob.ec/crl/icert.crl";
 
     private static final Logger logger = Logger.getLogger(ServicioCrl.class.getName());
 
@@ -88,6 +89,9 @@ public class ServicioCrl {
 
         logger.info("Descargando CRL de Security Data...");
         X509CRL sdCrl = downloadDrl(SD_CRL);
+
+        logger.info("Descargando CRL de CJ...");
+        X509CRL cjCrl = downloadDrl(CJ_CRL);
 
         Connection c = null;
         Statement st = null;
@@ -109,7 +113,10 @@ public class ServicioCrl {
             int contadorSD = insertarCrl(sdCrl, 2, ps);
             logger.info("Registros insertados Security Data: " + contadorSD);
 
-            int total = contadorBCE + contadorSD;
+            int contadorCJ = insertarCrl(cjCrl, 3, ps);
+            logger.info("Registros insertados CJ: " + contadorCJ);
+
+            int total = contadorBCE + contadorSD + contadorCJ;
             logger.info("Registros insertados Total: " + total);
 
             logger.info("Moviendo tabla temporal a definitiva");
@@ -183,7 +190,7 @@ public class ServicioCrl {
         for (X509CRLEntry cert : crl.getRevokedCertificates()) {
             BigInteger serial = cert.getSerialNumber();
             Date fechaRevocacion = cert.getRevocationDate();
-            String razonRevocacion = cert.getRevocationReason().toString();
+            String razonRevocacion = cert.getRevocationReason() == null ? "" : cert.getRevocationReason().toString();
             LocalDateTime ldt = LocalDateTime.ofInstant(fechaRevocacion.toInstant(), ZoneId.systemDefault());
 
             ps.setBigDecimal(1, new BigDecimal(serial));
