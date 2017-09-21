@@ -35,6 +35,8 @@ import javax.ws.rs.core.Response.Status;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import io.rubrica.core.SignatureVerificationException;
+import io.rubrica.sign.cms.DatosUsuario;
+import io.rubrica.sign.cms.VerificadorCMS;
 
 /**
  * Servicio de validacion de archivos CMS (P7M).
