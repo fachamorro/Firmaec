@@ -70,7 +70,7 @@ public class ServicioDocumento {
     private ServicioLog servicioLog;
 
     @PersistenceContext(unitName = "FirmaDigitalDS")
-    private EntityManager entityManager;
+    private EntityManager em;
 
     private static final Logger logger = Logger.getLogger(ServicioDocumento.class.getName());
 
@@ -102,7 +102,7 @@ public class ServicioDocumento {
             documento.setArchivo(decodificarBase64(archivo));
 
             // Almacenar
-            entityManager.persist(documento);
+            em.persist(documento);
 
             // Agregar a la lista de Ids
             ids.add(documento.getId().toString());
@@ -137,7 +137,7 @@ public class ServicioDocumento {
 
         for (String id : convertirEnList(ids)) {
             Long primaryKey = Long.parseLong(id);
-            Documento documento = entityManager.find(Documento.class, primaryKey);
+            Documento documento = em.find(Documento.class, primaryKey);
             String archivo = codificarBase64(documento.getArchivo());
             archivos.put(primaryKey, archivo);
         }
@@ -185,7 +185,7 @@ public class ServicioDocumento {
             }
 
             // Actualizar el archivo
-            Documento documento = entityManager.find(Documento.class, primaryKey);
+            Documento documento = em.find(Documento.class, primaryKey);
 
             if (documento == null) {
                 logger.severe("El documento " + primaryKey + " no existe en la base de datos");
@@ -227,7 +227,7 @@ public class ServicioDocumento {
             }
 
             // Eliminar el documento
-            entityManager.remove(documento);
+            em.remove(documento);
         }
     }
 

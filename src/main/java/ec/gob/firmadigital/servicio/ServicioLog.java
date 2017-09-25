@@ -37,12 +37,12 @@ import ec.gob.firmadigital.servicio.model.Log.Severidad;
 public class ServicioLog {
 
     @PersistenceContext(unitName = "FirmaDigitalDS")
-    private EntityManager entityManager;
+    private EntityManager em;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void log(Severidad severidad, String categoria, String descripcion) {
         Log log = new Log(severidad, categoria, descripcion);
-        entityManager.persist(log);
+        em.persist(log);
     }
 
     public void info(String categoria, String descripcion) {

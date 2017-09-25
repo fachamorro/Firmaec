@@ -60,14 +60,14 @@ import io.rubrica.util.HttpClient;
 @Startup
 public class ServicioCrl {
 
-    @Resource(lookup = "java:/FirmaDigitalDS")
-    private DataSource dataSource;
-
     @Resource
     private TimerService timerService;
 
+    @Resource(lookup = "java:/FirmaDigitalDS")
+    private DataSource ds;
+
     @PersistenceContext(unitName = "FirmaDigitalDS")
-    private EntityManager entityManager;
+    private EntityManager em;
 
     private static final String BCE_CRL = "http://www.eci.bce.ec/CRL/eci_bce_ec_crlfilecomb.crl";
     private static final String SD_CRL = "https://direct.securitydata.net.ec/~crl/autoridad_de_certificacion_sub_security_data_entidad_de_certificacion_de_informacion_curity_data_s.a._c_ec_crlfile.crl";
@@ -93,18 +93,18 @@ public class ServicioCrl {
         logger.info("Descargando CRL de CJ...");
         X509CRL cjCrl = downloadDrl(CJ_CRL);
 
-        Connection c = null;
+        Connection conn = null;
         Statement st = null;
         PreparedStatement ps = null;
 
         try {
-            c = dataSource.getConnection();
-            st = c.createStatement();
+            conn = ds.getConnection();
+            st = conn.createStatement();
 
             logger.info("Creando tabla temporal");
             st.executeUpdate("CREATE TABLE crl_new (LIKE crl)");
 
-            ps = c.prepareStatement(
+            ps = conn.prepareStatement(
                     "INSERT INTO crl_new (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?)");
 
             int contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -141,9 +141,9 @@ public class ServicioCrl {
                 } catch (SQLException e) {
                 }
             }
-            if (c != null) {
+            if (conn != null) {
                 try {
-                    c.close();
+                    conn.close();
                 } catch (SQLException e) {
                 }
             }
@@ -151,13 +151,13 @@ public class ServicioCrl {
     }
 
     public boolean isRevocado(BigInteger serial) {
-        Connection c = null;
+        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            c = dataSource.getConnection();
-            ps = c.prepareStatement("SELECT serial FROM crl WHERE serial=?");
+            conn = ds.getConnection();
+            ps = conn.prepareStatement("SELECT serial FROM crl WHERE serial=?");
             ps.setBigDecimal(1, new BigDecimal(serial));
             rs = ps.executeQuery();
             return rs.next();
@@ -177,9 +177,9 @@ public class ServicioCrl {
                 } catch (SQLException e) {
                 }
             }
-            if (c != null) {
+            if (conn != null) {
                 try {
-                    c.close();
+                    conn.close();
                 } catch (SQLException e) {
                 }
             }
