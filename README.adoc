@@ -1,15 +1,82 @@
-= Firma Digital: Servicio
+= FirmaEC: Servicio
 
-Este proyecto implementa los servicios REST para la integración con los Sistemas Transversales de Firma Digital de la Secretaría Nacional de la Administración Pública del Ecuador.
+_FirmaEC Servicio_ es una plataforma para recibir documentos desde sistemas transversales, para luego ser firmados digitalmente del lado del cliente.
+Es una aplicación Java desarrollada sobre la plataforma *Java EE 7*.
 
-== Cómo compilar
+== Introducción
+Los siguientes pasos le permitirán obtener una copia del proyecto para correrla en la máquina local para propósitos de desarrollo y pruebas.
 
-Para compilar:
+=== Prerequisitos
 
+==== Java
+Se necesita instalar _Java Development Kit (JDK) 8_ para compilar y correr la aplicación.
+
+En Microsoft Windows se debe descargar de la página de descargas en http://www.oracle.com/technetwork/java/javase/downloads/[Java SE Downloads].
+
+En Fedora se debe instalar el paquete _java-1.8.0-openjdk-devel_:
+
+[source, bash]
 ----
-mvn clean package
+$ sudo dnf install java-1.8.0-openjdk-devel
 ----
 
-== Cómo desplegar
+En Ubuntu se debe instalar el paquete _openjdk-8-jdk_.
 
-Se debe copiar el archivo `target/servicio.war` a la carpeta `standalone/deploy` de un servidor de aplicaciones WildFly 10.
+[source, bash]
+----
+$ sudo apt-get install openjdk-8-jdk
+----
+
+==== WildFly
+Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 7*.
+Se debe utilizar _WildFly Application Server 10.1.0_, disponible en http://www.wildfly.org[wildfly.org]
+
+==== Maven
+Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
+
+
+== Instalación
+Para compilar se utilizar Apache Maven:
+
+[source, bash]
+----
+$ mvn clean package
+----
+
+Esto produce el JAR en _target/firmador-jar-with-dependencies.jar_
+
+
+== Despliegue
+
+Para utilizar la aplicación se debe ejecutar
+
+[source,bash]
+----
+$ java -jar target/firmador-jar-with-dependencies.jar
+----
+
+
+== Construido con
+
+* https://maven.apache.org/[Maven] - Dependency Management
+
+
+== Colaborar
+
+Para colaborar se puede enviar un Merge Request utilizando la plataforma https://minka.gob.ec[Minka].
+
+
+== Versiones
+
+Usamos http://semver.org[SemVer] para versionar.
+
+
+== Autores
+
+* *Juan Diego Calle* - *Desarrollo inicial* - http://www.soportelibre.com[Soporte Libre]
+* *Ricardo Arguello* - *Desarrollo* - http://www.soportelibre.com[Soporte Libre]
+
+== Licencia
+
+Este proyecto esta licenciado bajo la licencia GPLv3.
+Revisar LICENSE para detalles.
