@@ -27,9 +27,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:https://minka.gob.ec/snap/firmadigital-servicio.git</connection>
-		<developerConnection>scm:git:git@minka.gob.ec:snap/firmadigital-servicio.git</developerConnection>
-		<url>https://minka.gob.ec/snap/firmadigital-servicio</url>
+		<connection>scm:git:https://minka.gob.ec/mintel/ge/firmaec/firmadigital-servicio.git</connection>
+		<developerConnection>scm:git:git@minka.gob.ec:mintel/ge/firmaec/firmadigital-servicio.git</developerConnection>
+		<url>https://minka.gob.ec/mintel/ge/firmaec/firmadigital-servicio</url>
 		<tag>HEAD</tag>
 	</scm>
 
