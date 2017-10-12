@@ -165,7 +165,12 @@ public class ServicioDocumento {
         logger.info("sistema=" + sistema + "; url=" + url);
 
         // Verificar si el sistema transversal está disponible
-        boolean sistemaTransversalDisponible = servicioSistemaTransversal.pingSistemaTransversal(url);
+        if (!servicioSistemaTransversal.pingSistemaTransversal(url)) {
+            String mensajeError = "El sistema transversal NO está disponible, el documento "
+                    + " no fue enviado al sistema transversal";
+            servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
+            logger.warning(mensajeError);
+        }
 
         List<String> idList = convertirEnList(ids);
 
@@ -208,22 +213,14 @@ public class ServicioDocumento {
                 throw new IllegalArgumentException("Error en la verificacion de firma", e);
             }
 
-            // Actualizar el documento en el sistema transversal
-            if (sistemaTransversalDisponible) {
-                try {
-                    servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
-                            archivoBase64, datosFirmante, url);
-                } catch (SistemaTransversalException e) {
-                    String mensajeError = "El sistema transversal está disponible, pero no se pudo enviar el documento "
-                            + documento.getId();
-                    servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
-                    logger.log(Level.SEVERE, mensajeError);
-                }
-            } else {
-                String mensajeError = "El sistema transversal NO está disponible, el documento " + documento.getId()
-                        + " no fue enviado al sistema transversal";
+            try {
+                servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
+                        archivoBase64, datosFirmante, url);
+            } catch (SistemaTransversalException e) {
+                String mensajeError = "No se pudo enviar el documento " + documento.getId()
+                        + " al sistema transversal: ";
                 servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
-                logger.warning(mensajeError);
+                logger.log(Level.SEVERE, mensajeError);
             }
 
             // Eliminar el documento

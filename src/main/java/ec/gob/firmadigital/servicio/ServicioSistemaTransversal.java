@@ -113,9 +113,9 @@ public class ServicioSistemaTransversal {
     public boolean pingSistemaTransversal(URL url) {
         try {
             InetAddress inet = InetAddress.getByName(url.getHost());
-            logger.info("Enviando ping a " + inet);
+            logger.fine("Enviando ping a " + inet);
             boolean reacheable = inet.isReachable(PING_TIMEOUT);
-            logger.info(reacheable ? "Servidor si responde" : "Servidor NO responde");
+            logger.fine(reacheable ? "Servidor si responde" : "Servidor NO responde");
             return reacheable;
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error al tratar de hacer ping al servidor del sistema transversal: " + url, e);
