@@ -24,7 +24,7 @@ import java.util.Base64.Encoder;
 
 /**
  * Clase utilitaria para procesar formato Base64.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 public class Base64Util {

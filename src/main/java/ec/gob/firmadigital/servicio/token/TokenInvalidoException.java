@@ -20,7 +20,7 @@ package ec.gob.firmadigital.servicio.token;
 
 /**
  * Excepcion lanzada en caso de que el token no sea valido.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 public class TokenInvalidoException extends Exception {

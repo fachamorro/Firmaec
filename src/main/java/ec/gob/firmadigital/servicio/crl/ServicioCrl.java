@@ -53,7 +53,7 @@ import io.rubrica.util.HttpClient;
 
 /**
  * Servicio para cargar los CRLs de las CAs soportadas en una tabla.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton

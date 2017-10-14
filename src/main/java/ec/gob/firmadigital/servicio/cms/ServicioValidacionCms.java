@@ -40,7 +40,7 @@ import io.rubrica.sign.cms.VerificadorCMS;
 
 /**
  * Servicio de validacion de archivos CMS (P7M).
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless

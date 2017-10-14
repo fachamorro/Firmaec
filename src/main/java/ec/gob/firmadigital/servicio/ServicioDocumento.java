@@ -51,7 +51,7 @@ import io.rubrica.sign.InvalidFormatException;
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
  * transversales y la aplicación en api.firmadigital.gob.ec
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless

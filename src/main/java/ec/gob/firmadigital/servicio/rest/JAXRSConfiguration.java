@@ -23,7 +23,7 @@ import javax.ws.rs.core.Application;
 
 /**
  * Configuración de la aplicacion REST
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @ApplicationPath("")

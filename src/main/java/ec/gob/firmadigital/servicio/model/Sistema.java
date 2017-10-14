@@ -27,7 +27,7 @@ import javax.persistence.Id;
 
 /**
  * Representa un sistema transversal.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity

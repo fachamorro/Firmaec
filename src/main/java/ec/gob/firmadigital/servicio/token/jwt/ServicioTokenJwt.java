@@ -47,14 +47,14 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
 
 /**
  * Servicio para trabajar con tokens tipo JWT (https://jwt.io).
- * 
+ *
  * La llave para firmar los tokens se genera al iniciar la aplicacion. Sin
  * embargo, se puede almacenar una version en Base64 de la llave en el archivo
  * de configuracion del servidor WildFly (standalone.xml), asi:
- * 
+ *
  * <system-properties> <property name="jwt.key" value= "Jgh46..." />
  * </system-properties>
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton

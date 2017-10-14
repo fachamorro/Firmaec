@@ -20,7 +20,7 @@ package ec.gob.firmadigital.servicio.token;
 
 /**
  * Excepcion lanzada en caso de que el token haya expirado.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 public class TokenExpiradoException extends Exception {

@@ -28,7 +28,7 @@ import javax.persistence.Id;
 
 /**
  * Representa un documento recibido para ser procesado en el sistema.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity

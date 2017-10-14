@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Servicio para gestionar tokens que permiten una comunicación confiable con
  * una aplicación externa.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 public interface ServicioToken {

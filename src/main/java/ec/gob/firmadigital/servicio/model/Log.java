@@ -28,7 +28,7 @@ import javax.persistence.Id;
 
 /**
  * Representa una entrada de log.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity

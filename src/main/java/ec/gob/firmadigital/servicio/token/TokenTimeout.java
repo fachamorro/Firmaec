@@ -22,7 +22,7 @@ import java.util.Date;
 
 /**
  * Timeout para un token.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 public class TokenTimeout {

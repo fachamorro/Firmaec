@@ -32,7 +32,7 @@ import ec.gob.firmadigital.servicio.crl.ServicioCrl;
 
 /**
  * Este servicio permite verificar si un certificado está revocado.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless

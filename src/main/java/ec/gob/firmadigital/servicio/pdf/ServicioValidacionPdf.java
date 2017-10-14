@@ -55,7 +55,7 @@ import io.rubrica.util.Utils;
 
 /**
  * Servicio de verificacion de archivos PDF.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless

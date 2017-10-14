@@ -57,7 +57,7 @@ import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 /**
  * Servicio REST para almacenar, actualizar y obtener documentos desde los
  * sistemas transversales y comunicarse con aplicación api.firmadigital.gob.ec
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless

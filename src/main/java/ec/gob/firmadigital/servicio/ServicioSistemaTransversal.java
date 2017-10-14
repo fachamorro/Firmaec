@@ -59,7 +59,7 @@ import ec.gob.firmadigital.servicio.model.Sistema;
 /**
  * Servicio para invocar Web Services de los sistemas transaccionales, utilizado
  * para almacenar el documento ya firmado.
- * 
+ *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless
