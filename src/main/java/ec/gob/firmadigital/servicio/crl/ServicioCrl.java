@@ -77,6 +77,7 @@ public class ServicioCrl {
 
     @PostConstruct
     public void init() {
+        crearTablaSiNoExiste();
         importarCrls();
     }
 
@@ -221,6 +222,36 @@ public class ServicioCrl {
         } catch (CertificateException | CRLException e) {
             logger.log(Level.SEVERE, "Error al procesar CRL de " + url, e);
             throw new EJBException(e);
+        }
+    }
+
+    private void crearTablaSiNoExiste() {
+        logger.info("Creando tabla CRL si es que no existe...");
+
+        Connection conn = null;
+        Statement st = null;
+
+        try {
+            conn = ds.getConnection();
+            st = conn.createStatement();
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS crl (serial BIGINT, fecharevocacion VARCHAR(2000), "
+                    + "razonrevocacion VARCHAR(2000), entidadcertificadora VARCHAR(2000))");
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error al crear tabla CRL", e);
+            throw new EJBException(e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 }
