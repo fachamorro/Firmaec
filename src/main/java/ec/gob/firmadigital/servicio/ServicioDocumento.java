@@ -152,13 +152,22 @@ public class ServicioDocumento {
      * @return
      * @throws SistemaTransversalException
      */
-    public void actualizarDocumentos(String token, Map<Long, String> archivos)
+    public void actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
             throws TokenInvalidoException, TokenExpiradoException, Base64InvalidoException {
 
         Map<String, Object> parametros = servicioToken.parseToken(token);
 
         String ids = (String) parametros.get("ids");
         logger.info("ids=" + ids);
+
+        String cedulaToken = (String) parametros.get("cedula");
+        logger.info("cedulaToken=" + cedulaToken);
+        logger.info("cedulaJson=" + cedulaJson);
+
+        if (!cedulaToken.equals(cedulaJson)) {
+            throw new IllegalArgumentException(
+                    "La cedual que se uso para firmar no es la misma que inicio el proceso en el sistema transversal!");
+        }
 
         String sistema = (String) parametros.get("sistema");
         URL url = servicioSistemaTransversal.buscarUrlSistema(sistema);
@@ -229,8 +238,8 @@ public class ServicioDocumento {
     }
 
     /**
-     * Convierte una cadena de texto con una lista separada por comas de ints en
-     * una List.
+     * Convierte una cadena de texto con una lista separada por comas de ints en una
+     * List.
      * 
      * @param ids
      * @return

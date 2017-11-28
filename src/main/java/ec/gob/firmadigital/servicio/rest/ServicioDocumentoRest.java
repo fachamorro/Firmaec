@@ -199,6 +199,9 @@ public class ServicioDocumentoRest {
     @Path("{token}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response actualizarDocumentos(@PathParam("token") String token, JsonObject json) {
+        String cedulaJson = json.getString("cedula");
+        logger.info("cedula=" + cedulaJson);
+
         Map<Long, String> documentos = new HashMap<>();
         List<JsonObject> array = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
 
@@ -209,7 +212,7 @@ public class ServicioDocumentoRest {
         }
 
         try {
-            servicioDocumento.actualizarDocumentos(token, documentos);
+            servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson);
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
