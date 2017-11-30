@@ -47,6 +47,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import ec.gob.firmadigital.servicio.CedulaInvalidaException;
 import ec.gob.firmadigital.servicio.ServicioDocumento;
 import ec.gob.firmadigital.servicio.ServicioLog;
 import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
@@ -214,6 +215,9 @@ public class ServicioDocumentoRest {
         try {
             servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson);
             return Response.noContent().build();
+        } catch (CedulaInvalidaException e) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula invalida: " + e.getMessage());
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (IllegalArgumentException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();

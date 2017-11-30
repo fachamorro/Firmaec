@@ -153,7 +153,7 @@ public class ServicioDocumento {
      * @throws SistemaTransversalException
      */
     public void actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
-            throws TokenInvalidoException, TokenExpiradoException, Base64InvalidoException {
+            throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException {
 
         Map<String, Object> parametros = servicioToken.parseToken(token);
 
@@ -165,8 +165,7 @@ public class ServicioDocumento {
         logger.info("cedulaJson=" + cedulaJson);
 
         if (!cedulaToken.equals(cedulaJson)) {
-            throw new IllegalArgumentException(
-                    "La cedual que se uso para firmar no es la misma que inicio el proceso en el sistema transversal!");
+            throw new CedulaInvalidaException("La cedula " + cedulaJson + " es incorrecta");
         }
 
         String sistema = (String) parametros.get("sistema");
