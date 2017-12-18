@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
@@ -92,8 +93,8 @@ public class ServicioSistemaTransversal {
     }
 
     /**
-     * Obtiene el URL del Web Service de un sistema transversal, para devolver
-     * el documento firmado por el usuario.
+     * Obtiene el URL del Web Service de un sistema transversal, para devolver el
+     * documento firmado por el usuario.
      * 
      * @param nombre
      *            nombre del sistema transversal
@@ -134,8 +135,8 @@ public class ServicioSistemaTransversal {
      * @param url
      * @throws SistemaTransversalException
      */
-    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url)
-            throws SistemaTransversalException {
+    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url,
+            X509Certificate certificate) throws SistemaTransversalException {
         try {
             MessageFactory factory = MessageFactory.newInstance();
             SOAPMessage soapMessage = factory.createMessage();
@@ -150,9 +151,11 @@ public class ServicioSistemaTransversal {
             bodyElement.addChildElement("set_var_datos_firmante").addTextNode(datosFirmante);
             bodyElement.addChildElement("set_var_fecha").addTextNode(sdf.format(new Date()));
 
-            // FIXME
-            bodyElement.addChildElement("set_var_institucion").addTextNode("INSTUTICION");
-            bodyElement.addChildElement("set_var_cargo").addTextNode("CARGO");
+            String institucion = InformacionCertificado.getDatosUsuarios(certificate).getInstitucion();
+            String cargo = InformacionCertificado.getDatosUsuarios(certificate).getCargo();
+
+            bodyElement.addChildElement("set_var_institucion").addTextNode(institucion);
+            bodyElement.addChildElement("set_var_cargo").addTextNode(cargo);
 
             SOAPConnection connection = SOAPConnectionFactory.newInstance().createConnection();
             SOAPMessage response = connection.call(soapMessage, url);

@@ -22,6 +22,7 @@ import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -47,6 +48,9 @@ import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import io.rubrica.ocsp.OcspValidationException;
 import io.rubrica.sign.InvalidFormatException;
+import io.rubrica.sign.SignInfo;
+import io.rubrica.sign.Signer;
+import io.rubrica.sign.pdf.PDFSigner;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -222,13 +226,22 @@ public class ServicioDocumento {
             }
 
             try {
+                Signer signer = new PDFSigner();
+                List<SignInfo> singInfos = signer.getSigners(archivo);
+                SignInfo firma = singInfos.get(0);
+                X509Certificate certificado = firma.getCerts()[0];
+
                 servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
-                        archivoBase64, datosFirmante, url);
+                        archivoBase64, datosFirmante, url, certificado);
             } catch (SistemaTransversalException e) {
                 String mensajeError = "No se pudo enviar el documento " + documento.getId()
                         + " al sistema transversal: ";
                 servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
                 logger.log(Level.SEVERE, mensajeError);
+            } catch (InvalidFormatException e) {
+                throw new IllegalArgumentException("Error al obtener información del firmante", e);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error al obtener información del firmante", e);
             }
 
             // Eliminar el documento

@@ -136,15 +136,14 @@ public class ServicioValidacionPdf {
             // TODO: Implementar
 
             /*
-             * if (CertificadoSecurityDataFactory.esCertificadoDeSecurityData(
-             * certificado)) { CertificadoSecurityData sd =
-             * CertificadoSecurityDataFactory.construir(certificado);
-             * builder.add("fecha", sdf.format(firma.getSigningTime()));
-             * builder.add("cedula", sd.getCedulaPasaporte());
-             * builder.add("nombre", sd.getNombres() + " " +
-             * sd.getPrimerApellido() + " " + sd.getSegundoApellido());
-             * builder.add("cargo", sd.getCargo()); builder.add("institucion",
-             * sd.getInstitucion()); arrayBuilder.add(builder); }
+             * if (CertificadoSecurityDataFactory.esCertificadoDeSecurityData( certificado))
+             * { CertificadoSecurityData sd =
+             * CertificadoSecurityDataFactory.construir(certificado); builder.add("fecha",
+             * sdf.format(firma.getSigningTime())); builder.add("cedula",
+             * sd.getCedulaPasaporte()); builder.add("nombre", sd.getNombres() + " " +
+             * sd.getPrimerApellido() + " " + sd.getSegundoApellido()); builder.add("cargo",
+             * sd.getCargo()); builder.add("institucion", sd.getInstitucion());
+             * arrayBuilder.add(builder); }
              */
         }
 
