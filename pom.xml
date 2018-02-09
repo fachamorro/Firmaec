@@ -4,7 +4,7 @@
 
 	<groupId>ec.gob.firmadigital</groupId>
 	<artifactId>servicio</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>war</packaging>
 
 	<name>firmadigital-servicio</name>
@@ -30,7 +30,7 @@
 		<connection>scm:git:https://minka.gob.ec/mintel/ge/firmaec/firmadigital-servicio.git</connection>
 		<developerConnection>scm:git:git@minka.gob.ec:mintel/ge/firmaec/firmadigital-servicio.git</developerConnection>
 		<url>https://minka.gob.ec/mintel/ge/firmaec/firmadigital-servicio</url>
-		<tag>HEAD</tag>
+		<tag>v1.0.1</tag>
 	</scm>
 
 	<properties>
