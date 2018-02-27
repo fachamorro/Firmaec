@@ -213,23 +213,30 @@ public class ServicioDocumentoRest {
         }
 
         try {
-            servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson);
-            return Response.noContent().build();
+            int documentosFirmados = servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson);
+            JsonObject jsonResponse = Json.createObjectBuilder().add("documentos_recibidos", documentos.size())
+                    .add("documentos_firmados", documentosFirmados).build();
+            return Response.ok(jsonResponse).build();
         } catch (CedulaInvalidaException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula invalida: " + e.getMessage());
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return generarErrorResponse("Cedula inválida");
         } catch (IllegalArgumentException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return generarErrorResponse("No se encontraron documentos para firmar");
         } catch (TokenInvalidoException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Token invalido: " + token);
-            return Response.status(Status.BAD_REQUEST).entity("Token invalido").build();
+            return generarErrorResponse("Token inválido");
         } catch (TokenExpiradoException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Token expirado: " + token);
-            return Response.status(Status.BAD_REQUEST).entity("Token expirado").build();
+            return generarErrorResponse("Token expirado");
         } catch (Base64InvalidoException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Base 64 invalido");
-            return Response.status(Status.BAD_REQUEST).entity("Base 64 invalido").build();
+            return generarErrorResponse("Base 64 inválido");
         }
+    }
+
+    private Response generarErrorResponse(String error) {
+        JsonObject errorResponse = Json.createObjectBuilder().add("error", error).build();
+        return Response.status(Status.BAD_REQUEST).entity(errorResponse).build();
     }
 }

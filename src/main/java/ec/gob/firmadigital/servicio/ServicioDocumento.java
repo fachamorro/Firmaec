@@ -156,7 +156,7 @@ public class ServicioDocumento {
      * @return
      * @throws SistemaTransversalException
      */
-    public void actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
+    public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
             throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException {
 
         Map<String, Object> parametros = servicioToken.parseToken(token);
@@ -190,6 +190,8 @@ public class ServicioDocumento {
             throw new IllegalArgumentException("El token contiene " + idList.size()
                     + " archivos por procesar pero se enviaron solo " + archivos.size() + " archivos!");
         }
+
+        int documentosFirmados = 0;
 
         for (String id : idList) {
             Long primaryKey = Long.parseLong(id);
@@ -246,7 +248,10 @@ public class ServicioDocumento {
 
             // Eliminar el documento
             em.remove(documento);
+            documentosFirmados++;
         }
+
+        return documentosFirmados;
     }
 
     /**
