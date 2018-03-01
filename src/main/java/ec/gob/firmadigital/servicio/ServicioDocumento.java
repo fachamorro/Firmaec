@@ -235,6 +235,7 @@ public class ServicioDocumento {
 
                 servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
                         archivoBase64, datosFirmante, url, certificado);
+                documentosFirmados++;
             } catch (SistemaTransversalException e) {
                 String mensajeError = "No se pudo enviar el documento " + documento.getId()
                         + " al sistema transversal: ";
@@ -248,7 +249,6 @@ public class ServicioDocumento {
 
             // Eliminar el documento
             em.remove(documento);
-            documentosFirmados++;
         }
 
         return documentosFirmados;
