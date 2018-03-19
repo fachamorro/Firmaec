@@ -46,6 +46,22 @@ import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import io.rubrica.certificate.ec.bce.CertificadoBancoCentral;
 import io.rubrica.certificate.ec.bce.CertificadoBancoCentralFactory;
+import io.rubrica.certificate.ec.cj.CertificadoConsejoJudicatura;
+import io.rubrica.certificate.ec.cj.CertificadoConsejoJudicaturaDataFactory;
+import io.rubrica.certificate.ec.cj.CertificadoDepartamentoEmpresaConsejoJudicatura;
+import io.rubrica.certificate.ec.cj.CertificadoEmpresaConsejoJudicatura;
+import io.rubrica.certificate.ec.cj.CertificadoMiembroEmpresaConsejoJudicatura;
+import io.rubrica.certificate.ec.cj.CertificadoPersonaJuridicaPrivadaConsejoJudicatura;
+import io.rubrica.certificate.ec.cj.CertificadoPersonaJuridicaPublicaConsejoJudicatura;
+import io.rubrica.certificate.ec.cj.CertificadoPersonaNaturalConsejoJudicatura;
+import io.rubrica.certificate.ec.securitydata.CertificadoFuncionarioPublicoSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoMiembroEmpresaSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoPersonaJuridicaSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoPersonaNaturalSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoPruebaSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoRepresentanteLegalSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoSecurityData;
+import io.rubrica.certificate.ec.securitydata.CertificadoSecurityDataFactory;
 import io.rubrica.ocsp.OcspValidationException;
 import io.rubrica.sign.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
@@ -133,18 +149,117 @@ public class ServicioValidacionPdf {
                 arrayBuilder.add(builder);
             }
 
-            // TODO: Implementar
+            if (CertificadoSecurityDataFactory.esCertificadoDeSecurityData(certificado)) {
+                CertificadoSecurityData sd = CertificadoSecurityDataFactory.construir(certificado);
 
-            /*
-             * if (CertificadoSecurityDataFactory.esCertificadoDeSecurityData( certificado))
-             * { CertificadoSecurityData sd =
-             * CertificadoSecurityDataFactory.construir(certificado); builder.add("fecha",
-             * sdf.format(firma.getSigningTime())); builder.add("cedula",
-             * sd.getCedulaPasaporte()); builder.add("nombre", sd.getNombres() + " " +
-             * sd.getPrimerApellido() + " " + sd.getSegundoApellido()); builder.add("cargo",
-             * sd.getCargo()); builder.add("institucion", sd.getInstitucion());
-             * arrayBuilder.add(builder); }
-             */
+                builder.add("nombre", sd.getNombres() + " " + sd.getPrimerApellido() + " " + sd.getSegundoApellido());
+                builder.add("fecha", sdf.format(firma.getSigningTime()));
+
+                if (sd instanceof CertificadoFuncionarioPublicoSecurityData) {
+                    builder.add("cedula", ((CertificadoFuncionarioPublicoSecurityData) sd).getCedulaPasaporte());
+                    builder.add("cargo", ((CertificadoFuncionarioPublicoSecurityData) sd).getCargo());
+                    builder.add("institucion", ((CertificadoFuncionarioPublicoSecurityData) sd).getInstitucion());
+                }
+
+                if (sd instanceof CertificadoMiembroEmpresaSecurityData) {
+                    builder.add("cedula", ((CertificadoMiembroEmpresaSecurityData) sd).getCedulaPasaporte());
+                    builder.add("cargo", ((CertificadoMiembroEmpresaSecurityData) sd).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (sd instanceof CertificadoPersonaJuridicaSecurityData) {
+                    builder.add("cedula", "N/A");
+                    builder.add("cargo", "N/A");
+                    builder.add("institucion", "N/A");
+                }
+
+                if (sd instanceof CertificadoPersonaNaturalSecurityData) {
+                    builder.add("cedula", ((CertificadoPersonaNaturalSecurityData) sd).getCedulaPasaporte());
+                    builder.add("cargo", "N/A");
+                    builder.add("institucion", "N/A");
+                }
+
+                if (sd instanceof CertificadoRepresentanteLegalSecurityData) {
+                    builder.add("cedula", ((CertificadoRepresentanteLegalSecurityData) sd).getCedulaPasaporte());
+                    builder.add("cargo", ((CertificadoRepresentanteLegalSecurityData) sd).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (sd instanceof CertificadoPruebaSecurityData) {
+                    builder.add("cedula", ((CertificadoPruebaSecurityData) sd).getCedulaPasaporte());
+                    builder.add("cargo", "N/A");
+                    builder.add("institucion", "N/A");
+                }
+
+                arrayBuilder.add(builder);
+            }
+
+            if (CertificadoConsejoJudicaturaDataFactory.esCertificadoDelConsejoJudicatura(certificado)) {
+                CertificadoConsejoJudicatura cj = CertificadoConsejoJudicaturaDataFactory.construir(certificado);
+                builder.add("fecha", sdf.format(firma.getSigningTime()));
+
+                if (cj instanceof CertificadoDepartamentoEmpresaConsejoJudicatura) {
+                    builder.add("cedula", ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getCedulaPasaporte());
+                    builder.add("nombre",
+                            ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getNombres() + " "
+                                    + ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getPrimerApellido() + " "
+                                    + ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getSegundoApellido());
+                    builder.add("cargo", ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (cj instanceof CertificadoEmpresaConsejoJudicatura) {
+                    builder.add("cedula", ((CertificadoEmpresaConsejoJudicatura) cj).getCedulaPasaporte());
+                    builder.add("nombre",
+                            ((CertificadoEmpresaConsejoJudicatura) cj).getNombres() + " "
+                                    + ((CertificadoEmpresaConsejoJudicatura) cj).getPrimerApellido() + " "
+                                    + ((CertificadoEmpresaConsejoJudicatura) cj).getSegundoApellido());
+                    builder.add("cargo", ((CertificadoEmpresaConsejoJudicatura) cj).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (cj instanceof CertificadoMiembroEmpresaConsejoJudicatura) {
+                    builder.add("cedula", ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getCedulaPasaporte());
+                    builder.add("nombre",
+                            ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getNombres() + " "
+                                    + ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getPrimerApellido() + " "
+                                    + ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getSegundoApellido());
+                    builder.add("cargo", ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (cj instanceof CertificadoPersonaJuridicaPrivadaConsejoJudicatura) {
+                    builder.add("cedula",
+                            ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getCedulaPasaporte());
+                    builder.add("nombre", ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getNombres() + " "
+                            + ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getPrimerApellido() + " "
+                            + ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getSegundoApellido());
+                    builder.add("cargo", ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (cj instanceof CertificadoPersonaJuridicaPublicaConsejoJudicatura) {
+                    builder.add("cedula",
+                            ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getCedulaPasaporte());
+                    builder.add("nombre", ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getNombres() + " "
+                            + ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getPrimerApellido() + " "
+                            + ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getSegundoApellido());
+                    builder.add("cargo", ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getCargo());
+                    builder.add("institucion", "N/A");
+                }
+
+                if (cj instanceof CertificadoPersonaNaturalConsejoJudicatura) {
+                    builder.add("cedula", ((CertificadoPersonaNaturalConsejoJudicatura) cj).getCedulaPasaporte());
+                    builder.add("nombre",
+                            ((CertificadoPersonaNaturalConsejoJudicatura) cj).getNombres() + " "
+                                    + ((CertificadoPersonaNaturalConsejoJudicatura) cj).getPrimerApellido() + " "
+                                    + ((CertificadoPersonaNaturalConsejoJudicatura) cj).getSegundoApellido());
+                    builder.add("cargo", "N/A");
+                    builder.add("institucion", "N/A");
+                }
+
+                arrayBuilder.add(builder);
+            }
         }
 
         // Construir JSON
