@@ -25,21 +25,21 @@ package ec.gob.firmadigital.servicio.token;
  */
 public class TokenInvalidoException extends Exception {
 
-    private static final long serialVersionUID = 6309875307360686262L;
+	private static final long serialVersionUID = 6309875307360686262L;
 
-    public TokenInvalidoException() {
-        super();
-    }
+	public TokenInvalidoException() {
+		super();
+	}
 
-    public TokenInvalidoException(String message) {
-        super(message);
-    }
+	public TokenInvalidoException(String message) {
+		super(message);
+	}
 
-    public TokenInvalidoException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public TokenInvalidoException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public TokenInvalidoException(Throwable cause) {
-        super(cause);
-    }
+	public TokenInvalidoException(Throwable cause) {
+		super(cause);
+	}
 }

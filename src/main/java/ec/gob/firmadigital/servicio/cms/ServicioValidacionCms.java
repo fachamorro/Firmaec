@@ -47,45 +47,45 @@ import io.rubrica.sign.cms.VerificadorCMS;
 @Path("/validacioncms")
 public class ServicioValidacionCms {
 
-    @POST
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response verificarCms(String archivoBase64) throws SignatureVerificationException {
+	@POST
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response verificarCms(String archivoBase64) throws SignatureVerificationException {
 
-        byte[] archivo;
+		byte[] archivo;
 
-        try {
-            archivo = Base64Util.decode(archivoBase64);
-        } catch (Base64InvalidoException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
-        }
+		try {
+			archivo = Base64Util.decode(archivoBase64);
+		} catch (Base64InvalidoException e) {
+			return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
+		}
 
-        VerificadorCMS verificador = new VerificadorCMS();
-        byte[] archivoOriginal = verificador.verify(archivo);
-        String archivoOriginalBase64 = Base64Util.encode(archivoOriginal);
+		VerificadorCMS verificador = new VerificadorCMS();
+		byte[] archivoOriginal = verificador.verify(archivo);
+		String archivoOriginalBase64 = Base64Util.encode(archivoOriginal);
 
-        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-        objectBuilder.add("archivo", archivoOriginalBase64);
+		JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+		objectBuilder.add("archivo", archivoOriginalBase64);
 
-        // Para construir un array de firmantes
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+		// Para construir un array de firmantes
+		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
-        // FIXME
-        List<DatosUsuario> listaDatosUsuario = verificador.listaDatosUsuario;
+		// FIXME
+		List<DatosUsuario> listaDatosUsuario = verificador.listaDatosUsuario;
 
-        for (DatosUsuario datosUsuario : listaDatosUsuario) {
-            JsonObjectBuilder builder = Json.createObjectBuilder();
-            builder.add("nombre", datosUsuario.getNombre());
-            builder.add("apellido", datosUsuario.getApellido());
-            builder.add("cargo", datosUsuario.getCargo());
-            builder.add("cedula", datosUsuario.getCedula());
-            builder.add("institucion", datosUsuario.getInstitucion());
-            arrayBuilder.add(builder);
-        }
+		for (DatosUsuario datosUsuario : listaDatosUsuario) {
+			JsonObjectBuilder builder = Json.createObjectBuilder();
+			builder.add("nombre", datosUsuario.getNombre());
+			builder.add("apellido", datosUsuario.getApellido());
+			builder.add("cargo", datosUsuario.getCargo());
+			builder.add("cedula", datosUsuario.getCedula());
+			builder.add("institucion", datosUsuario.getInstitucion());
+			arrayBuilder.add(builder);
+		}
 
-        objectBuilder.add("firmantes", arrayBuilder.build());
-        String json = objectBuilder.build().toString();
+		objectBuilder.add("firmantes", arrayBuilder.build());
+		String json = objectBuilder.build().toString();
 
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
-    }
+		return Response.ok(json, MediaType.APPLICATION_JSON).build();
+	}
 }

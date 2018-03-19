@@ -26,9 +26,9 @@ package ec.gob.firmadigital.servicio.util;
  */
 public class Base64InvalidoException extends Exception {
 
-    private static final long serialVersionUID = 4433183404356913624L;
+	private static final long serialVersionUID = 4433183404356913624L;
 
-    public Base64InvalidoException(IllegalArgumentException cause) {
-        super(cause);
-    }
+	public Base64InvalidoException(IllegalArgumentException cause) {
+		super(cause);
+	}
 }

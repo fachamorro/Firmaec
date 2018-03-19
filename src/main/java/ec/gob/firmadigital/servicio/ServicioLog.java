@@ -36,24 +36,24 @@ import ec.gob.firmadigital.servicio.model.Log.Severidad;
 @Stateful
 public class ServicioLog {
 
-    @PersistenceContext(unitName = "FirmaDigitalDS")
-    private EntityManager em;
+	@PersistenceContext(unitName = "FirmaDigitalDS")
+	private EntityManager em;
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void log(Severidad severidad, String categoria, String descripcion) {
-        Log log = new Log(severidad, categoria, descripcion);
-        em.persist(log);
-    }
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void log(Severidad severidad, String categoria, String descripcion) {
+		Log log = new Log(severidad, categoria, descripcion);
+		em.persist(log);
+	}
 
-    public void info(String categoria, String descripcion) {
-        log(Severidad.INFO, categoria, descripcion);
-    }
+	public void info(String categoria, String descripcion) {
+		log(Severidad.INFO, categoria, descripcion);
+	}
 
-    public void warning(String categoria, String descripcion) {
-        log(Severidad.WARNING, categoria, descripcion);
-    }
+	public void warning(String categoria, String descripcion) {
+		log(Severidad.WARNING, categoria, descripcion);
+	}
 
-    public void error(String categoria, String descripcion) {
-        log(Severidad.ERROR, categoria, descripcion);
-    }
+	public void error(String categoria, String descripcion) {
+		log(Severidad.ERROR, categoria, descripcion);
+	}
 }

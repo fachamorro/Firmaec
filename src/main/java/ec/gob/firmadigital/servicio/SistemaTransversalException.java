@@ -26,21 +26,21 @@ package ec.gob.firmadigital.servicio;
  */
 public class SistemaTransversalException extends Exception {
 
-    private static final long serialVersionUID = -7132855600223954519L;
+	private static final long serialVersionUID = -7132855600223954519L;
 
-    public SistemaTransversalException() {
-        super();
-    }
+	public SistemaTransversalException() {
+		super();
+	}
 
-    public SistemaTransversalException(String message) {
-        super(message);
-    }
+	public SistemaTransversalException(String message) {
+		super(message);
+	}
 
-    public SistemaTransversalException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public SistemaTransversalException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public SistemaTransversalException(Throwable cause) {
-        super(cause);
-    }
+	public SistemaTransversalException(Throwable cause) {
+		super(cause);
+	}
 }

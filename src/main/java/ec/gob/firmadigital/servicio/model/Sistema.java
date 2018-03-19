@@ -33,57 +33,57 @@ import javax.persistence.Id;
 @Entity
 public class Sistema implements Serializable {
 
-    private static final long serialVersionUID = 5588060743829609875L;
+	private static final long serialVersionUID = 5588060743829609875L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
 
-    private String nombre;
-    private String descripcion;
-    private String URL;
-    private String apiKey;
+	private String nombre;
+	private String descripcion;
+	private String URL;
+	private String apiKey;
 
-    public Sistema() {
-    }
+	public Sistema() {
+	}
 
-    public long getId() {
-        return id;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public String getNombre() {
-        return nombre;
-    }
+	public String getNombre() {
+		return nombre;
+	}
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+	public String getDescripcion() {
+		return descripcion;
+	}
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
+	}
 
-    public String getURL() {
-        return URL;
-    }
+	public String getURL() {
+		return URL;
+	}
 
-    public void setURL(String uRL) {
-        URL = uRL;
-    }
+	public void setURL(String uRL) {
+		URL = uRL;
+	}
 
-    public String getApiKey() {
-        return apiKey;
-    }
+	public String getApiKey() {
+		return apiKey;
+	}
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
 }

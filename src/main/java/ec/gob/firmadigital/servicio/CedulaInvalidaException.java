@@ -26,13 +26,13 @@ package ec.gob.firmadigital.servicio;
  */
 public class CedulaInvalidaException extends Exception {
 
-    private static final long serialVersionUID = 1093880787253700671L;
+	private static final long serialVersionUID = 1093880787253700671L;
 
-    public CedulaInvalidaException() {
-        super();
-    }
+	public CedulaInvalidaException() {
+		super();
+	}
 
-    public CedulaInvalidaException(String message) {
-        super(message);
-    }
+	public CedulaInvalidaException(String message) {
+		super(message);
+	}
 }

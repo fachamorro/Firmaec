@@ -39,13 +39,13 @@ import ec.gob.firmadigital.servicio.crl.ServicioCrl;
 @Path("/certificado")
 public class ServicioCertificadoRest {
 
-    @EJB
-    private ServicioCrl servicioCrl;
+	@EJB
+	private ServicioCrl servicioCrl;
 
-    @GET
-    @Path("/revocado/{serial}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String validarCertificado(@PathParam("serial") BigInteger serial) {
-        return Boolean.valueOf(servicioCrl.isRevocado(serial)).toString();
-    }
+	@GET
+	@Path("/revocado/{serial}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String validarCertificado(@PathParam("serial") BigInteger serial) {
+		return Boolean.valueOf(servicioCrl.isRevocado(serial)).toString();
+	}
 }

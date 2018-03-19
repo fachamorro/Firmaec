@@ -43,47 +43,47 @@ import javax.sql.DataSource;
 @Startup
 public class ServicioEliminacionDocumento {
 
-    @Resource
-    private TimerService timerService;
+	@Resource
+	private TimerService timerService;
 
-    @Resource(lookup = "java:/FirmaDigitalDS")
-    private DataSource ds;
+	@Resource(lookup = "java:/FirmaDigitalDS")
+	private DataSource ds;
 
-    private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
+	private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
 
-    @PostConstruct
-    public void init() {
-        borrarDocumentos();
-    }
+	@PostConstruct
+	public void init() {
+		borrarDocumentos();
+	}
 
-    @Schedule(hour = "*", minute = "*/30", persistent = false)
-    public void borrarDocumentos() {
-        Connection conn = null;
-        Statement st = null;
+	@Schedule(hour = "*", minute = "*/30", persistent = false)
+	public void borrarDocumentos() {
+		Connection conn = null;
+		Statement st = null;
 
-        try {
-            conn = ds.getConnection();
-            st = conn.createStatement();
+		try {
+			conn = ds.getConnection();
+			st = conn.createStatement();
 
-            logger.info("Borrando documentos de hace mas de 30 minutos...");
-            int n = st.executeUpdate("DELETE FROM documento WHERE fecha < now() - INTERVAL '30 minutes'");
-            logger.info("Registros eliminados: " + n);
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error al borrar certificados", e);
-            throw new EJBException(e);
-        } finally {
-            if (st != null) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-    }
+			logger.info("Borrando documentos de hace mas de 30 minutos...");
+			int n = st.executeUpdate("DELETE FROM documento WHERE fecha < now() - INTERVAL '30 minutes'");
+			logger.info("Registros eliminados: " + n);
+		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error al borrar certificados", e);
+			throw new EJBException(e);
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
 }

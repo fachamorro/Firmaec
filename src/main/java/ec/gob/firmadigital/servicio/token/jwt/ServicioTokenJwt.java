@@ -61,72 +61,72 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
 @Startup
 public class ServicioTokenJwt implements ServicioToken {
 
-    private static final Logger logger = Logger.getLogger(ServicioTokenJwt.class.getName());
+	private static final Logger logger = Logger.getLogger(ServicioTokenJwt.class.getName());
 
-    /** Llave privada para firmar los tokens */
-    private Key key;
+	/** Llave privada para firmar los tokens */
+	private Key key;
 
-    /** Algoritmo de firma HMAC por defecto */
-    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = HS256;
+	/** Algoritmo de firma HMAC por defecto */
+	private static final SignatureAlgorithm SIGNATURE_ALGORITHM = HS256;
 
-    /**
-     * Nombre de la propiedad de sistema que contiene la llave secreta, en
-     * formato Base64
-     */
-    private static final String KEY_SYSTEM_PROPERTY = "jwt.key";
+	/**
+	 * Nombre de la propiedad de sistema que contiene la llave secreta, en formato
+	 * Base64
+	 */
+	private static final String KEY_SYSTEM_PROPERTY = "jwt.key";
 
-    @PostConstruct
-    private void init() {
-        logger.info("Inicializando llave secreta para tokens JWT...");
-        String keyBase64 = System.getProperty(KEY_SYSTEM_PROPERTY);
+	@PostConstruct
+	private void init() {
+		logger.info("Inicializando llave secreta para tokens JWT...");
+		String keyBase64 = System.getProperty(KEY_SYSTEM_PROPERTY);
 
-        if (keyBase64 != null) {
-            logger.info("Se encontro la propiedad de sistema \"jwt.key\"");
+		if (keyBase64 != null) {
+			logger.info("Se encontro la propiedad de sistema \"jwt.key\"");
 
-            try {
-                // Cargar la llave secreta
-                this.key = new SecretKeySpec(Base64Util.decode(keyBase64), "RAW");
-                logger.info("Se creo una llave secreta a partir de la propiedad de sistema \"jwt.key\"");
-                return;
-            } catch (Throwable e) {
-                logger.warn("ERROR: No se pudo crear una llave secreta a partir de la propiedad \"jwt.key\"", e);
-            }
-        }
+			try {
+				// Cargar la llave secreta
+				this.key = new SecretKeySpec(Base64Util.decode(keyBase64), "RAW");
+				logger.info("Se creo una llave secreta a partir de la propiedad de sistema \"jwt.key\"");
+				return;
+			} catch (Throwable e) {
+				logger.warn("ERROR: No se pudo crear una llave secreta a partir de la propiedad \"jwt.key\"", e);
+			}
+		}
 
-        // Llave secreta autogenerada
-        this.key = MacProvider.generateKey();
-        logger.info("Se creo una llave secreta autogenerada");
-    }
+		// Llave secreta autogenerada
+		this.key = MacProvider.generateKey();
+		logger.info("Se creo una llave secreta autogenerada");
+	}
 
-    /**
-     * @see ec.gob.firmadigital.servicio.ServicioToken#generarToken(java.util.Map)
-     */
-    @Override
-    public String generarToken(Map<String, Object> parametros) {
-        return generarToken(parametros, null);
-    }
+	/**
+	 * @see ec.gob.firmadigital.servicio.ServicioToken#generarToken(java.util.Map)
+	 */
+	@Override
+	public String generarToken(Map<String, Object> parametros) {
+		return generarToken(parametros, null);
+	}
 
-    /**
-     * @see ec.gob.firmadigital.servicio.ServicioToken#generarToken(java.util.Map,
-     *      java.util.Date)
-     */
-    @Override
-    public String generarToken(Map<String, Object> parametros, Date expiracion) {
-        Claims claims = new DefaultClaims(parametros);
-        return Jwts.builder().setClaims(claims).signWith(SIGNATURE_ALGORITHM, key).setExpiration(expiracion).compact();
-    }
+	/**
+	 * @see ec.gob.firmadigital.servicio.ServicioToken#generarToken(java.util.Map,
+	 *      java.util.Date)
+	 */
+	@Override
+	public String generarToken(Map<String, Object> parametros, Date expiracion) {
+		Claims claims = new DefaultClaims(parametros);
+		return Jwts.builder().setClaims(claims).signWith(SIGNATURE_ALGORITHM, key).setExpiration(expiracion).compact();
+	}
 
-    /**
-     * @see ec.gob.firmadigital.servicio.ServicioToken#parseToken(java.lang.String)
-     */
-    @Override
-    public Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException {
-        try {
-            return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-        } catch (MalformedJwtException | SignatureException | MissingClaimException e) {
-            throw new TokenInvalidoException(e);
-        } catch (ExpiredJwtException e) {
-            throw new TokenExpiradoException(e);
-        }
-    }
+	/**
+	 * @see ec.gob.firmadigital.servicio.ServicioToken#parseToken(java.lang.String)
+	 */
+	@Override
+	public Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException {
+		try {
+			return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+		} catch (MalformedJwtException | SignatureException | MissingClaimException e) {
+			throw new TokenInvalidoException(e);
+		} catch (ExpiredJwtException e) {
+			throw new TokenExpiradoException(e);
+		}
+	}
 }

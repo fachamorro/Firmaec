@@ -29,31 +29,31 @@ import java.util.Map;
  */
 public interface ServicioToken {
 
-    /**
-     * Generar un token sin expiracion.
-     * 
-     * @param id
-     * @return
-     */
-    String generarToken(Map<String, Object> parametros);
+	/**
+	 * Generar un token sin expiracion.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	String generarToken(Map<String, Object> parametros);
 
-    /**
-     * Generar un token con tiempo de expiracion
-     * 
-     * @param id
-     * @param expiracion
-     * @return
-     */
-    String generarToken(Map<String, Object> parametros, Date expiracion);
+	/**
+	 * Generar un token con tiempo de expiracion
+	 * 
+	 * @param id
+	 * @param expiracion
+	 * @return
+	 */
+	String generarToken(Map<String, Object> parametros, Date expiracion);
 
-    /**
-     * Analizar los contenidos de un token para sacar la información necesaria
-     * para procesar un documento.
-     * 
-     * @param token
-     * @return
-     * @throws TokenInvalidoException
-     * @throws TokenExpiradoException
-     */
-    Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException;
+	/**
+	 * Analizar los contenidos de un token para sacar la información necesaria para
+	 * procesar un documento.
+	 * 
+	 * @param token
+	 * @return
+	 * @throws TokenInvalidoException
+	 * @throws TokenExpiradoException
+	 */
+	Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException;
 }

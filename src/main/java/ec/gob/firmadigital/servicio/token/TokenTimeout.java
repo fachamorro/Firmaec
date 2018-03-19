@@ -27,20 +27,20 @@ import java.util.Date;
  */
 public class TokenTimeout {
 
-    /**
-     * Minutos antes de que el Token expire.
-     */
-    public static final int DEFAULT_TIMEOUT = 25;
+	/**
+	 * Minutos antes de que el Token expire.
+	 */
+	public static final int DEFAULT_TIMEOUT = 25;
 
-    /**
-     * Agregar una cantidad de minutos a una hora dada.
-     * 
-     * @param date
-     * @param minutes
-     * @return
-     */
-    public static Date addMinutes(Date date, int minutes) {
-        long time = date.getTime() + (minutes * 60 * 1000);
-        return new Date(time);
-    }
+	/**
+	 * Agregar una cantidad de minutos a una hora dada.
+	 * 
+	 * @param date
+	 * @param minutes
+	 * @return
+	 */
+	public static Date addMinutes(Date date, int minutes) {
+		long time = date.getTime() + (minutes * 60 * 1000);
+		return new Date(time);
+	}
 }
