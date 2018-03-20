@@ -48,6 +48,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.CedulaInvalidaException;
+import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
 import ec.gob.firmadigital.servicio.ServicioDocumento;
 import ec.gob.firmadigital.servicio.ServicioLog;
 import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
@@ -220,6 +221,9 @@ public class ServicioDocumentoRest {
 		} catch (CedulaInvalidaException e) {
 			servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula invalida: " + e.getMessage());
 			return generarErrorResponse("Cedula inválida");
+		} catch (CertificadoRevocadoException e) {
+			servicioLog.error("ServicioDocumentoRest::certificadoRevocado", e.getMessage());
+			return generarErrorResponse("Certificado revocado");
 		} catch (IllegalArgumentException e) {
 			servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
 			return generarErrorResponse("No se encontraron documentos para firmar");

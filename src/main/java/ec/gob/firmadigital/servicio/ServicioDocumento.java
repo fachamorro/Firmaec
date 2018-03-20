@@ -46,7 +46,6 @@ import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
-import io.rubrica.ocsp.OcspValidationException;
 import io.rubrica.sign.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
@@ -157,7 +156,8 @@ public class ServicioDocumento {
 	 * @throws SistemaTransversalException
 	 */
 	public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
-			throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException {
+			throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException,
+			CertificadoRevocadoException {
 
 		Map<String, Object> parametros = servicioToken.parseToken(token);
 
@@ -222,8 +222,6 @@ public class ServicioDocumento {
 			} catch (InvalidFormatException e) {
 				throw new IllegalArgumentException("Error en la verificacion de firma", e);
 			} catch (IOException e) {
-				throw new IllegalArgumentException("Error en la verificacion de firma", e);
-			} catch (OcspValidationException e) {
 				throw new IllegalArgumentException("Error en la verificacion de firma", e);
 			}
 

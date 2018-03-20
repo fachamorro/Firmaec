@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.jboss.logging.Logger;
 
+import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
 import ec.gob.firmadigital.servicio.crl.ServicioCrl;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
@@ -83,7 +84,7 @@ public class ServicioValidacionPdf {
 
 	private static final Logger logger = Logger.getLogger(ServicioValidacionPdf.class.getName());
 
-	public String getNombre(byte[] pdf) throws IOException, InvalidFormatException, OcspValidationException {
+	public String getNombre(byte[] pdf) throws IOException, InvalidFormatException, CertificadoRevocadoException {
 		Signer signer = new PDFSigner();
 		List<SignInfo> singInfos = signer.getSigners(pdf);
 
@@ -96,8 +97,7 @@ public class ServicioValidacionPdf {
 			logger.info("revocado=" + revocado);
 
 			if (revocado) {
-				// FIXME
-				throw new OcspValidationException();
+				throw new CertificadoRevocadoException();
 			}
 
 			return Utils.getCN(certificado);
