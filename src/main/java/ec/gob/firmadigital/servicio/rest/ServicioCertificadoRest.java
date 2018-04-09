@@ -46,6 +46,13 @@ public class ServicioCertificadoRest {
 	@Path("/revocado/{serial}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String validarCertificado(@PathParam("serial") BigInteger serial) {
-		return Boolean.valueOf(servicioCrl.isRevocado(serial)).toString();
+		return Boolean.toString(servicioCrl.isRevocado(serial));
+	}
+
+	@GET
+	@Path("/fechaRevocado/{serial}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String validarFechaRevocado(@PathParam("serial") BigInteger serial) {
+            return servicioCrl.fechaRevocado(serial);
 	}
 }

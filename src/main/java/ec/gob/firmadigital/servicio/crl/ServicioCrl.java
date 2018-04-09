@@ -186,6 +186,46 @@ public class ServicioCrl {
 			}
 		}
 	}
+        
+	public String fechaRevocado(BigInteger serial) {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			conn = ds.getConnection();
+			ps = conn.prepareStatement("SELECT fecharevocacion FROM crl WHERE serial=?");
+			ps.setBigDecimal(1, new BigDecimal(serial));
+			rs = ps.executeQuery();
+                        String fecharevocacion = null;
+                        while (rs.next()) {
+                            fecharevocacion = rs.getString("fecharevocacion");
+                        }
+                        return fecharevocacion;
+		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error al buscar certificado", e);
+			throw new EJBException(e);
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
 
 	private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
 		for (X509CRLEntry cert : crl.getRevokedCertificates()) {

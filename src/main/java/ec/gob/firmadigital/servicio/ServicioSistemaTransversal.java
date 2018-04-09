@@ -111,18 +111,18 @@ public class ServicioSistemaTransversal {
 		}
 	}
 
-	public boolean pingSistemaTransversal(URL url) {
-		try {
-			InetAddress inet = InetAddress.getByName(url.getHost());
-			logger.fine("Enviando ping a " + inet);
-			boolean reacheable = inet.isReachable(PING_TIMEOUT);
-			logger.fine(reacheable ? "Servidor si responde" : "Servidor NO responde");
-			return reacheable;
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Error al tratar de hacer ping al servidor del sistema transversal: " + url, e);
-			return false;
-		}
-	}
+//	public boolean pingSistemaTransversal(URL url) {
+//		try {
+//			InetAddress inet = InetAddress.getByName(url.getHost());
+//			logger.fine("Enviando ping a " + inet);
+//			boolean reacheable = inet.isReachable(PING_TIMEOUT);
+//			logger.fine(reacheable ? "Servidor si responde" : "Servidor NO responde");
+//			return reacheable;
+//		} catch (IOException e) {
+//			logger.log(Level.SEVERE, "Error al tratar de hacer ping al servidor del sistema transversal: " + url, e);
+//			return false;
+//		}
+//	}
 
 	/**
 	 * Almacena el documento firmado en el sistema tranversarl, mediante la

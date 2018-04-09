@@ -176,13 +176,13 @@ public class ServicioDocumento {
 		URL url = servicioSistemaTransversal.buscarUrlSistema(sistema);
 		logger.info("sistema=" + sistema + "; url=" + url);
 
-		// Verificar si el sistema transversal está disponible
-		if (!servicioSistemaTransversal.pingSistemaTransversal(url)) {
-			String mensajeError = "El sistema transversal NO está disponible, el documento "
-					+ " no fue enviado al sistema transversal";
-			servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
-			logger.warning(mensajeError);
-		}
+//		// Verificar si el sistema transversal está disponible
+//		if (!servicioSistemaTransversal.pingSistemaTransversal(url)) {
+//			String mensajeError = "El sistema transversal NO está disponible, el documento "
+//					+ " no fue enviado al sistema transversal";
+//			servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
+//			logger.warning(mensajeError);
+//		}
 
 		List<String> idList = convertirEnList(ids);
 
