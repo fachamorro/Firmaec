@@ -129,4 +129,33 @@ public class ServicioTokenJwt implements ServicioToken {
 			throw new TokenExpiradoException(e);
 		}
 	}
+
+	/**
+	 * Genera una llave privada randómica para configurar como variable dentro del
+	 * archivo standalone.xml del servidor de aplicaciones WildFly/JBoss.
+	 *
+	 * Esta llave debe ser configurada en el servidor de aplicaciones WildFly, en el
+	 * archivo standalone.xml, en la sección <pre><system-properties></pre>:
+	 *
+	 * <pre>
+	 *  ...
+	 *  </extensions>
+	 *  <system-properties>
+	 *    <property name="jwt.key" value="tYdX9if...=="/>
+	 *  </system-properties>
+	 *  <management>
+	 *  ...
+	 * </pre>
+	 *
+	 * @return una llave privada en formato Base 64.
+	 */
+	public static String generarLlavePrivada() {
+		Key key = MacProvider.generateKey();
+		byte[] encoded = key.getEncoded();
+		return Base64Util.encode(encoded);
+	}
+
+	public static void main(String[] args) {
+		System.out.println("jwt.key: " + generarLlavePrivada());
+	}
 }
