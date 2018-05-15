@@ -18,13 +18,11 @@
 
 package ec.gob.firmadigital.servicio.token.jwt;
 
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
-
-import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -34,6 +32,7 @@ import org.jboss.logging.Logger;
 import ec.gob.firmadigital.servicio.token.ServicioToken;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
+import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -48,12 +47,15 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
 /**
  * Servicio para trabajar con tokens tipo JWT (https://jwt.io).
  *
- * La llave para firmar los tokens se genera al iniciar la aplicacion. Sin
- * embargo, se puede almacenar una version en Base64 de la llave en el archivo
- * de configuracion del servidor WildFly (standalone.xml), asi:
+ * La llave secreta para firmar los tokens se genera al iniciar la aplicacion.
+ * Sin embargo, se puede almacenar una version en Base64 de la llave en el
+ * archivo de configuracion del servidor WildFly (standalone.xml), asi:
  *
- * <system-properties> <property name="jwt.key" value= "Jgh46..." />
- * </system-properties>
+ * <pre>
+ *   <system-properties>
+ *     <property name="jwt.key" value= "Jgh46..." />
+ *   </system-properties>
+ * </pre>
  *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
@@ -63,11 +65,11 @@ public class ServicioTokenJwt implements ServicioToken {
 
 	private static final Logger logger = Logger.getLogger(ServicioTokenJwt.class.getName());
 
-	/** Llave privada para firmar los tokens */
-	private Key key;
+	/** Llave secreta para firmar los tokens */
+	private SecretKey secretKey;
 
 	/** Algoritmo de firma HMAC por defecto */
-	private static final SignatureAlgorithm SIGNATURE_ALGORITHM = HS256;
+	private static final SignatureAlgorithm DEFAULT_SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
 	/**
 	 * Nombre de la propiedad de sistema que contiene la llave secreta, en formato
@@ -76,7 +78,7 @@ public class ServicioTokenJwt implements ServicioToken {
 	private static final String KEY_SYSTEM_PROPERTY = "jwt.key";
 
 	@PostConstruct
-	private void init() {
+	public void init() {
 		logger.info("Inicializando llave secreta para tokens JWT...");
 		String keyBase64 = System.getProperty(KEY_SYSTEM_PROPERTY);
 
@@ -85,7 +87,7 @@ public class ServicioTokenJwt implements ServicioToken {
 
 			try {
 				// Cargar la llave secreta
-				this.key = new SecretKeySpec(Base64Util.decode(keyBase64), "RAW");
+				this.secretKey = decodificarLlaveSecreta(keyBase64);
 				logger.info("Se creo una llave secreta a partir de la propiedad de sistema \"jwt.key\"");
 				return;
 			} catch (Throwable e) {
@@ -94,7 +96,7 @@ public class ServicioTokenJwt implements ServicioToken {
 		}
 
 		// Llave secreta autogenerada
-		this.key = MacProvider.generateKey();
+		this.secretKey = generarLlaveSecreta();
 		logger.info("Se creo una llave secreta autogenerada");
 	}
 
@@ -113,7 +115,8 @@ public class ServicioTokenJwt implements ServicioToken {
 	@Override
 	public String generarToken(Map<String, Object> parametros, Date expiracion) {
 		Claims claims = new DefaultClaims(parametros);
-		return Jwts.builder().setClaims(claims).signWith(SIGNATURE_ALGORITHM, key).setExpiration(expiracion).compact();
+		return Jwts.builder().setClaims(claims).signWith(DEFAULT_SIGNATURE_ALGORITHM, secretKey)
+				.setExpiration(expiracion).compact();
 	}
 
 	/**
@@ -122,7 +125,7 @@ public class ServicioTokenJwt implements ServicioToken {
 	@Override
 	public Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException {
 		try {
-			return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+			return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
 		} catch (MalformedJwtException | SignatureException | MissingClaimException e) {
 			throw new TokenInvalidoException(e);
 		} catch (ExpiredJwtException e) {
@@ -131,11 +134,20 @@ public class ServicioTokenJwt implements ServicioToken {
 	}
 
 	/**
+	 * Genera una llave secreta para firmar los tokens.
+	 *
+	 * @return
+	 */
+	public static SecretKey generarLlaveSecreta() {
+		return MacProvider.generateKey(DEFAULT_SIGNATURE_ALGORITHM);
+	}
+
+	/**
 	 * Genera una llave privada randómica para configurar como variable dentro del
 	 * archivo standalone.xml del servidor de aplicaciones WildFly/JBoss.
 	 *
 	 * Esta llave debe ser configurada en el servidor de aplicaciones WildFly, en el
-	 * archivo standalone.xml, en la sección <pre><system-properties></pre>:
+	 * archivo standalone.xml, en la sección <system-properties>:
 	 *
 	 * <pre>
 	 *  ...
@@ -149,13 +161,23 @@ public class ServicioTokenJwt implements ServicioToken {
 	 *
 	 * @return una llave privada en formato Base 64.
 	 */
-	public static String generarLlavePrivada() {
-		Key key = MacProvider.generateKey();
-		byte[] encoded = key.getEncoded();
-		return Base64Util.encode(encoded);
+	public static String codificarLlaveSecreta(SecretKey key) {
+		return Base64Util.encode(key.getEncoded());
 	}
 
+	/**
+	 * Decodificar llave secreta en Base 64.
+	 *
+	 * @param keyBase64
+	 * @throws Base64InvalidoException
+	 */
+	public static SecretKey decodificarLlaveSecreta(String keyBase64) throws Base64InvalidoException {
+		return new SecretKeySpec(Base64Util.decode(keyBase64), DEFAULT_SIGNATURE_ALGORITHM.getJcaName());
+	}
+
+	// Generar llave secreta randomica en Base 64
 	public static void main(String[] args) {
-		System.out.println("jwt.key: " + generarLlavePrivada());
+		SecretKey key = generarLlaveSecreta();
+		System.out.println("jwt.key: " + codificarLlaveSecreta(key));
 	}
 }
