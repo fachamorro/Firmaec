@@ -20,13 +20,20 @@ package ec.gob.firmadigital.servicio.token.jwt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
 
 import org.junit.Test;
+
+import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
+import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 
 /**
  * Pruebas de unidad de ServicioTokenJwt.
@@ -46,6 +53,75 @@ public class TestServicioTokenJwt {
 
 		Map<String, Object> parametros2 = servicioToken.parseToken(token);
 		assertEquals(parametros, parametros2);
+	}
+
+	@Test
+	public void testParseTokenConExpiracion() throws Exception {
+		ServicioTokenJwt servicioToken = new ServicioTokenJwt();
+		servicioToken.init();
+
+		Map<String, Object> parametros = new HashMap<>();
+		parametros.put("a", 1);
+
+		LocalDateTime before = LocalDateTime.now().minusMinutes(1);
+		Date date = Date.from(before.toInstant(ZoneOffset.of("-05:00")));
+
+		String token = servicioToken.generarToken(parametros, date);
+
+		try {
+			servicioToken.parseToken(token);
+			fail();
+		} catch (TokenExpiradoException e) {
+		}
+	}
+
+	@Test
+	public void testParseTokenSinExpiracion() throws Exception {
+		ServicioTokenJwt servicioToken = new ServicioTokenJwt();
+		servicioToken.init();
+
+		Map<String, Object> parametros = new HashMap<>();
+		parametros.put("a", 1);
+
+		LocalDateTime before = LocalDateTime.now().plusMinutes(15);
+		Date date = Date.from(before.toInstant(ZoneOffset.of("-05:00")));
+
+		String token = servicioToken.generarToken(parametros, date);
+
+		try {
+			servicioToken.parseToken(token);
+			Map<String, Object> parametros2 = servicioToken.parseToken(token);
+			assertEquals(1, parametros2.get("a"));
+		} catch (TokenExpiradoException e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void testParseTokenInvalido() throws Exception {
+		ServicioTokenJwt servicioToken = new ServicioTokenJwt();
+		servicioToken.init();
+
+		try {
+			// Token firmado con otra llave secreta
+			servicioToken.parseToken("eyJhbGciOiJIUzI1NiJ9.eyJhIjoxfQ.co8628bPk8NFBhogFsOCaBCWM0hEUv0exdhMmMOPe2k");
+			fail();
+		} catch (TokenInvalidoException e) {
+		}
+
+		try {
+			// Token sin firma
+			servicioToken.parseToken("eyJhbGciOiJIUzI1NiJ9.eyJhIjoxfQ");
+			fail();
+		} catch (TokenInvalidoException e) {
+		}
+
+		try {
+			// Token mal formado
+			servicioToken.parseToken("gfdgfdgfdgfdgfdgfd.gfdgfdgfdgfdgfdgfd.gfdgfdgfdg");
+			fail();
+		} catch (TokenInvalidoException e) {
+		}
 	}
 
 	@Test
