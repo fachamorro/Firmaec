@@ -220,7 +220,7 @@ public class ServicioDocumentoRest {
 			return Response.ok(jsonResponse).build();
 		} catch (CedulaInvalidaException e) {
 			servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula invalida: " + e.getMessage());
-			return generarErrorResponse("Cedula inválida");
+			return generarErrorResponse("Cedula invalida");
 		} catch (CertificadoRevocadoException e) {
 			servicioLog.error("ServicioDocumentoRest::certificadoRevocado", e.getMessage());
 			return generarErrorResponse("Certificado revocado");
