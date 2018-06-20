@@ -176,14 +176,6 @@ public class ServicioDocumento {
 		URL url = servicioSistemaTransversal.buscarUrlSistema(sistema);
 		logger.info("sistema=" + sistema + "; url=" + url);
 
-//		// Verificar si el sistema transversal está disponible
-//		if (!servicioSistemaTransversal.pingSistemaTransversal(url)) {
-//			String mensajeError = "El sistema transversal NO está disponible, el documento "
-//					+ " no fue enviado al sistema transversal";
-//			servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
-//			logger.warning(mensajeError);
-//		}
-
 		List<String> idList = convertirEnList(ids);
 
 		if (idList.size() != archivos.size()) {
@@ -247,6 +239,9 @@ public class ServicioDocumento {
 
 			// Eliminar el documento
 			em.remove(documento);
+
+			logger.info("Documento actualizado: " + id);
+			servicioLog.info("ServicioDocumento::actualizarDocumentos", "Documento actualizado: " + id);
 		}
 
 		return documentosFirmados;
