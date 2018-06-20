@@ -53,6 +53,6 @@ public class ServicioCertificadoRest {
 	@Path("/fechaRevocado/{serial}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String validarFechaRevocado(@PathParam("serial") BigInteger serial) {
-            return servicioCrl.fechaRevocado(serial);
+		return servicioCrl.fechaRevocado(serial);
 	}
 }

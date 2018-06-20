@@ -186,7 +186,7 @@ public class ServicioCrl {
 			}
 		}
 	}
-        
+
 	public String fechaRevocado(BigInteger serial) {
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -197,11 +197,11 @@ public class ServicioCrl {
 			ps = conn.prepareStatement("SELECT fecharevocacion FROM crl WHERE serial=?");
 			ps.setBigDecimal(1, new BigDecimal(serial));
 			rs = ps.executeQuery();
-                        String fecharevocacion = null;
-                        while (rs.next()) {
-                            fecharevocacion = rs.getString("fecharevocacion");
-                        }
-                        return fecharevocacion;
+			String fecharevocacion = null;
+			while (rs.next()) {
+				fecharevocacion = rs.getString("fecharevocacion");
+			}
+			return fecharevocacion;
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Error al buscar certificado", e);
 			throw new EJBException(e);

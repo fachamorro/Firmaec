@@ -18,9 +18,7 @@
 
 package ec.gob.firmadigital.servicio;
 
-import java.io.IOException;
 import java.io.StringWriter;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -69,8 +67,6 @@ public class ServicioSistemaTransversal {
 	@PersistenceContext(unitName = "FirmaDigitalDS")
 	private EntityManager em;
 
-	private static final int PING_TIMEOUT = 5000;
-
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
 	private static final Logger logger = Logger.getLogger(ServicioSistemaTransversal.class.getName());
@@ -110,19 +106,6 @@ public class ServicioSistemaTransversal {
 			throw new IllegalArgumentException("El URL no es correcto: " + e.getMessage());
 		}
 	}
-
-//	public boolean pingSistemaTransversal(URL url) {
-//		try {
-//			InetAddress inet = InetAddress.getByName(url.getHost());
-//			logger.fine("Enviando ping a " + inet);
-//			boolean reacheable = inet.isReachable(PING_TIMEOUT);
-//			logger.fine(reacheable ? "Servidor si responde" : "Servidor NO responde");
-//			return reacheable;
-//		} catch (IOException e) {
-//			logger.log(Level.SEVERE, "Error al tratar de hacer ping al servidor del sistema transversal: " + url, e);
-//			return false;
-//		}
-//	}
 
 	/**
 	 * Almacena el documento firmado en el sistema tranversarl, mediante la
@@ -202,9 +185,9 @@ public class ServicioSistemaTransversal {
 		String apiKeySistema = sistema.getApiKey();
 		logger.fine("apiKeySistema=" + apiKey);
 
+		// Si no tiene API Key dejar pasar la invocacion!
 		if (apiKeySistema == null) {
 			logger.warning("API KEY is null, sistema=" + nombre);
-			// TODO: return false
 			return true;
 		}
 
