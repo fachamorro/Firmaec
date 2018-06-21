@@ -18,9 +18,7 @@
 
 package ec.gob.firmadigital.servicio;
 
-import java.io.IOException;
 import java.io.StringWriter;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
