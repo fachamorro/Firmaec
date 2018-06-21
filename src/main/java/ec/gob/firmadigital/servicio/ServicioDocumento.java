@@ -46,6 +46,7 @@ import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
+import ec.gob.firmadigital.servicio.util.FileUtil;
 import io.rubrica.sign.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
@@ -208,9 +209,14 @@ public class ServicioDocumento {
 			// Obtener el nombre del firmante para almacenar el documento en el
 			// sistema transversal
 			String datosFirmante;
-
+			
 			try {
-				datosFirmante = servicioValidacionPdf.getNombre(archivo);
+				//Se valida la extension del archivo
+				if(!FileUtil.getExtension(archivo).contains("xml")){
+					datosFirmante = servicioValidacionPdf.getNombre(archivo);
+				}else{
+					datosFirmante = "";
+				}
 			} catch (InvalidFormatException e) {
 				throw new IllegalArgumentException("Error en la verificacion de firma", e);
 			} catch (IOException e) {
@@ -221,6 +227,7 @@ public class ServicioDocumento {
 				Signer signer = new PDFSigner();
 				List<SignInfo> singInfos = signer.getSigners(archivo);
 				SignInfo firma = singInfos.get(0);
+				
 				X509Certificate certificado = firma.getCerts()[0];
 
 				servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
