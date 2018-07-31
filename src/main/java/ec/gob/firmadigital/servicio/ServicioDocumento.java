@@ -226,9 +226,11 @@ public class ServicioDocumento {
 				servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
 						archivoBase64, datosFirmante, url, certificado);
 				documentosFirmados++;
+                                
+                                logger.info("Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
+                                servicioLog.info("ServicioDocumento::actualizarDocumentos", "Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
 			} catch (SistemaTransversalException e) {
-				String mensajeError = "No se pudo enviar el documento " + documento.getId()
-						+ " al sistema transversal: ";
+				String mensajeError = "No se pudo enviar el documento al sistema " + sistema;
 				servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
 				logger.log(Level.SEVERE, mensajeError);
 			} catch (InvalidFormatException e) {
@@ -239,9 +241,6 @@ public class ServicioDocumento {
 
 			// Eliminar el documento
 			em.remove(documento);
-
-			logger.info("Documento actualizado: " + id);
-			servicioLog.info("ServicioDocumento::actualizarDocumentos", "Documento actualizado: " + id);
 		}
 
 		return documentosFirmados;
