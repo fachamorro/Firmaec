@@ -134,8 +134,16 @@ public class ServicioSistemaTransversal {
 			bodyElement.addChildElement("set_var_datos_firmante").addTextNode(datosFirmante);
 			bodyElement.addChildElement("set_var_fecha").addTextNode(sdf.format(new Date()));
 
-			String institucion = InformacionCertificado.getDatosUsuarios(certificate).getInstitucion();
-			String cargo = InformacionCertificado.getDatosUsuarios(certificate).getCargo();
+			String institucion = "";
+            String cargo = "";
+            if(certificate==null){
+                System.out.println("Advertencia: El certificado es nulo");
+                institucion = "No encontrado";
+                cargo = "No encontrado";
+            }else{
+                institucion = InformacionCertificado.getDatosUsuarios(certificate).getInstitucion();
+                cargo = InformacionCertificado.getDatosUsuarios(certificate).getCargo();                    
+            }
 
 			bodyElement.addChildElement("set_var_institucion").addTextNode(institucion);
 			bodyElement.addChildElement("set_var_cargo").addTextNode(cargo);
