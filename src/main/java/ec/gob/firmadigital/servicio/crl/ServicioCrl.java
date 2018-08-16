@@ -108,14 +108,32 @@ public class ServicioCrl {
 			ps = conn.prepareStatement(
 					"INSERT INTO crl_new (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?)");
 
-			int contadorBCE = insertarCrl(bceCrl, 1, ps);
-			logger.info("Registros insertados BCE: " + contadorBCE);
+			int contadorBCE = 0;
 
-			int contadorSD = insertarCrl(sdCrl, 2, ps);
-			logger.info("Registros insertados Security Data: " + contadorSD);
+			if (bceCrl != null) {
+				contadorBCE = insertarCrl(bceCrl, 1, ps);
+				logger.info("Registros insertados BCE: " + contadorBCE);
+			} else {
+				logger.info("No se inserta BCE");
+			}
 
-			int contadorCJ = insertarCrl(cjCrl, 3, ps);
-			logger.info("Registros insertados CJ: " + contadorCJ);
+			int contadorSD = 0;
+
+			if (sdCrl != null) {
+				contadorSD = insertarCrl(sdCrl, 2, ps);
+				logger.info("Registros insertados Security Data: " + contadorSD);
+			} else {
+				logger.info("No se inserta Security Data");
+			}
+
+			int contadorCJ = 0;
+
+			if (cjCrl != null) {
+				contadorCJ = insertarCrl(cjCrl, 3, ps);
+				logger.info("Registros insertados CJ: " + contadorCJ);
+			} else {
+				logger.info("No se inserta CJ");
+			}
 
 			int total = contadorBCE + contadorSD + contadorCJ;
 			logger.info("Registros insertados Total: " + total);
@@ -253,7 +271,7 @@ public class ServicioCrl {
 			content = http.download(url);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Error al descargar CRL de " + url, e);
-			throw new EJBException(e);
+			return null;
 		}
 
 		try {
@@ -261,7 +279,7 @@ public class ServicioCrl {
 			return (X509CRL) cf.generateCRL(new ByteArrayInputStream(content));
 		} catch (CertificateException | CRLException e) {
 			logger.log(Level.SEVERE, "Error al procesar CRL de " + url, e);
-			throw new EJBException(e);
+			return null;
 		}
 	}
 
