@@ -46,6 +46,7 @@ import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
+import ec.gob.firmadigital.servicio.util.FileUtil;
 import io.rubrica.sign.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
@@ -207,10 +208,20 @@ public class ServicioDocumento {
 
 			// Obtener el nombre del firmante para almacenar el documento en el
 			// sistema transversal
-			String datosFirmante;
+			String datosFirmante = "";
+			String mimeType = FileUtil.getMimeType(archivo);
 
 			try {
-				datosFirmante = servicioValidacionPdf.getNombre(archivo);
+				// Se valida la extension del archivo
+				System.out.println("MimeType: " + mimeType); // TODO: Eliminar
+				if (mimeType.contains("pdf"))
+					datosFirmante = servicioValidacionPdf.getNombre(archivo);
+				if (mimeType.contains("xml"))
+					datosFirmante = ""; // TODO: Implementar el validador XML
+										// (XAdES)
+				// else
+				// datosFirmante = ""; //TODO: Implementar el validador de
+				// binario (CAdES), si aplica
 			} catch (InvalidFormatException e) {
 				throw new IllegalArgumentException("Error en la verificacion de firma", e);
 			} catch (IOException e) {
@@ -218,17 +229,21 @@ public class ServicioDocumento {
 			}
 
 			try {
-				Signer signer = new PDFSigner();
-				List<SignInfo> singInfos = signer.getSigners(archivo);
-				SignInfo firma = singInfos.get(0);
-				X509Certificate certificado = firma.getCerts()[0];
+				X509Certificate certificado = null;
+				if (mimeType.contains("pdf")) {
+					Signer signer = new PDFSigner();
+					List<SignInfo> singInfos = signer.getSigners(archivo);
+					SignInfo firma = singInfos.get(0);
+					certificado = firma.getCerts()[0];
+				}
 
 				servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
 						archivoBase64, datosFirmante, url, certificado);
 				documentosFirmados++;
-                                
-                                logger.info("Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
-                                servicioLog.info("ServicioDocumento::actualizarDocumentos", "Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
+
+				logger.info("Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
+				servicioLog.info("ServicioDocumento::actualizarDocumentos",
+						"Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
 			} catch (SistemaTransversalException e) {
 				String mensajeError = "No se pudo enviar el documento al sistema " + sistema;
 				servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
@@ -247,8 +262,8 @@ public class ServicioDocumento {
 	}
 
 	/**
-	 * Convierte una cadena de texto con una lista separada por comas de ints en una
-	 * List.
+	 * Convierte una cadena de texto con una lista separada por comas de ints en
+	 * una List.
 	 * 
 	 * @param ids
 	 * @return
