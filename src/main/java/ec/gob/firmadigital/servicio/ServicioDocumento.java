@@ -152,9 +152,14 @@ public class ServicioDocumento {
 	/**
 	 * 
 	 * @param token
-	 * @param archivoBase64
+         * @param archivos
+         * @param cedulaJson
 	 * @return
-	 * @throws SistemaTransversalException
+         * @throws ec.gob.firmadigital.servicio.token.TokenInvalidoException
+         * @throws ec.gob.firmadigital.servicio.CedulaInvalidaException
+         * @throws ec.gob.firmadigital.servicio.token.TokenExpiradoException
+         * @throws ec.gob.firmadigital.servicio.util.Base64InvalidoException
+         * @throws ec.gob.firmadigital.servicio.CertificadoRevocadoException
 	 */
 	public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
 			throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException,
@@ -243,7 +248,9 @@ public class ServicioDocumento {
 
 				logger.info("Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
 				servicioLog.info("ServicioDocumento::actualizarDocumentos",
-						"Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
+						"Documento enviado al sistema " + sistema + 
+                                                ", firmado por " + cedulaToken +
+                                                ", documento " + documento.getNombre());
 			} catch (SistemaTransversalException e) {
 				String mensajeError = "No se pudo enviar el documento al sistema " + sistema;
 				servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
