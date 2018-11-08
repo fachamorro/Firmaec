@@ -81,9 +81,9 @@ public class ServicioDocumentoRest {
 
 	/**
 	 * Almacena varios documentos desde un Sistema Transversal.
-	 * 
+	 *
 	 * Ejemplo:
-	 * 
+	 *
 	 * { "cedula":"12345678", "sistema":"quipux", "documentos":[
 	 * {"nombre":"Archivo1.pdf", "base64":"abc"} ] }
 	 */
@@ -94,6 +94,10 @@ public class ServicioDocumentoRest {
 
 		if (apiKey == null) {
 			return Response.status(Status.BAD_REQUEST).entity("Se debe incluir un API Key!").build();
+		}
+
+		if (jsonParameter == null || jsonParameter.isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("Se debe incluir JSON!").build();
 		}
 
 		JsonReader jsonReader = Json.createReader(new StringReader(jsonParameter));
@@ -162,7 +166,7 @@ public class ServicioDocumentoRest {
 
 	/**
 	 * Obtiene documentos mediante un token JWT.
-	 * 
+	 *
 	 * @param token
 	 * @return el documento en Base64
 	 */
