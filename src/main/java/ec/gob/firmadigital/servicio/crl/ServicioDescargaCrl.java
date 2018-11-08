@@ -29,7 +29,6 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -45,8 +44,6 @@ import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.TimerService;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import io.rubrica.util.HttpClient;
@@ -58,7 +55,7 @@ import io.rubrica.util.HttpClient;
  */
 @Singleton
 @Startup
-public class ServicioCrl {
+public class ServicioDescargaCrl {
 
 	@Resource
 	private TimerService timerService;
@@ -66,14 +63,16 @@ public class ServicioCrl {
 	@Resource(lookup = "java:/FirmaDigitalDS")
 	private DataSource ds;
 
-	@PersistenceContext(unitName = "FirmaDigitalDS")
-	private EntityManager em;
-
+	/** URL de descarga de CRL del Banco Central del Ecuador */
 	private static final String BCE_CRL = "http://www.eci.bce.ec/CRL/eci_bce_ec_crlfilecomb.crl";
+
+	/** URL de descarga de CRL de Security Data */
 	private static final String SD_CRL = "https://direct.securitydata.net.ec/~crl/autoridad_de_certificacion_sub_security_data_entidad_de_certificacion_de_informacion_curity_data_s.a._c_ec_crlfile.crl";
+
+	/** URL de descarga de CRL del Consejo de la Judicatura */
 	private static final String CJ_CRL = "https://www.icert.fje.gob.ec/crl/icert.crl";
 
-	private static final Logger logger = Logger.getLogger(ServicioCrl.class.getName());
+	private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
 	@PostConstruct
 	public void init() {
@@ -86,29 +85,23 @@ public class ServicioCrl {
 		logger.info("Iniciando el proceso de descarga de CRL");
 
 		logger.info("Descargando CRL de BCE...");
-		X509CRL bceCrl = downloadDrl(BCE_CRL);
+		X509CRL bceCrl = downloadCrl(BCE_CRL);
 
 		logger.info("Descargando CRL de Security Data...");
-		X509CRL sdCrl = downloadDrl(SD_CRL);
+		X509CRL sdCrl = downloadCrl(SD_CRL);
 
 		logger.info("Descargando CRL de CJ...");
-		X509CRL cjCrl = downloadDrl(CJ_CRL);
+		X509CRL cjCrl = downloadCrl(CJ_CRL);
 
-		Connection conn = null;
-		Statement st = null;
-		PreparedStatement ps = null;
-
-		try {
-			conn = ds.getConnection();
-			st = conn.createStatement();
+		try (Connection conn = ds.getConnection();
+				Statement st = conn.createStatement();
+				PreparedStatement ps = conn.prepareStatement(
+						"INSERT INTO crl_new (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?)")) {
 
 			logger.info("Creando tabla temporal");
 			st.executeUpdate("CREATE TABLE crl_new (LIKE crl)");
 
-			ps = conn.prepareStatement(
-					"INSERT INTO crl_new (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?)");
-
-			int contadorBCE = 0;
+			int contadorBCE = 0, contadorSD = 0, contadorCJ = 0;
 
 			if (bceCrl != null) {
 				contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -117,16 +110,12 @@ public class ServicioCrl {
 				logger.info("No se inserta BCE");
 			}
 
-			int contadorSD = 0;
-
 			if (sdCrl != null) {
 				contadorSD = insertarCrl(sdCrl, 2, ps);
 				logger.info("Registros insertados Security Data: " + contadorSD);
 			} else {
 				logger.info("No se inserta Security Data");
 			}
-
-			int contadorCJ = 0;
 
 			if (cjCrl != null) {
 				contadorCJ = insertarCrl(cjCrl, 3, ps);
@@ -147,101 +136,6 @@ public class ServicioCrl {
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Error al insertar certificado", e);
 			throw new EJBException(e);
-		} finally {
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
-		}
-	}
-
-	public boolean isRevocado(BigInteger serial) {
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			conn = ds.getConnection();
-			ps = conn.prepareStatement("SELECT serial FROM crl WHERE serial=?");
-			ps.setBigDecimal(1, new BigDecimal(serial));
-			rs = ps.executeQuery();
-			return rs.next();
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE, "Error al buscar certificado", e);
-			throw new EJBException(e);
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
-		}
-	}
-
-	public String fechaRevocado(BigInteger serial) {
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			conn = ds.getConnection();
-			ps = conn.prepareStatement("SELECT fecharevocacion FROM crl WHERE serial=?");
-			ps.setBigDecimal(1, new BigDecimal(serial));
-			rs = ps.executeQuery();
-			String fecharevocacion = null;
-			while (rs.next()) {
-				fecharevocacion = rs.getString("fecharevocacion");
-			}
-			return fecharevocacion;
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE, "Error al buscar certificado", e);
-			throw new EJBException(e);
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 
@@ -263,7 +157,7 @@ public class ServicioCrl {
 		return count.length;
 	}
 
-	private X509CRL downloadDrl(String url) {
+	private X509CRL downloadCrl(String url) {
 		byte[] content;
 
 		try {
@@ -286,30 +180,12 @@ public class ServicioCrl {
 	private void crearTablaSiNoExiste() {
 		logger.info("Creando tabla CRL si es que no existe...");
 
-		Connection conn = null;
-		Statement st = null;
-
-		try {
-			conn = ds.getConnection();
-			st = conn.createStatement();
+		try (Connection conn = ds.getConnection(); Statement st = conn.createStatement()) {
 			st.executeUpdate("CREATE TABLE IF NOT EXISTS crl (serial BIGINT, fecharevocacion VARCHAR(2000), "
 					+ "razonrevocacion VARCHAR(2000), entidadcertificadora VARCHAR(2000))");
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Error al crear tabla CRL", e);
 			throw new EJBException(e);
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 }

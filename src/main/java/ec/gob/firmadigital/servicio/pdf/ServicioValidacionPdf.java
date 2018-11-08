@@ -24,6 +24,7 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -39,10 +40,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.jboss.logging.Logger;
-
 import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
-import ec.gob.firmadigital.servicio.crl.ServicioCrl;
+import ec.gob.firmadigital.servicio.crl.ServicioConsultaCrl;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import io.rubrica.certificate.ec.bce.CertificadoBancoCentral;
@@ -80,7 +79,7 @@ import io.rubrica.util.Utils;
 public class ServicioValidacionPdf {
 
 	@EJB
-	private ServicioCrl servicioCrl;
+	private ServicioConsultaCrl servicioCrl;
 
 	private static final Logger logger = Logger.getLogger(ServicioValidacionPdf.class.getName());
 

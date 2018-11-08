@@ -28,7 +28,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import ec.gob.firmadigital.servicio.crl.ServicioCrl;
+import ec.gob.firmadigital.servicio.crl.ServicioConsultaCrl;
 
 /**
  * Este servicio permite verificar si un certificado está revocado.
@@ -40,7 +40,7 @@ import ec.gob.firmadigital.servicio.crl.ServicioCrl;
 public class ServicioCertificadoRest {
 
 	@EJB
-	private ServicioCrl servicioCrl;
+	private ServicioConsultaCrl servicioCrl;
 
 	@GET
 	@Path("/revocado/{serial}")
