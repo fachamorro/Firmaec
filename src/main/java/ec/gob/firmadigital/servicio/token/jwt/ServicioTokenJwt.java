@@ -20,14 +20,14 @@ package ec.gob.firmadigital.servicio.token.jwt;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-
-import org.jboss.logging.Logger;
 
 import ec.gob.firmadigital.servicio.token.ServicioToken;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
@@ -91,7 +91,8 @@ public class ServicioTokenJwt implements ServicioToken {
 				logger.info("Se creo una llave secreta a partir de la propiedad de sistema \"jwt.key\"");
 				return;
 			} catch (Throwable e) {
-				logger.warn("ERROR: No se pudo crear una llave secreta a partir de la propiedad \"jwt.key\"", e);
+				logger.log(Level.SEVERE,
+						"ERROR: No se pudo crear una llave secreta a partir de la propiedad \"jwt.key\"", e);
 			}
 		}
 
