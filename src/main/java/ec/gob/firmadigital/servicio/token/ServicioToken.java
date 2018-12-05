@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.token;
 
 import java.util.Date;
@@ -29,31 +28,31 @@ import java.util.Map;
  */
 public interface ServicioToken {
 
-	/**
-	 * Generar un token sin expiracion.
-	 * 
-	 * @param id
-	 * @return
-	 */
-	String generarToken(Map<String, Object> parametros);
+    /**
+     * Generar un token sin expiracion.
+     *
+     * @param parametros
+     * @return
+     */
+    String generarToken(Map<String, Object> parametros);
 
-	/**
-	 * Generar un token con tiempo de expiracion
-	 * 
-	 * @param id
-	 * @param expiracion
-	 * @return
-	 */
-	String generarToken(Map<String, Object> parametros, Date expiracion);
+    /**
+     * Generar un token con tiempo de expiracion
+     *
+     * @param parametros
+     * @param expiracion
+     * @return
+     */
+    String generarToken(Map<String, Object> parametros, Date expiracion);
 
-	/**
-	 * Analizar los contenidos de un token para sacar la información necesaria para
-	 * procesar un documento.
-	 * 
-	 * @param token
-	 * @return
-	 * @throws TokenInvalidoException
-	 * @throws TokenExpiradoException
-	 */
-	Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException;
+    /**
+     * Analizar los contenidos de un token para sacar la información necesaria
+     * para procesar un documento.
+     *
+     * @param token
+     * @return
+     * @throws TokenInvalidoException
+     * @throws TokenExpiradoException
+     */
+    Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException;
 }

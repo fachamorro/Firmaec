@@ -30,7 +30,7 @@ public class TokenTimeout {
 	/**
 	 * Minutos antes de que el Token expire.
 	 */
-	public static final int DEFAULT_TIMEOUT = 25;
+	public static final int DEFAULT_TIMEOUT = 5;
 
 	/**
 	 * Agregar una cantidad de minutos a una hora dada.

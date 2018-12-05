@@ -56,7 +56,7 @@ public class ServicioEliminacionDocumento {
 		borrarDocumentos();
 	}
 
-	@Schedule(hour = "*", minute = "*/30", persistent = false)
+	@Schedule(hour = "*", minute = "*/5", persistent = false)
 	public void borrarDocumentos() {
 		Connection conn = null;
 		Statement st = null;
@@ -65,8 +65,8 @@ public class ServicioEliminacionDocumento {
 			conn = ds.getConnection();
 			st = conn.createStatement();
 
-			logger.info("Borrando documentos de hace mas de 30 minutos...");
-			int n = st.executeUpdate("DELETE FROM documento WHERE fecha < now() - INTERVAL '30 minutes'");
+			logger.info("Borrando documentos de hace mas de 5 minutos...");
+			int n = st.executeUpdate("DELETE FROM documento WHERE fecha < now() - INTERVAL '5 minutes'");
 			logger.info("Registros eliminados: " + n);
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Error al borrar certificados", e);
