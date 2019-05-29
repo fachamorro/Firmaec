@@ -53,6 +53,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
+import io.rubrica.certificate.CertEcUtils;
 
 /**
  * Servicio para invocar Web Services de los sistemas transaccionales, utilizado
@@ -140,8 +141,8 @@ public class ServicioSistemaTransversal {
                 institucion = "No encontrado";
                 cargo = "No encontrado";
             } else {
-                institucion = InformacionCertificado.getDatosUsuarios(certificate).getInstitucion();
-                cargo = InformacionCertificado.getDatosUsuarios(certificate).getCargo();
+                institucion = CertEcUtils.getDatosUsuarios(certificate).getInstitucion();
+                cargo = CertEcUtils.getDatosUsuarios(certificate).getCargo();
             }
 
             bodyElement.addChildElement("set_var_institucion").addTextNode(institucion);

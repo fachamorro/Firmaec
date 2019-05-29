@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.pdf;
 
 import java.io.IOException;
@@ -44,30 +43,14 @@ import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
 import ec.gob.firmadigital.servicio.crl.ServicioConsultaCrl;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
-import io.rubrica.certificate.ec.bce.CertificadoBancoCentral;
-import io.rubrica.certificate.ec.bce.CertificadoBancoCentralFactory;
-import io.rubrica.certificate.ec.cj.CertificadoConsejoJudicatura;
-import io.rubrica.certificate.ec.cj.CertificadoConsejoJudicaturaDataFactory;
-import io.rubrica.certificate.ec.cj.CertificadoDepartamentoEmpresaConsejoJudicatura;
-import io.rubrica.certificate.ec.cj.CertificadoEmpresaConsejoJudicatura;
-import io.rubrica.certificate.ec.cj.CertificadoMiembroEmpresaConsejoJudicatura;
-import io.rubrica.certificate.ec.cj.CertificadoPersonaJuridicaPrivadaConsejoJudicatura;
-import io.rubrica.certificate.ec.cj.CertificadoPersonaJuridicaPublicaConsejoJudicatura;
-import io.rubrica.certificate.ec.cj.CertificadoPersonaNaturalConsejoJudicatura;
-import io.rubrica.certificate.ec.securitydata.CertificadoFuncionarioPublicoSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoMiembroEmpresaSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoPersonaJuridicaSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoPersonaNaturalSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoPruebaSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoRepresentanteLegalSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoSecurityData;
-import io.rubrica.certificate.ec.securitydata.CertificadoSecurityDataFactory;
-import io.rubrica.ocsp.OcspValidationException;
-import io.rubrica.sign.InvalidFormatException;
+import io.rubrica.certificate.CertEcUtils;
+import io.rubrica.exceptions.OcspValidationException;
+import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
+import io.rubrica.sign.cms.DatosUsuario;
 import io.rubrica.sign.pdf.PDFSigner;
-import io.rubrica.util.Utils;
+import io.rubrica.utils.Utils;
 
 /**
  * Servicio de verificacion de archivos PDF.
@@ -78,194 +61,109 @@ import io.rubrica.util.Utils;
 @Path("/validacionpdf")
 public class ServicioValidacionPdf {
 
-	@EJB
-	private ServicioConsultaCrl servicioCrl;
+    @EJB
+    private ServicioConsultaCrl servicioCrl;
 
-	private static final Logger logger = Logger.getLogger(ServicioValidacionPdf.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ServicioValidacionPdf.class.getName());
 
-	public String getNombre(byte[] pdf) throws IOException, InvalidFormatException, CertificadoRevocadoException {
-		Signer signer = new PDFSigner();
-		List<SignInfo> singInfos = signer.getSigners(pdf);
+    public String getNombre(byte[] pdf) throws IOException, InvalidFormatException, CertificadoRevocadoException {
+        Signer signer = new PDFSigner();
+        List<SignInfo> singInfos = signer.getSigners(pdf);
 
-		if (!singInfos.isEmpty()) {
-			SignInfo firma = singInfos.get(0);
-			X509Certificate certificado = firma.getCerts()[0];
+        if (!singInfos.isEmpty()) {
+            SignInfo firma = singInfos.get(0);
+            X509Certificate certificado = firma.getCerts()[0];
 
-			logger.info("Verificando CRL local del certificado");
-			boolean revocado = servicioCrl.isRevocado(certificado.getSerialNumber());
-			logger.info("revocado=" + revocado);
+            LOGGER.info("Verificando CRL local del certificado");
+            boolean revocado = servicioCrl.isRevocado(certificado.getSerialNumber());
+            LOGGER.info("revocado=" + revocado);
 
-			if (revocado) {
-				throw new CertificadoRevocadoException();
-			}
+            if (revocado) {
+                throw new CertificadoRevocadoException();
+            }
 
-			return Utils.getCN(certificado);
-		} else {
-			return "Unknown";
-		}
-	}
+            return Utils.getCN(certificado);
+        } else {
+            return "Unknown";
+        }
+    }
 
-	@POST
-	@Consumes(MediaType.TEXT_PLAIN)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response verificarPdf(String archivoBase64)
-			throws KeyStoreException, SignatureException, OcspValidationException {
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response verificarPdf(String archivoBase64)
+            throws KeyStoreException, SignatureException, OcspValidationException {
 
-		byte[] pdf;
+        byte[] pdf;
 
-		try {
-			pdf = Base64Util.decode(archivoBase64);
-		} catch (Base64InvalidoException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
-		}
+        try {
+            pdf = Base64Util.decode(archivoBase64);
+        } catch (Base64InvalidoException e) {
+            return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
+        }
 
-		Signer signer = new PDFSigner();
-		List<SignInfo> firmas;
+        Signer signer = new PDFSigner();
+        List<SignInfo> firmas;
 
-		try {
-			firmas = signer.getSigners(pdf);
-		} catch (InvalidFormatException | IOException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Error al verificar PDF: \"" + e.getMessage() + "\"")
-					.build();
-		}
+        try {
+            firmas = signer.getSigners(pdf);
+        } catch (InvalidFormatException | IOException e) {
+            return Response.status(Status.BAD_REQUEST).entity("Error al verificar PDF: \"" + e.getMessage() + "\"")
+                    .build();
+        }
 
-		// Para construir un array de firmantes
-		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        // Para construir un array de firmantes
+        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-		for (SignInfo firma : firmas) {
-			JsonObjectBuilder builder = Json.createObjectBuilder();
-			X509Certificate certificado = firma.getCerts()[0];
+        for (SignInfo firma : firmas) {
+            //arreglar certificados invalidos
+            JsonObjectBuilder builder = Json.createObjectBuilder();
+            X509Certificate certificado = firma.getCerts()[0];
+            DatosUsuario datosUsuario = CertEcUtils.getDatosUsuarios(certificado);
 
-			if (CertificadoBancoCentralFactory.esCertificadoDelBancoCentral(certificado)) {
-				CertificadoBancoCentral bce = CertificadoBancoCentralFactory.construir(certificado);
-				builder.add("fecha", sdf.format(firma.getSigningTime()));
-				builder.add("cedula", bce.getCedulaPasaporte());
-				builder.add("nombre",
-						bce.getNombres() + " " + bce.getPrimerApellido() + " " + bce.getSegundoApellido());
-				builder.add("cargo", bce.getCargo());
-				builder.add("institucion", bce.getInstitucion());
-				arrayBuilder.add(builder);
-			}
+            builder.add("fecha", sdf.format(firma.getSigningTime()));
+            builder.add("cedula", datosUsuario.getCedula());
+            builder.add("nombre", datosUsuario.getNombre() + " " + datosUsuario.getApellido());
+            builder.add("cargo", datosUsuario.getCargo());
+            builder.add("institucion", datosUsuario.getInstitucion());
+            arrayBuilder.add(builder);
+        }
+        
+//        List<Certificado> certificados = Utils.verificarDocumento(pdf);
+//        certificados.forEach((certificado) -> {
+//            String apellido = certificado.getDatosUsuario().getApellido();
+//            if (certificado.getDatosUsuario().getApellido() == null) {
+//                apellido = "";
+//            }
+//            String nombre = certificado.getDatosUsuario().getNombre();
+//            if (certificado.getDatosUsuario().getNombre() == null) {
+//                nombre = "";
+//            }
+//            String validarFirma = Utils.validarFirma(certificado.getValidFrom(), certificado.getValidTo(), certificado.getGenerated(), certificado.getRevocated());
+//            if (certificado.getDocVerify() != null && !certificado.getDocVerify()) {
+//                validarFirma = "Inválida";
+//            }
+//            
+//            JsonObjectBuilder builder = Json.createObjectBuilder();
+//            builder.add("fecha", sdf.format(certificado.getGenerated().getTime()));
+//            builder.add("cedula", certificado.getDatosUsuario().getCedula());
+//            builder.add("nombre", nombre+ " " + apellido);
+//            builder.add("cargo", certificado.getDatosUsuario().getCargo());
+//            builder.add("institucion", certificado.getDatosUsuario().getInstitucion());
+//            arrayBuilder.add(builder);
+//            
+//            String[] dataCert = new String[6];
+//            dataCert[2] = certificado.getDocReason();
+//            dataCert[3] = certificado.getDatosUsuario().getEntidadCertificadora();
+//            dataCert[5] = validarFirma;
+//        });
 
-			if (CertificadoSecurityDataFactory.esCertificadoDeSecurityData(certificado)) {
-				CertificadoSecurityData sd = CertificadoSecurityDataFactory.construir(certificado);
+        // Construir JSON
+        JsonArray jsonArray = arrayBuilder.build();
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        String json = objectBuilder.add("firmantes", jsonArray).build().toString();
 
-				builder.add("nombre", sd.getNombres() + " " + sd.getPrimerApellido() + " " + sd.getSegundoApellido());
-				builder.add("fecha", sdf.format(firma.getSigningTime()));
-
-				if (sd instanceof CertificadoFuncionarioPublicoSecurityData) {
-					builder.add("cedula", ((CertificadoFuncionarioPublicoSecurityData) sd).getCedulaPasaporte());
-					builder.add("cargo", ((CertificadoFuncionarioPublicoSecurityData) sd).getCargo());
-					builder.add("institucion", ((CertificadoFuncionarioPublicoSecurityData) sd).getInstitucion());
-				}
-
-				if (sd instanceof CertificadoMiembroEmpresaSecurityData) {
-					builder.add("cedula", ((CertificadoMiembroEmpresaSecurityData) sd).getCedulaPasaporte());
-					builder.add("cargo", ((CertificadoMiembroEmpresaSecurityData) sd).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (sd instanceof CertificadoPersonaJuridicaSecurityData) {
-					builder.add("cedula", "N/A");
-					builder.add("cargo", "N/A");
-					builder.add("institucion", "N/A");
-				}
-
-				if (sd instanceof CertificadoPersonaNaturalSecurityData) {
-					builder.add("cedula", ((CertificadoPersonaNaturalSecurityData) sd).getCedulaPasaporte());
-					builder.add("cargo", "N/A");
-					builder.add("institucion", "N/A");
-				}
-
-				if (sd instanceof CertificadoRepresentanteLegalSecurityData) {
-					builder.add("cedula", ((CertificadoRepresentanteLegalSecurityData) sd).getCedulaPasaporte());
-					builder.add("cargo", ((CertificadoRepresentanteLegalSecurityData) sd).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (sd instanceof CertificadoPruebaSecurityData) {
-					builder.add("cedula", ((CertificadoPruebaSecurityData) sd).getCedulaPasaporte());
-					builder.add("cargo", "N/A");
-					builder.add("institucion", "N/A");
-				}
-
-				arrayBuilder.add(builder);
-			}
-
-			if (CertificadoConsejoJudicaturaDataFactory.esCertificadoDelConsejoJudicatura(certificado)) {
-				CertificadoConsejoJudicatura cj = CertificadoConsejoJudicaturaDataFactory.construir(certificado);
-				builder.add("fecha", sdf.format(firma.getSigningTime()));
-
-				if (cj instanceof CertificadoDepartamentoEmpresaConsejoJudicatura) {
-					builder.add("cedula", ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getCedulaPasaporte());
-					builder.add("nombre",
-							((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getNombres() + " "
-									+ ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getPrimerApellido() + " "
-									+ ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getSegundoApellido());
-					builder.add("cargo", ((CertificadoDepartamentoEmpresaConsejoJudicatura) cj).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (cj instanceof CertificadoEmpresaConsejoJudicatura) {
-					builder.add("cedula", ((CertificadoEmpresaConsejoJudicatura) cj).getCedulaPasaporte());
-					builder.add("nombre",
-							((CertificadoEmpresaConsejoJudicatura) cj).getNombres() + " "
-									+ ((CertificadoEmpresaConsejoJudicatura) cj).getPrimerApellido() + " "
-									+ ((CertificadoEmpresaConsejoJudicatura) cj).getSegundoApellido());
-					builder.add("cargo", ((CertificadoEmpresaConsejoJudicatura) cj).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (cj instanceof CertificadoMiembroEmpresaConsejoJudicatura) {
-					builder.add("cedula", ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getCedulaPasaporte());
-					builder.add("nombre",
-							((CertificadoMiembroEmpresaConsejoJudicatura) cj).getNombres() + " "
-									+ ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getPrimerApellido() + " "
-									+ ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getSegundoApellido());
-					builder.add("cargo", ((CertificadoMiembroEmpresaConsejoJudicatura) cj).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (cj instanceof CertificadoPersonaJuridicaPrivadaConsejoJudicatura) {
-					builder.add("cedula",
-							((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getCedulaPasaporte());
-					builder.add("nombre", ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getNombres() + " "
-							+ ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getPrimerApellido() + " "
-							+ ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getSegundoApellido());
-					builder.add("cargo", ((CertificadoPersonaJuridicaPrivadaConsejoJudicatura) cj).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (cj instanceof CertificadoPersonaJuridicaPublicaConsejoJudicatura) {
-					builder.add("cedula",
-							((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getCedulaPasaporte());
-					builder.add("nombre", ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getNombres() + " "
-							+ ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getPrimerApellido() + " "
-							+ ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getSegundoApellido());
-					builder.add("cargo", ((CertificadoPersonaJuridicaPublicaConsejoJudicatura) cj).getCargo());
-					builder.add("institucion", "N/A");
-				}
-
-				if (cj instanceof CertificadoPersonaNaturalConsejoJudicatura) {
-					builder.add("cedula", ((CertificadoPersonaNaturalConsejoJudicatura) cj).getCedulaPasaporte());
-					builder.add("nombre",
-							((CertificadoPersonaNaturalConsejoJudicatura) cj).getNombres() + " "
-									+ ((CertificadoPersonaNaturalConsejoJudicatura) cj).getPrimerApellido() + " "
-									+ ((CertificadoPersonaNaturalConsejoJudicatura) cj).getSegundoApellido());
-					builder.add("cargo", "N/A");
-					builder.add("institucion", "N/A");
-				}
-
-				arrayBuilder.add(builder);
-			}
-		}
-
-		// Construir JSON
-		JsonArray jsonArray = arrayBuilder.build();
-		JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-		String json = objectBuilder.add("firmantes", jsonArray).build().toString();
-
-		return Response.ok(json, MediaType.APPLICATION_JSON).build();
-	}
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
 }
