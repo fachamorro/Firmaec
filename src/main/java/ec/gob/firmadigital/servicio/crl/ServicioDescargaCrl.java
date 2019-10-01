@@ -1,7 +1,5 @@
 /*
  * Firma Digital: Servicio
- * Copyright 2017 Secretaría Nacional de la Administración Pública
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -54,7 +52,7 @@ import io.rubrica.utils.HttpClient;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton
-//COMENTAR EVITAR DESCARGA CRL
+//PRODUCCION COMENTAR EVITAR DESCARGA CRL
 @Startup
 public class ServicioDescargaCrl {
 
@@ -66,13 +64,13 @@ public class ServicioDescargaCrl {
 
     private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
-    //COMENTAR EVITAR DESCARGA CRL
+    //PRODUCCION COMENTAR EVITAR DESCARGA CRL
     @PostConstruct
     public void init() {
         crearTablaSiNoExiste();
         importarCrls();
     }
-    //COMENTAR EVITAR DESCARGA CRL
+    //PRODUCCION COMENTAR EVITAR DESCARGA CRL
 
     @Schedule(minute = "0", hour = "*", persistent = false)
     public void importarCrls() {

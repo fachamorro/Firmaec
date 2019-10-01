@@ -1,7 +1,5 @@
 /*
  * Firma Digital: Servicio
- * Copyright 2017 Secretaría Nacional de la Administración Pública
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -129,7 +127,7 @@ public class ServicioValidacionPdf {
             builder.add("institucion", datosUsuario.getInstitucion());
             arrayBuilder.add(builder);
         }
-        
+
 //        List<Certificado> certificados = Utils.verificarDocumento(pdf);
 //        certificados.forEach((certificado) -> {
 //            String apellido = certificado.getDatosUsuario().getApellido();
@@ -158,7 +156,6 @@ public class ServicioValidacionPdf {
 //            dataCert[3] = certificado.getDatosUsuario().getEntidadCertificadora();
 //            dataCert[5] = validarFirma;
 //        });
-
         // Construir JSON
         JsonArray jsonArray = arrayBuilder.build();
         JsonObjectBuilder objectBuilder = Json.createObjectBuilder();

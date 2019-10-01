@@ -139,7 +139,7 @@ Usamos http://semver.org[SemVer] para versionar.
 
 * *Juan Diego Calle* - *Desarrollo inicial* - http://www.soportelibre.com[Soporte Libre]
 * *Ricardo Arguello* - *Desarrollo* - http://www.soportelibre.com[Soporte Libre]
-* *Misael Fernández* - *Desarrollo* - misael.fernandez.correa@gmail.com[misael.fernandez.correa@gmail.com]
+* *Misael Fernández* - *Desarrollo* - misael.fernandez.correa@gmail.com
 
 == Licencia
 

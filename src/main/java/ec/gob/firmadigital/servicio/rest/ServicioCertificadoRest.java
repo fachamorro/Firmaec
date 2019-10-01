@@ -1,7 +1,5 @@
 /*
  * Firma Digital: Servicio
- * Copyright 2017 Secretaría Nacional de la Administración Pública
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -15,7 +13,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.rest;
 
 import java.math.BigInteger;
@@ -39,20 +36,20 @@ import ec.gob.firmadigital.servicio.crl.ServicioConsultaCrl;
 @Path("/certificado")
 public class ServicioCertificadoRest {
 
-	@EJB
-	private ServicioConsultaCrl servicioCrl;
+    @EJB
+    private ServicioConsultaCrl servicioCrl;
 
-	@GET
-	@Path("/revocado/{serial}")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String validarCertificado(@PathParam("serial") BigInteger serial) {
-		return Boolean.toString(servicioCrl.isRevocado(serial));
-	}
+    @GET
+    @Path("/revocado/{serial}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String validarCertificado(@PathParam("serial") BigInteger serial) {
+        return Boolean.toString(servicioCrl.isRevocado(serial));
+    }
 
-	@GET
-	@Path("/fechaRevocado/{serial}")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String validarFechaRevocado(@PathParam("serial") BigInteger serial) {
-		return servicioCrl.fechaRevocado(serial);
-	}
+    @GET
+    @Path("/fechaRevocado/{serial}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String validarFechaRevocado(@PathParam("serial") BigInteger serial) {
+        return servicioCrl.fechaRevocado(serial);
+    }
 }

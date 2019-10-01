@@ -1,7 +1,5 @@
 /*
  * Firma Digital: Servicio
- * Copyright 2017 Secretaría Nacional de la Administración Pública
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -15,7 +13,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.token;
 
 import java.util.Date;
@@ -27,20 +24,20 @@ import java.util.Date;
  */
 public class TokenTimeout {
 
-	/**
-	 * Minutos antes de que el Token expire.
-	 */
-	public static final int DEFAULT_TIMEOUT = 5;
+    /**
+     * Minutos antes de que el Token expire.
+     */
+    public static final int DEFAULT_TIMEOUT = 5;
 
-	/**
-	 * Agregar una cantidad de minutos a una hora dada.
-	 * 
-	 * @param date
-	 * @param minutes
-	 * @return
-	 */
-	public static Date addMinutes(Date date, int minutes) {
-		long time = date.getTime() + (minutes * 60 * 1000);
-		return new Date(time);
-	}
+    /**
+     * Agregar una cantidad de minutos a una hora dada.
+     *
+     * @param date
+     * @param minutes
+     * @return
+     */
+    public static Date addMinutes(Date date, int minutes) {
+        long time = date.getTime() + (minutes * 60 * 1000);
+        return new Date(time);
+    }
 }
