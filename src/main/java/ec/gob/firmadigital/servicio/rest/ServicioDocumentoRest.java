@@ -1,5 +1,6 @@
 /*
  * Firma Digital: Servicio
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -13,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package ec.gob.firmadigital.servicio.rest;
 
 import java.io.StringReader;
@@ -208,12 +210,40 @@ public class ServicioDocumentoRest {
     public Response actualizarDocumentos(@PathParam("token") String token, JsonObject json) {
         String cedulaJson = json.getString("cedula");
 
-        Map<Long, String> documentos = new HashMap<>();
+        if (cedulaJson == null || cedulaJson.isEmpty()) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula vacia");
+            return Response.status(Status.BAD_REQUEST).entity("Cedula vacia").build();
+        }
+
         List<JsonObject> array = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
 
+        if (array.size() == 0) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No se encuentran documentos");
+            return Response.status(Status.BAD_REQUEST).entity("No se encuentran documentos").build();
+        }
+
+        Map<Long, String> documentos = new HashMap<>();
+
         for (JsonObject documentoJson : array) {
-            Integer id = documentoJson.getInt("id");
+            Integer id;
+
+            try {
+                id = documentoJson.getInt("id");
+            } catch (NullPointerException e) {
+                servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No se encuentra id");
+                return Response.status(Status.BAD_REQUEST).entity("No se encuentra id").build();
+            } catch (ClassCastException e) {
+                servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "id no es un int");
+                return Response.status(Status.BAD_REQUEST).entity("No se encuentra id").build();
+            }
+
             String documento = documentoJson.getString("documento");
+
+            if (documento == null || documento.isEmpty()) {
+                servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No se encuentra documento");
+                return Response.status(Status.BAD_REQUEST).entity("No se encuentra documento").build();
+            }
+
             documentos.put(id.longValue(), documento);
         }
 
