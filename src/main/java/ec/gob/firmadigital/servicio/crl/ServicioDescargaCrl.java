@@ -1,5 +1,6 @@
 /*
  * Firma Digital: Servicio
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -13,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package ec.gob.firmadigital.servicio.crl;
 
 import io.rubrica.crl.ServicioCRL;
@@ -174,7 +176,7 @@ public class ServicioDescargaCrl {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509CRL) cf.generateCRL(new ByteArrayInputStream(content));
         } catch (CertificateException | CRLException e) {
-            logger.log(Level.SEVERE, "Error al procesar CRL de " + url, e);
+            logger.log(Level.SEVERE, "Error al descargar CRL de " + url + ": " + e.getMessage());
             return null;
         }
     }
