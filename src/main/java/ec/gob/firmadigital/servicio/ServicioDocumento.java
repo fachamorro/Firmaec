@@ -70,7 +70,7 @@ public class ServicioDocumento {
     @EJB
     private ServicioLog servicioLog;
 
-    @PersistenceContext(unitName = "FirmaDigitalDS")
+    @PersistenceContext
     private EntityManager em;
 
     private static final Logger logger = Logger.getLogger(ServicioDocumento.class.getName());
