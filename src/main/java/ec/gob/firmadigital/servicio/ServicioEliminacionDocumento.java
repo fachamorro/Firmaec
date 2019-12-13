@@ -46,6 +46,9 @@ public class ServicioEliminacionDocumento {
     @Resource(lookup = "java:/FirmaDigitalDS")
     private DataSource ds;
 
+    // Timeout en minutos
+    private static final String TIMEOUT = "5";
+
     private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
 
     @PostConstruct
@@ -53,7 +56,7 @@ public class ServicioEliminacionDocumento {
         borrarDocumentos();
     }
 
-    @Schedule(hour = "*", minute = "*/5", persistent = false)
+    @Schedule(hour = "*", minute = "*/" + TIMEOUT, persistent = false)
     public void borrarDocumentos() {
         Connection conn = null;
         Statement st = null;
@@ -62,11 +65,11 @@ public class ServicioEliminacionDocumento {
             conn = ds.getConnection();
             st = conn.createStatement();
 
-            logger.info("Borrando documentos de hace mas de 5 minutos...");
-            int n = st.executeUpdate("DELETE FROM documento WHERE fecha < now() - INTERVAL '5 minutes'");
+            logger.info("Borrando documentos de hace mas de " + TIMEOUT + " minutos...");
+            int n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + TIMEOUT + " minutes'");
             logger.info("Registros eliminados: " + n);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error al borrar certificados", e);
+            logger.log(Level.SEVERE, "Error al borrar documentos", e);
             throw new EJBException(e);
         } finally {
             if (st != null) {
