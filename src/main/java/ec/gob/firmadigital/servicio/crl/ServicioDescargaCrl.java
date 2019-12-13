@@ -17,7 +17,6 @@
 
 package ec.gob.firmadigital.servicio.crl;
 
-import io.rubrica.crl.ServicioCRL;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -46,6 +45,7 @@ import javax.ejb.Startup;
 import javax.ejb.TimerService;
 import javax.sql.DataSource;
 
+import io.rubrica.crl.ServicioCRL;
 import io.rubrica.utils.HttpClient;
 
 /**
@@ -54,7 +54,6 @@ import io.rubrica.utils.HttpClient;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton
-//PRODUCCION COMENTAR EVITAR DESCARGA CRL
 @Startup
 public class ServicioDescargaCrl {
 
@@ -66,13 +65,11 @@ public class ServicioDescargaCrl {
 
     private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
-    //PRODUCCION COMENTAR EVITAR DESCARGA CRL
     @PostConstruct
     public void init() {
         crearTablaSiNoExiste();
         importarCrls();
     }
-    //PRODUCCION COMENTAR EVITAR DESCARGA CRL
 
     @Schedule(minute = "0", hour = "*", persistent = false)
     public void importarCrls() {
@@ -144,6 +141,11 @@ public class ServicioDescargaCrl {
     }
 
     private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
+        // Existen CRLs?
+        if (crl.getRevokedCertificates() == null) {
+            return 0;
+        }
+
         for (X509CRLEntry cert : crl.getRevokedCertificates()) {
             BigInteger serial = cert.getSerialNumber();
             Date fechaRevocacion = cert.getRevocationDate();
