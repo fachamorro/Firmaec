@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.rest;
 
+import ec.gob.firmadigital.servicio.ApiUrlNoEncontradoException;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
@@ -24,10 +24,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import ec.gob.firmadigital.servicio.ApiUrlNoEncontradoException;
 import ec.gob.firmadigital.servicio.ServicioApiUrl;
 import ec.gob.firmadigital.servicio.model.ApiUrl;
 
@@ -45,13 +41,17 @@ public class ServicioApiUrlRest {
 
     @GET
     @Path("{url}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response buscarUrl(@PathParam("url") String url) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public String buscarUrl(@PathParam("url") String url) {
         try {
             ApiUrl apiUrl = servicioApiUrl.buscarPorUrl(url);
-            return Response.ok(apiUrl).build();
+            if (apiUrl.getStatus()) {
+                return "Url habilitada";
+            } else {
+                return "Url deshabilitada";
+            }
         } catch (ApiUrlNoEncontradoException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            return "Url no encontrado";
         }
     }
 }

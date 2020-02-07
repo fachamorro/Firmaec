@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.rest;
 
 import java.io.StringReader;
@@ -48,6 +47,7 @@ import javax.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.CedulaInvalidaException;
 import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
+import ec.gob.firmadigital.servicio.DocumentoNoExisteException;
 import ec.gob.firmadigital.servicio.ServicioDocumento;
 import ec.gob.firmadigital.servicio.ServicioLog;
 import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
@@ -270,6 +270,9 @@ public class ServicioDocumentoRest {
         } catch (Base64InvalidoException e) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Base 64 invalido");
             return generarErrorResponse("Base 64 inválido");
+        } catch (DocumentoNoExisteException e) {
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No existe documento");
+            return generarErrorResponse("No existe documento");
         }
     }
 

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio;
 
 import java.util.logging.Logger;
@@ -28,6 +27,7 @@ import javax.persistence.TypedQuery;
 import javax.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.ApiUrl;
+import javax.ejb.EJB;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -38,6 +38,9 @@ import ec.gob.firmadigital.servicio.model.ApiUrl;
  */
 @Stateless
 public class ServicioApiUrl {
+
+    @EJB
+    private ServicioLog servicioLog;
 
     @PersistenceContext
     private EntityManager em;
@@ -55,13 +58,16 @@ public class ServicioApiUrl {
         try {
             TypedQuery<ApiUrl> query = em.createNamedQuery("ApiUrl.findByUrl", ApiUrl.class);
             query.setParameter("url", url);
+            servicioLog.info("ServicioApiUrl::buscarPorUrl", "url consultada: " + url);
             return query.getSingleResult();
         } catch (NoResultException e) {
-            logger.info("URL no encontrado: " + url);
-            throw new ApiUrlNoEncontradoException();
-        } catch (NonUniqueResultException e) { 
+            logger.info("URL no encontrada: " + url);
+            servicioLog.error("ServicioApiUrl::buscarPorUrl", "URL no encontrada: " + url);
+            throw new ApiUrlNoEncontradoException("No encontrado");
+        } catch (NonUniqueResultException e) {
             logger.severe("Se encontraron multiples URLs " + url);
-            throw new ApiUrlNoEncontradoException("Se encontraron multiples URLs!");
+            servicioLog.error("ServicioApiUrl::buscarPorUrl", "Se encontraron multiples URLs " + url);
+            throw new ApiUrlNoEncontradoException("Múltiples URLs!");
         }
     }
 }

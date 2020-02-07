@@ -48,6 +48,8 @@ import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.sign.pdf.PDFSigner;
+import java.security.MessageDigest;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -82,6 +84,7 @@ public class ServicioDocumento {
      * @param sistema
      * @param archivos
      * @return
+     * @throws ec.gob.firmadigital.servicio.util.Base64InvalidoException
      */
     public String crearDocumentos(@NotNull String cedula, @NotNull String sistema,
             @NotNull Map<String, String> archivos) throws Base64InvalidoException {
@@ -157,10 +160,11 @@ public class ServicioDocumento {
      * @throws ec.gob.firmadigital.servicio.token.TokenExpiradoException
      * @throws ec.gob.firmadigital.servicio.util.Base64InvalidoException
      * @throws ec.gob.firmadigital.servicio.CertificadoRevocadoException
+     * @throws ec.gob.firmadigital.servicio.DocumentoNoExisteException
      */
     public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
             throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException,
-            CertificadoRevocadoException {
+            CertificadoRevocadoException, DocumentoNoExisteException {
 
         Map<String, Object> parametros = servicioToken.parseToken(token);
 
@@ -168,8 +172,8 @@ public class ServicioDocumento {
         logger.info("ids=" + ids);
 
         String cedulaToken = (String) parametros.get("cedula");
-        logger.info("cedulaToken=" + cedulaToken);
-        logger.info("cedulaJson=" + cedulaJson);
+        logger.info("cedulaToken=" + hashMD5(cedulaToken));
+        logger.info("cedulaJson=" + hashMD5(cedulaJson));
 
         if (!cedulaToken.equals(cedulaJson)) {
             throw new CedulaInvalidaException("La cedula " + cedulaJson + " es incorrecta");
@@ -202,8 +206,8 @@ public class ServicioDocumento {
             Documento documento = em.find(Documento.class, primaryKey);
 
             if (documento == null) {
-                logger.severe("El documento " + primaryKey + " no existe en la base de datos");
-                throw new IllegalArgumentException("El documento " + primaryKey + " no existe en la base de datos");
+                logger.warning("El documento " + primaryKey + " no existe en la base de datos");
+                throw new DocumentoNoExisteException("El documento " + primaryKey + " no existe en la base de datos");
             }
 
             byte[] archivo = decodificarBase64(archivoBase64);
@@ -225,9 +229,7 @@ public class ServicioDocumento {
                 // else
                 // datosFirmante = ""; //TODO: Implementar el validador de
                 // binario (CAdES), si aplica
-            } catch (InvalidFormatException e) {
-                throw new IllegalArgumentException("Error en la verificacion de firma", e);
-            } catch (IOException e) {
+            } catch (InvalidFormatException | IOException e) {
                 throw new IllegalArgumentException("Error en la verificacion de firma", e);
             }
 
@@ -244,18 +246,16 @@ public class ServicioDocumento {
                         archivoBase64, datosFirmante, url, certificado);
                 documentosFirmados++;
 
-                logger.info("Documento enviado al sistema " + sistema + ", firmado por " + cedulaToken);
+                logger.info("Documento enviado al sistema " + sistema);
                 servicioLog.info("ServicioDocumento::actualizarDocumentos",
                         "Documento enviado al sistema " + sistema
-                        + ", firmado por " + cedulaToken
-                        + ", documento " + documento.getNombre());
+                        + ", firmado por " + hashMD5(cedulaToken)
+                        + ", tamano documento (bytes) " + documento.getArchivo().length);
             } catch (SistemaTransversalException e) {
                 String mensajeError = "No se pudo enviar el documento al sistema " + sistema;
                 servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
                 logger.log(Level.SEVERE, mensajeError);
-            } catch (InvalidFormatException e) {
-                throw new IllegalArgumentException("Error al obtener información del firmante", e);
-            } catch (IOException e) {
+            } catch (InvalidFormatException | IOException e) {
                 throw new IllegalArgumentException("Error al obtener información del firmante", e);
             }
 
@@ -288,5 +288,16 @@ public class ServicioDocumento {
 
     private String codificarBase64(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
+    }
+
+    private static String hashMD5(String apiKey) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(apiKey.getBytes("UTF-8"));
+            byte[] digest = md.digest();
+            return DatatypeConverter.printHexBinary(digest).toLowerCase();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

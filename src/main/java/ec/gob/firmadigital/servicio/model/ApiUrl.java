@@ -18,9 +18,9 @@ public class ApiUrl {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String nombre;
     private String url;
+    private Boolean status;
 
     public ApiUrl() {
     }
@@ -53,9 +53,16 @@ public class ApiUrl {
     public void setUrl(String url) {
         this.url = url;
     }
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {
-        return "ApiUrl[id=" + id + ", nombre=" + nombre + ", url=" + url + "]";
+        return "ApiUrl[id=" + id + ", nombre=" + nombre + ", url=" + url + ", status=" + status + "]";
     }
 }

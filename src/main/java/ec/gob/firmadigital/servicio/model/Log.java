@@ -17,6 +17,7 @@ package ec.gob.firmadigital.servicio.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Column;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,10 +44,10 @@ public class Log implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     private Date fecha;
     private Severidad severidad;
     private String categoria;
+    @Column(name = "DESCRIPCION", nullable = false, length = 300)
     private String descripcion;
 
     public Log() {

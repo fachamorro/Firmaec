@@ -172,7 +172,17 @@ public class ServicioSistemaTransversal {
                 throw new SistemaTransversalException("Resultado invalido del sistema transversal: " + resultado);
             }
         } catch (SOAPException e) {
-            logger.log(Level.SEVERE, "Error al actualizar el documento en el sistema transversal", e);
+            String mensaje = (String) e.getMessage();
+            //System.out.println("Exception Normal " + mensaje);
+            if (mensaje != null) {
+                if (mensaje.contains("SOAP message could not be sent")) {
+                    System.out.println("Mensaje SOAP no pudo ser enviado");
+                }
+            } else {
+                System.out.println("----------");
+                logger.log(Level.SEVERE, "Error al actualizar el documento en el sistema transversal", e);
+                System.out.println("----------");
+            }
             throw new SistemaTransversalException("Error al invocar Web Service del sistema transversal", e);
         }
     }
