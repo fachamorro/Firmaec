@@ -18,7 +18,6 @@ package ec.gob.firmadigital.servicio.model;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,8 +46,10 @@ public class Log implements Serializable {
     private Date fecha;
     private Severidad severidad;
     private String categoria;
-    @Column(name = "DESCRIPCION", nullable = false, length = 300)
+    @Column(length = 300)
     private String descripcion;
+    private String cedula;
+    private String sistema;
 
     public Log() {
     }
@@ -58,6 +59,15 @@ public class Log implements Serializable {
         this.severidad = severidad;
         this.categoria = categoria;
         this.descripcion = descripcion;
+    }
+
+    public Log(Severidad severidad, String categoria, String descripcion, String sistema, String cedula) {
+        this.fecha = new Date();
+        this.severidad = severidad;
+        this.categoria = categoria;
+        this.descripcion = descripcion;
+        this.sistema = sistema;
+        this.cedula = cedula;
     }
 
     public long getId() {
@@ -98,5 +108,21 @@ public class Log implements Serializable {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public String getCedula() {
+        return cedula;
+    }
+
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
+    }
+
+    public String getSistema() {
+        return sistema;
+    }
+
+    public void setSistema(String sistema) {
+        this.sistema = sistema;
     }
 }

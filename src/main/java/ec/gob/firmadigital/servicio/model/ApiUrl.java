@@ -1,5 +1,6 @@
 package ec.gob.firmadigital.servicio.model;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,7 +14,7 @@ import javax.persistence.NamedQuery;
  */
 @Entity
 @NamedQuery(name = "ApiUrl.findByUrl", query = "SELECT a FROM ApiUrl a WHERE a.url LIKE :url")
-public class ApiUrl {
+public class ApiUrl implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

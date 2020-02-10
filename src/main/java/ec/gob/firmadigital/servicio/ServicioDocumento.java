@@ -53,7 +53,7 @@ import javax.xml.bind.DatatypeConverter;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
- * transversales y la aplicación en api.firmadigital.gob.ec
+ * transversales y la aplicación en firmadigital-api
  *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */

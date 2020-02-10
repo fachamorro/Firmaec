@@ -25,7 +25,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import ec.gob.firmadigital.servicio.ServicioApiUrl;
-import ec.gob.firmadigital.servicio.model.ApiUrl;
 
 /**
  * Servicio REST para verificar si existe un API URL.
@@ -44,12 +43,7 @@ public class ServicioApiUrlRest {
     @Produces(MediaType.TEXT_PLAIN)
     public String buscarUrl(@PathParam("url") String url) {
         try {
-            ApiUrl apiUrl = servicioApiUrl.buscarPorUrl(url);
-            if (apiUrl.getStatus()) {
-                return "Url habilitada";
-            } else {
-                return "Url deshabilitada";
-            }
+            return servicioApiUrl.buscarPorUrl(url);
         } catch (ApiUrlNoEncontradoException e) {
             return "Url no encontrado";
         }

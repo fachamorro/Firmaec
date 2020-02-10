@@ -54,19 +54,25 @@ public class ServicioApiUrl {
      * @return
      * @throws ApiUrlNoEncontradoException
      */
-    public ApiUrl buscarPorUrl(@NotNull String url) throws ApiUrlNoEncontradoException {
+    public String buscarPorUrl(@NotNull String url) throws ApiUrlNoEncontradoException {
         try {
             TypedQuery<ApiUrl> query = em.createNamedQuery("ApiUrl.findByUrl", ApiUrl.class);
             query.setParameter("url", url);
-            servicioLog.info("ServicioApiUrl::buscarPorUrl", "url consultada: " + url);
-            return query.getSingleResult();
+            ApiUrl apiUrl = query.getSingleResult();
+            if (apiUrl.getStatus()) {
+                servicioLog.info("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url habilitada");
+                return "Url habilitada";
+            } else {
+                servicioLog.warning("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url deshabilitada");
+                return "Url deshabilitada";
+            }
         } catch (NoResultException e) {
             logger.info("URL no encontrada: " + url);
-            servicioLog.error("ServicioApiUrl::buscarPorUrl", "URL no encontrada: " + url);
+            servicioLog.error("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url no encontrada");
             throw new ApiUrlNoEncontradoException("No encontrado");
         } catch (NonUniqueResultException e) {
             logger.severe("Se encontraron multiples URLs " + url);
-            servicioLog.error("ServicioApiUrl::buscarPorUrl", "Se encontraron multiples URLs " + url);
+            servicioLog.error("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", se encontraron multiples URLs ");
             throw new ApiUrlNoEncontradoException("Múltiples URLs!");
         }
     }
