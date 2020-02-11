@@ -40,6 +40,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.crypto.MacProvider;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 
 /**
  * Servicio para trabajar con tokens tipo JWT (https://jwt.io).
@@ -58,6 +60,7 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
  */
 @Singleton
 @Startup
+@Lock(LockType.READ)
 public class ServicioTokenJwt implements ServicioToken {
 
     private static final Logger LOGGER = Logger.getLogger(ServicioTokenJwt.class.getName());
