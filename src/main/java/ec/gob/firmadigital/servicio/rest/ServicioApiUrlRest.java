@@ -45,7 +45,7 @@ public class ServicioApiUrlRest {
         try {
             return servicioApiUrl.buscarPorUrl(url);
         } catch (ApiUrlNoEncontradoException e) {
-            return "Url no encontrado";
+            return "Fuente no encontrado";
         }
     }
 }

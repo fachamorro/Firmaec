@@ -61,10 +61,10 @@ public class ServicioApiUrl {
             ApiUrl apiUrl = query.getSingleResult();
             if (apiUrl.getStatus()) {
                 servicioLog.info("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url habilitada");
-                return "Url habilitada";
+                return "Fuente habilitada";
             } else {
                 servicioLog.warning("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url deshabilitada");
-                return "Url deshabilitada";
+                return "Fuente deshabilitada";
             }
         } catch (NoResultException e) {
             logger.info("URL no encontrada: " + url);
