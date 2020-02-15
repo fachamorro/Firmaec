@@ -38,7 +38,7 @@ public class Documento implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String cedula;
-    @Column(name = "NOMBRE", nullable = false, length = 300)
+    @Column(name = "nombre", nullable = false, length = 300)
     private String nombre;
     private Date fecha;
     private String sistema;

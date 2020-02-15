@@ -1,6 +1,7 @@
 package ec.gob.firmadigital.servicio.model;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,7 +14,7 @@ import javax.persistence.NamedQuery;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity
-@NamedQuery(name = "ApiUrl.findByUrl", query = "SELECT a FROM ApiUrl a WHERE a.url LIKE :url")
+@NamedQuery(name = "ApiUrl.findByUrl", query = "SELECT a FROM ApiUrl a WHERE lower(a.url) LIKE lower(:url)")
 public class ApiUrl implements Serializable {
 
     @Id
@@ -21,6 +22,7 @@ public class ApiUrl implements Serializable {
     private Long id;
     private String nombre;
     private String url;
+//    @Column(name = "url", nullable = false)
     private Boolean status;
 
     public ApiUrl() {
