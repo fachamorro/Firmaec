@@ -21,8 +21,8 @@ public class ApiUrl implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
+    @Column(name = "url", nullable = false, length = 300)
     private String url;
-//    @Column(name = "url", nullable = false)
     private Boolean status;
 
     public ApiUrl() {
@@ -56,6 +56,7 @@ public class ApiUrl implements Serializable {
     public void setUrl(String url) {
         this.url = url;
     }
+
     public Boolean getStatus() {
         return status;
     }

@@ -17,7 +17,6 @@ package ec.gob.firmadigital.servicio.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,7 +37,6 @@ public class Documento implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String cedula;
-    @Column(name = "nombre", nullable = false, length = 300)
     private String nombre;
     private Date fecha;
     private String sistema;

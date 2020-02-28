@@ -27,6 +27,7 @@ import javax.persistence.TypedQuery;
 import javax.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.ApiUrl;
+import ec.gob.firmadigital.servicio.util.FileUtil;
 import javax.ejb.EJB;
 
 /**
@@ -50,30 +51,44 @@ public class ServicioApiUrl {
     /**
      * Busca un ApiUrl por URL.
      *
+     * @param sistema
      * @param url
      * @return
      * @throws ApiUrlNoEncontradoException
      */
-    public String buscarPorUrl(@NotNull String url) throws ApiUrlNoEncontradoException {
+    public String buscarPorUrl(@NotNull String sistema, @NotNull String url) throws ApiUrlNoEncontradoException {
+        String retorno = "";
         try {
             TypedQuery<ApiUrl> query = em.createNamedQuery("ApiUrl.findByUrl", ApiUrl.class);
             query.setParameter("url", url);
             ApiUrl apiUrl = query.getSingleResult();
             if (apiUrl.getStatus()) {
-                servicioLog.info("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url habilitada");
-                return "Url habilitada";
+                retorno = "Url habilitada";
+                servicioLog.info("ServicioApiUrl::buscarPorUrl",
+                        "Sistema " + sistema
+                        + ", URL consultada: " + url + ", " + retorno);
             } else {
-                servicioLog.warning("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url deshabilitada");
-                return "Url deshabilitada";
+                retorno = "Url deshabilitada";
+                servicioLog.warning("ServicioApiUrl::buscarPorUrl",
+                        "Sistema " + sistema
+                        + ", URL consultada: " + url + ", " + retorno);
             }
         } catch (NoResultException e) {
-            logger.info("URL no encontrada: " + url);
-            servicioLog.error("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", url no encontrada");
-            throw new ApiUrlNoEncontradoException("No encontrado");
+            retorno = "URL no encontrado";
+            logger.severe(retorno + ": " + url);
+            servicioLog.error("ServicioApiUrl::buscarPorUrl",
+                    "Sistema " + sistema
+                    + ", URL consultada: " + url + ", " + retorno);
+            throw new ApiUrlNoEncontradoException(retorno);
         } catch (NonUniqueResultException e) {
-            logger.severe("Se encontraron multiples URLs " + url);
-            servicioLog.error("ServicioApiUrl::buscarPorUrl", "URL consultada: " + url + ", se encontraron multiples URLs ");
-            throw new ApiUrlNoEncontradoException("Múltiples URLs!");
+            retorno = "Múltiples URLs registradas";
+            logger.severe(retorno + ": " + url);
+            servicioLog.error("ServicioApiUrl::buscarPorUrl",
+                    "Sistema " + sistema
+                    + ", URL consultada: " + url + ", " + retorno);
+            throw new ApiUrlNoEncontradoException(retorno);
+        } finally {
+            return retorno;
         }
     }
 }

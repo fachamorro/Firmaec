@@ -16,39 +16,41 @@
  */
 package ec.gob.firmadigital.servicio.rest;
 
-import ec.gob.firmadigital.servicio.ApiUrlNoEncontradoException;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import ec.gob.firmadigital.servicio.ServicioApiUrl;
+import ec.gob.firmadigital.servicio.ApiEstadisticaException;
+import ec.gob.firmadigital.servicio.ServicioEstadisticaDocumentosFirmados;
 import java.io.StringReader;
+import javax.ejb.Stateless;
+import javax.ejb.EJB;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
- * Servicio REST para verificar si existe un API URL.
+ * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
+ * federar la utilización de FirmaEC sobre otra infraestructura, consultando en
+ * una lista de servidores permitidos.
  *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless
-@Path("/apiurl")
-public class ServicioApiUrlRest {
+@Path("/estadisticadocumentosfirmados")
+public class ServicioEstadisticaDocumentosFirmadosRest {
 
     @EJB
-    private ServicioApiUrl servicioApiUrl;
+    private ServicioEstadisticaDocumentosFirmados servicioEstadisticaDocumentosFirmados;
 
     @GET
     @Path("{json}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String buscarUrl(@PathParam("json") String jsonParameter) {
+    public String buscarPorFechaDesdeFechaHasta(@PathParam("json") String jsonParameter) {
         if (jsonParameter == null || jsonParameter.isEmpty()) {
             return "Se debe incluir JSON con los parámetros: sistema, fecha_desde y fecha_hasta";
         }
@@ -63,7 +65,8 @@ public class ServicioApiUrlRest {
         }
 
         String sistema;
-        String url;
+        String fechaDesde;
+        String fechaHasta;
 
         try {
             sistema = json.getString("sistema");
@@ -71,14 +74,19 @@ public class ServicioApiUrlRest {
             return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"sistema\"";
         }
         try {
-            url = json.getString("url");
+            fechaDesde = json.getString("fecha_desde");
         } catch (NullPointerException e) {
-            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"url\"";
+            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"fecha_desde\"";
+        }
+        try {
+            fechaHasta = json.getString("fecha_hasta");
+        } catch (NullPointerException e) {
+            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"fecha_hasta\"";
         }
 
         try {
-            return servicioApiUrl.buscarPorUrl(sistema, url);
-        } catch (ApiUrlNoEncontradoException e) {
+            return servicioEstadisticaDocumentosFirmados.buscarPorFechaDesdeFechaHasta(sistema, fechaDesde, fechaHasta);
+        } catch (ApiEstadisticaException e) {
             return "Url no encontrado";
         }
     }

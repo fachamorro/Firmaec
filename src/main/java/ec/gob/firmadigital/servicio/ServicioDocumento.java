@@ -48,8 +48,6 @@ import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.sign.pdf.PDFSigner;
-import java.security.MessageDigest;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -172,8 +170,8 @@ public class ServicioDocumento {
         logger.info("ids=" + ids);
 
         String cedulaToken = (String) parametros.get("cedula");
-        logger.info("cedulaToken=" + hashMD5(cedulaToken));
-        logger.info("cedulaJson=" + hashMD5(cedulaJson));
+        logger.info("cedulaToken=" + FileUtil.hashMD5(cedulaToken));
+        logger.info("cedulaJson=" + FileUtil.hashMD5(cedulaJson));
 
         if (!cedulaToken.equals(cedulaJson)) {
             throw new CedulaInvalidaException("La cedula " + cedulaJson + " es incorrecta");
@@ -249,7 +247,7 @@ public class ServicioDocumento {
                 logger.info("Documento enviado al sistema " + sistema);
                 servicioLog.info("ServicioDocumento::actualizarDocumentos",
                         "Documento enviado al sistema " + sistema
-                        + ", firmado por " + hashMD5(cedulaToken)
+                        + ", firmado por " + FileUtil.hashMD5(cedulaToken)
                         + ", tamano documento (bytes) " + documento.getArchivo().length);
             } catch (SistemaTransversalException e) {
                 String mensajeError = "No se pudo enviar el documento al sistema " + sistema;
@@ -288,16 +286,5 @@ public class ServicioDocumento {
 
     private String codificarBase64(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
-    }
-
-    private static String hashMD5(String apiKey) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(apiKey.getBytes("UTF-8"));
-            byte[] digest = md.digest();
-            return DatatypeConverter.printHexBinary(digest).toLowerCase();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

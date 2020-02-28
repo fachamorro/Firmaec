@@ -109,7 +109,7 @@ public class ServicioDocumentoRest {
         try {
             json = (JsonObject) jsonReader.read();
         } catch (JsonParsingException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Error al decodificar JSON: \"" + e.getMessage() + "\"")
+            return Response.status(Status.BAD_REQUEST).entity(getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage() + "\"")
                     .build();
         }
 
@@ -119,14 +119,14 @@ public class ServicioDocumentoRest {
         try {
             cedula = json.getString("cedula");
         } catch (NullPointerException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Error al decodificar JSON: Se debe incluir \"cedula\"")
+            return Response.status(Status.BAD_REQUEST).entity(getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"cedula\"")
                     .build();
         }
 
         try {
             sistema = json.getString("sistema");
         } catch (NullPointerException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Error al decodificar JSON: Se debe incluir \"sistema\"")
+            return Response.status(Status.BAD_REQUEST).entity(getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"sistema\"")
                     .build();
         }
 
