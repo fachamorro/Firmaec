@@ -46,7 +46,7 @@ public class ServicioConsultaCrl {
         try (Connection conn = ds.getConnection();
                 PreparedStatement ps = conn.prepareStatement("SELECT serial FROM crl WHERE serial=?")) {
 
-            ps.setBigDecimal(1, new BigDecimal(serial));
+            ps.setString(1, serial.toString());
 
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -61,7 +61,7 @@ public class ServicioConsultaCrl {
         try (Connection conn = ds.getConnection();
                 PreparedStatement ps = conn.prepareStatement("SELECT fecharevocacion FROM crl WHERE serial=?")) {
 
-            ps.setBigDecimal(1, new BigDecimal(serial));
+            ps.setString(1, serial.toString());
 
             try (ResultSet rs = ps.executeQuery()) {
                 String fecharevocacion = null;
