@@ -17,7 +17,6 @@
 package ec.gob.firmadigital.servicio.rest;
 
 import ec.gob.firmadigital.servicio.ApiEstadisticaException;
-import ec.gob.firmadigital.servicio.ServicioEstadisticaDocumentosFirmados;
 import ec.gob.firmadigital.servicio.ServicioEstadisticaUsuarios;
 import java.io.StringReader;
 import javax.ejb.Stateless;

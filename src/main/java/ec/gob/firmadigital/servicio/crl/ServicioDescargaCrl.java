@@ -152,7 +152,7 @@ public class ServicioDescargaCrl {
             String razonRevocacion = cert.getRevocationReason() == null ? "" : cert.getRevocationReason().toString();
             LocalDateTime ldt = LocalDateTime.ofInstant(fechaRevocacion.toInstant(), ZoneId.systemDefault());
 
-            ps.setBigDecimal(1, new BigDecimal(serial));
+            ps.setString(1, serial.toString());
             ps.setObject(2, ldt);
             ps.setString(3, razonRevocacion);
             ps.setInt(4, entidadCertificadora);
@@ -187,7 +187,7 @@ public class ServicioDescargaCrl {
         logger.info("Creando tabla CRL si es que no existe...");
 
         try (Connection conn = ds.getConnection(); Statement st = conn.createStatement()) {
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS crl (serial BIGINT, fecharevocacion VARCHAR(2000), "
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS crl (serial VARCHAR(2000), fecharevocacion VARCHAR(2000), "
                     + "razonrevocacion VARCHAR(2000), entidadcertificadora VARCHAR(2000))");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error al crear tabla CRL", e);
