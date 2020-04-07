@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.crl;
 
 import java.io.ByteArrayInputStream;
@@ -47,6 +46,8 @@ import javax.sql.DataSource;
 
 import io.rubrica.crl.ServicioCRL;
 import io.rubrica.utils.HttpClient;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Servicio para cargar los CRLs de las CAs soportadas en una tabla.
@@ -152,11 +153,18 @@ public class ServicioDescargaCrl {
             String razonRevocacion = cert.getRevocationReason() == null ? "" : cert.getRevocationReason().toString();
             LocalDateTime ldt = LocalDateTime.ofInstant(fechaRevocacion.toInstant(), ZoneId.systemDefault());
 
-            ps.setString(1, serial.toString());
-            ps.setObject(2, ldt);
-            ps.setString(3, razonRevocacion);
-            ps.setInt(4, entidadCertificadora);
-            ps.addBatch();
+            //https://www.ipa.go.jp/security/rfc/RFC3280-04EN.html#41202
+            Pattern pattern = Pattern.compile("\\d{1,2000}");
+            Matcher matcher = pattern.matcher(serial.toString());
+            if (matcher.matches()) {
+                ps.setString(1, serial.toString());
+                ps.setObject(2, ldt);
+                ps.setString(3, razonRevocacion);
+                ps.setInt(4, entidadCertificadora);
+                ps.addBatch();
+            } else {
+                logger.log(Level.SEVERE, "Error con el serial number {0} de la entidad certificadora {1}", new Object[]{serial.toString(), entidadCertificadora});
+            }
         }
 
         int[] count = ps.executeBatch();
