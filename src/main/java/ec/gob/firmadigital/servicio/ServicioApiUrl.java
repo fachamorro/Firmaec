@@ -81,7 +81,14 @@ public class ServicioApiUrl {
                     + ", URL consultada: " + url + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } catch (NonUniqueResultException e) {
-            retorno = "Múltiples URLs registradas";
+            retorno = "Varias URLs registradas";
+            logger.severe(retorno + ": " + url);
+            servicioLog.error("ServicioApiUrl::buscarPorUrl",
+                    "Sistema " + sistema
+                    + ", URL consultada: " + url + ", " + retorno);
+            throw new ApiUrlNoEncontradoException(retorno);
+        } catch (java.lang.NullPointerException e) {
+            retorno = "Revisar el estado de la URL registrada";
             logger.severe(retorno + ": " + url);
             servicioLog.error("ServicioApiUrl::buscarPorUrl",
                     "Sistema " + sistema
