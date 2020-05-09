@@ -18,7 +18,6 @@ package ec.gob.firmadigital.servicio.crl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
@@ -55,6 +54,7 @@ import java.util.regex.Pattern;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton
+//PRODUCCION COMENTAR EVITAR DESCARGA CRL
 @Startup
 public class ServicioDescargaCrl {
 
@@ -66,11 +66,13 @@ public class ServicioDescargaCrl {
 
     private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
+    //PRODUCCION COMENTAR EVITAR DESCARGA CRL
     @PostConstruct
     public void init() {
         crearTablaSiNoExiste();
         importarCrls();
     }
+    //PRODUCCION COMENTAR EVITAR DESCARGA CRL
 
     @Schedule(minute = "0", hour = "*", persistent = false)
     public void importarCrls() {
