@@ -27,7 +27,6 @@ import javax.persistence.TypedQuery;
 import javax.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.ApiUrl;
-import ec.gob.firmadigital.servicio.util.FileUtil;
 import javax.ejb.EJB;
 
 /**
