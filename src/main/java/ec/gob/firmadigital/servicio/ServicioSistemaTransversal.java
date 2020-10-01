@@ -52,6 +52,12 @@ import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
 import io.rubrica.certificate.CertEcUtils;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Servicio para invocar Web Services de los sistemas transaccionales, utilizado
@@ -61,6 +67,8 @@ import io.rubrica.certificate.CertEcUtils;
  */
 @Stateless
 public class ServicioSistemaTransversal {
+
+    private static final String API_KEY_HEADER_PARAMETER = "X-API-KEY";
 
     @PersistenceContext(unitName = "FirmaDigitalDS")
     private EntityManager em;
@@ -101,6 +109,62 @@ public class ServicioSistemaTransversal {
             return new URL(sistema.getURL());
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("El URL no es correcto: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene el ApiKey del Web Service de un sistema transversal, para
+     * devolver el documento firmado por el usuario.
+     *
+     * @param nombre nombre del sistema transversal
+     * @return el ApiKey del servicio REST
+     */
+    public String buscarApiKeyRest(String nombre) {
+        Sistema sistema = buscarSistema(nombre);
+        return sistema.getApiKeyRest();
+    }
+
+    /**
+     * Almacena el documento firmado en el sistema tranversarl, mediante la
+     * invocación de un Web Service (SOAP).
+     *
+     * @param cedula
+     * @param nombreDocumento
+     * @param archivoBase64
+     * @param nombreApellidoFirmante
+     * @param url
+     * @param apiKeyRest
+     * @param certificate
+     * @throws SistemaTransversalException
+     */
+    public void almacenarDocumentoREST(String cedula, String nombreDocumento, String archivoBase64, String nombreApellidoFirmante, URL url, String apiKeyRest,
+            X509Certificate certificate) throws SistemaTransversalException {
+        com.google.gson.JsonObject object = new com.google.gson.JsonObject();
+        object.addProperty("cedula", cedula);
+        object.addProperty("nombreDocumento", nombreDocumento);
+        object.addProperty("archivo", archivoBase64);
+        object.addProperty("fecha", sdf.format(new Date()));
+        object.addProperty("nombreApellidoFirmante", nombreApellidoFirmante);
+        if (certificate == null) {
+            System.out.println("Advertencia: El certificado es nulo");
+            object.addProperty("institucion", "No encontrado");
+            object.addProperty("cargo", "No encontrado");
+        } else {
+            object.addProperty("institucion", CertEcUtils.getDatosUsuarios(certificate).getInstitucion());
+            object.addProperty("cargo", CertEcUtils.getDatosUsuarios(certificate).getCargo());
+        }
+        //Consumo del Servicio Web en REST
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(url.toString());
+        Response response = target.request().header(API_KEY_HEADER_PARAMETER, apiKeyRest).header("Content-Type", MediaType.APPLICATION_JSON).post(Entity.json(object.toString()));
+        String resultado = response.readEntity(String.class);
+        System.out.println("response: " + response.getStatus() + "-" + response.getStatusInfo() + " resultado: " + resultado);
+        if ("OK".equals(resultado)) {
+            return;
+        } else if ("ERROR".equals(resultado)) {
+            throw new SistemaTransversalException("Se devuelve error del sistema transversal: " + resultado);
+        } else {
+            throw new SistemaTransversalException("Resultado invalido del sistema transversal: " + resultado);
         }
     }
 

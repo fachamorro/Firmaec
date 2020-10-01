@@ -40,6 +40,7 @@ public class Sistema implements Serializable {
     private String descripcion;
     private String URL;
     private String apiKey;
+    private String apiKeyRest;
 
     public Sistema() {
     }
@@ -82,5 +83,13 @@ public class Sistema implements Serializable {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+    
+    public String getApiKeyRest() {
+        return apiKeyRest;
+    }
+
+    public void setApiKeyRest(String apiKeyRest) {
+        this.apiKeyRest = apiKeyRest;
     }
 }

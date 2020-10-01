@@ -27,7 +27,6 @@ import javax.ws.rs.core.MediaType;
 import ec.gob.firmadigital.servicio.ServicioApiUrl;
 import java.io.StringReader;
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.ws.rs.Consumes;
@@ -54,10 +53,10 @@ public class ServicioApiUrlRest {
         }
 
         JsonReader jsonReader = Json.createReader(new StringReader(jsonParameter));
-        JsonObject json;
+        javax.json.JsonObject json;
 
         try {
-            json = (JsonObject) jsonReader.read();
+            json = (javax.json.JsonObject) jsonReader.read();
         } catch (JsonParsingException e) {
             return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
         }
