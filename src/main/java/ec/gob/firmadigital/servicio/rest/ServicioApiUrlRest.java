@@ -26,10 +26,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import ec.gob.firmadigital.servicio.ServicioApiUrl;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Base64;
+import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
-import javax.ws.rs.Consumes;
 
 /**
  * Servicio REST para verificar si existe un API URL.
@@ -40,24 +43,28 @@ import javax.ws.rs.Consumes;
 @Path("/apiurl")
 public class ServicioApiUrlRest {
 
+    private static final Logger logger = Logger.getLogger(ServicioApiUrlRest.class.getName());
     @EJB
     private ServicioApiUrl servicioApiUrl;
 
     @GET
-    @Path("{json}")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("{base64}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String buscarUrl(@PathParam("json") String jsonParameter) {
+    public String buscarUrl(@PathParam("base64") String base64) {
+        if (base64 == null || base64.isEmpty()) {
+            return "Se debe generar en Base64";
+        }
+        logger.info("base64=" + base64);
+        String jsonParameter = new String(Base64.getDecoder().decode(base64));
         if (jsonParameter == null || jsonParameter.isEmpty()) {
             return "Se debe incluir JSON con los parámetros: sistema, fecha_desde y fecha_hasta";
         }
 
-        JsonReader jsonReader = Json.createReader(new StringReader(jsonParameter));
         javax.json.JsonObject json;
-
         try {
+            JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
             json = (javax.json.JsonObject) jsonReader.read();
-        } catch (JsonParsingException e) {
+        } catch (JsonParsingException | UnsupportedEncodingException e) {
             return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
         }
 
