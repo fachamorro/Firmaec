@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response.Status;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.sign.cms.DatosUsuario;
+import io.rubrica.certificate.to.DatosUsuario;
 import io.rubrica.sign.cms.VerificadorCMS;
 
 /**
