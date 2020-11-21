@@ -82,8 +82,20 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de BCE...");
         X509CRL bceCrl = downloadCrl(ServicioCRL.BCE_CRL);
 
-        logger.info("Descargando CRL de Security Data...");
-        X509CRL sdCrl = downloadCrl(ServicioCRL.SD_CRL);
+        logger.info("Descargando CRL de Security Data 1...");
+        X509CRL sdCrl1 = downloadCrl(ServicioCRL.SD_CRL1);
+
+        logger.info("Descargando CRL de Security Data 2...");
+        X509CRL sdCrl2 = downloadCrl(ServicioCRL.SD_CRL2);
+
+        logger.info("Descargando CRL de Security Data 3...");
+        X509CRL sdCrl3 = downloadCrl(ServicioCRL.SD_CRL3);
+
+        logger.info("Descargando CRL de Security Data 4...");
+        X509CRL sdCrl4 = downloadCrl(ServicioCRL.SD_CRL4);
+
+        logger.info("Descargando CRL de Security Data 5...");
+        X509CRL sdCrl5 = downloadCrl(ServicioCRL.SD_CRL5);
 
         logger.info("Descargando CRL de CJ...");
         X509CRL cjCrl = downloadCrl(ServicioCRL.CJ_CRL);
@@ -99,7 +111,7 @@ public class ServicioDescargaCrl {
             logger.info("Creando tabla temporal");
             st.executeUpdate("CREATE TABLE crl_new (LIKE crl)");
 
-            int contadorBCE = 0, contadorSD = 0, contadorCJ = 0, contadorANFAC = 0;
+            int contadorBCE = 0, contadorSD1 = 0, contadorSD2 = 0, contadorSD3 = 0, contadorSD4 = 0, contadorSD5 = 0, contadorCJ = 0, contadorANFAC = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -108,11 +120,39 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta BCE");
             }
 
-            if (sdCrl != null) {
-                contadorSD = insertarCrl(sdCrl, 2, ps);
-                logger.info("Registros insertados Security Data: " + contadorSD);
+            if (sdCrl1 != null) {
+                contadorSD1 = insertarCrl(sdCrl1, 2, ps);
+                logger.info("Registros insertados Security Data 1: " + contadorSD1);
             } else {
-                logger.info("No se inserta Security Data");
+                logger.info("No se inserta Security Data 1");
+            }
+
+            if (sdCrl2 != null) {
+                contadorSD2 = insertarCrl(sdCrl2, 2, ps);
+                logger.info("Registros insertados Security Data 2: " + contadorSD2);
+            } else {
+                logger.info("No se inserta Security Data 2");
+            }
+
+            if (sdCrl3 != null) {
+                contadorSD3 = insertarCrl(sdCrl3, 2, ps);
+                logger.info("Registros insertados Security Data 3: " + contadorSD3);
+            } else {
+                logger.info("No se inserta Security Data 3");
+            }
+
+            if (sdCrl4 != null) {
+                contadorSD4 = insertarCrl(sdCrl4, 2, ps);
+                logger.info("Registros insertados Security Data 4: " + contadorSD4);
+            } else {
+                logger.info("No se inserta Security Data 4");
+            }
+
+            if (sdCrl5 != null) {
+                contadorSD5 = insertarCrl(sdCrl5, 2, ps);
+                logger.info("Registros insertados Security Data 5: " + contadorSD5);
+            } else {
+                logger.info("No se inserta Security Data 5");
             }
 
             if (cjCrl != null) {
@@ -129,7 +169,7 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta ANFAC");
             }
 
-            int total = contadorBCE + contadorSD + contadorCJ + contadorANFAC;
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC;
             logger.info("Registros insertados Total: " + total);
 
             logger.info("Moviendo tabla temporal a definitiva");

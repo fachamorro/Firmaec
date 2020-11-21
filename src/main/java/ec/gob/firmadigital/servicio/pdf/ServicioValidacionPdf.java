@@ -46,7 +46,7 @@ import io.rubrica.exceptions.OcspValidationException;
 import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
-import io.rubrica.sign.cms.DatosUsuario;
+import io.rubrica.certificate.to.DatosUsuario;
 import io.rubrica.sign.pdf.PDFSigner;
 import io.rubrica.utils.Utils;
 
