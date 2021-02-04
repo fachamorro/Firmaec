@@ -17,55 +17,60 @@
  */
 package ec.gob.firmadigital.servicio.rest;
 
-import ec.gob.firmadigital.servicio.ApiEstadisticaException;
-import ec.gob.firmadigital.servicio.ServicioEstadisticaDocumentosFirmados;
-import java.io.StringReader;
-import javax.ejb.Stateless;
+import ec.gob.firmadigital.servicio.ApiUrlNoEncontradoException;
 import javax.ejb.EJB;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
-import javax.ws.rs.Consumes;
+import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import ec.gob.firmadigital.servicio.ServicioApiUrl;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Base64;
+import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonReader;
+import javax.json.stream.JsonParsingException;
 
 /**
- * Genera estadísticas de uso basado en documentos dentro del sistema.
+ * Servicio REST para verificar si existe un API URL.
  *
- * @author mfernandez
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Stateless
-@Path("/estadisticadocumentosfirmados")
-public class ServicioEstadisticaDocumentosFirmadosRest {
+@Path("/configuracion")
+public class ServicioConfiguracionRest {
 
+    private static final Logger logger = Logger.getLogger(ServicioConfiguracionRest.class.getName());
     @EJB
-    private ServicioEstadisticaDocumentosFirmados servicioEstadisticaDocumentosFirmados;
+    private ServicioApiUrl servicioApiUrl;
 
     @GET
-    @Path("{json}")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("{base64}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String buscarPorFechaDesdeFechaHasta(@PathParam("json") String jsonParameter) {
+    public String buscarUrl(@PathParam("base64") String base64) {
+        if (base64 == null || base64.isEmpty()) {
+            return "Se debe generar en Base64";
+        }
+        logger.info("base64=" + base64);
+        String jsonParameter = new String(Base64.getDecoder().decode(base64));
         if (jsonParameter == null || jsonParameter.isEmpty()) {
             return "Se debe incluir JSON con los parámetros: sistema, fecha_desde y fecha_hasta";
         }
 
-        JsonReader jsonReader = Json.createReader(new StringReader(jsonParameter));
-        JsonObject json;
-
+        javax.json.JsonObject json;
         try {
-            json = (JsonObject) jsonReader.read();
-        } catch (JsonParsingException e) {
+            JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
+            json = (javax.json.JsonObject) jsonReader.read();
+        } catch (JsonParsingException | UnsupportedEncodingException e) {
             return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
         }
 
         String sistema;
-        String fechaDesde;
-        String fechaHasta;
+        String url;
 
         try {
             sistema = json.getString("sistema");
@@ -73,19 +78,14 @@ public class ServicioEstadisticaDocumentosFirmadosRest {
             return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"sistema\"";
         }
         try {
-            fechaDesde = json.getString("fecha_desde");
+            url = json.getString("url");
         } catch (NullPointerException e) {
-            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"fecha_desde\"";
-        }
-        try {
-            fechaHasta = json.getString("fecha_hasta");
-        } catch (NullPointerException e) {
-            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"fecha_hasta\"";
+            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"url\"";
         }
 
         try {
-            return servicioEstadisticaDocumentosFirmados.buscarPorFechaDesdeFechaHasta(sistema, fechaDesde, fechaHasta);
-        } catch (ApiEstadisticaException e) {
+            return servicioApiUrl.buscarPorUrl(sistema, url);
+        } catch (ApiUrlNoEncontradoException e) {
             return "Url no encontrado";
         }
     }

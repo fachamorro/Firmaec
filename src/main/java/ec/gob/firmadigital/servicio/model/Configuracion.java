@@ -18,7 +18,6 @@
 package ec.gob.firmadigital.servicio.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,28 +25,24 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 
 /**
- * Representa el URL de un servidor API provisto por un tercero.
+ * Representa la configuración a nivel general.
  *
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ * @author mfernandez
  */
 @Entity
-@NamedQuery(name = "ApiUrl.findByUrl", query = "SELECT a FROM ApiUrl a WHERE lower(a.url) LIKE lower(:url)")
-public class ApiUrl implements Serializable {
+@NamedQuery(name = "Configuracion.findByVersion", query = "SELECT a FROM Configuracion a WHERE lower(a.version) LIKE lower(:version)")
+public class Configuracion implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nombre;
-    @Column(name = "url", nullable = false, length = 300)
-    private String url;
-    private Boolean status;
+    private String version;
 
-    public ApiUrl() {
+    public Configuracion() {
     }
 
-    public ApiUrl(String nombre, String url) {
-        this.nombre = nombre;
-        this.url = url;
+    public Configuracion(String version) {
+        this.version = version;
     }
 
     public Long getId() {
@@ -58,32 +53,16 @@ public class ApiUrl implements Serializable {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getVersion() {
+        return version;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override
     public String toString() {
-        return "ApiUrl[id=" + id + ", nombre=" + nombre + ", url=" + url + ", status=" + status + "]";
+        return "Configuracion[id=" + id + ", nombre=" + version + "]";
     }
 }

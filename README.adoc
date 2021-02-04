@@ -143,5 +143,5 @@ Usamos http://semver.org[SemVer] para versionar.
 
 == Licencia
 
-Este proyecto esta licenciado bajo la licencia GPLv3.
+Este proyecto está licenciado bajo la licencia AGPL v3.
 Revisar LICENSE para detalles.
