@@ -49,7 +49,7 @@ import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.certificate.to.DatosUsuario;
-import io.rubrica.sign.pdf.PDFSigner;
+import io.rubrica.sign.pdf.PDFSignerItext;
 import io.rubrica.utils.Utils;
 
 /**
@@ -67,7 +67,7 @@ public class ServicioValidacionPdf {
     private static final Logger LOGGER = Logger.getLogger(ServicioValidacionPdf.class.getName());
 
     public String getNombre(byte[] pdf) throws IOException, InvalidFormatException, CertificadoRevocadoException {
-        Signer signer = new PDFSigner();
+        Signer signer = new PDFSignerItext();
         List<SignInfo> singInfos = signer.getSigners(pdf);
 
         if (!singInfos.isEmpty()) {
@@ -102,7 +102,7 @@ public class ServicioValidacionPdf {
             return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
         }
 
-        Signer signer = new PDFSigner();
+        Signer signer = new PDFSignerItext();
         List<SignInfo> firmas;
 
         try {

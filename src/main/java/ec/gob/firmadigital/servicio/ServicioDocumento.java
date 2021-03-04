@@ -39,7 +39,6 @@ import javax.persistence.PersistenceContext;
 import javax.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.Documento;
-import ec.gob.firmadigital.servicio.model.Sistema;
 import ec.gob.firmadigital.servicio.pdf.ServicioValidacionPdf;
 import ec.gob.firmadigital.servicio.token.ServicioToken;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
@@ -50,7 +49,7 @@ import ec.gob.firmadigital.servicio.util.FileUtil;
 import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSigner;
+import io.rubrica.sign.pdf.PDFSignerItext;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -237,7 +236,7 @@ public class ServicioDocumento {
             try {
                 X509Certificate certificado = null;
                 if (mimeType.contains("pdf")) {
-                    Signer signer = new PDFSigner();
+                    Signer signer = new PDFSignerItext();
                     List<SignInfo> singInfos = signer.getSigners(archivo);
                     SignInfo firma = singInfos.get(0);
                     certificado = firma.getCerts()[0];
