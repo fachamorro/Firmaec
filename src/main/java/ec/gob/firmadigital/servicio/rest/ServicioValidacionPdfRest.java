@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 
+ * Copyright (C) 2020
  * Authors: Ricardo Arguello, Misael Fernández, Efraín Rodríguez
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package ec.gob.firmadigital.servicio.rest;
 
 import com.google.gson.Gson;
@@ -47,11 +48,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
-/**
- * Verificar documentos PDF
- *
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
- */
 @Stateless
 @Path("/validacionavanzadapdf")
 public class ServicioValidacionPdfRest {

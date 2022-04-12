@@ -1,19 +1,18 @@
 /*
- * Copyright (C) 2020 
- * Authors: Ricardo Arguello, Misael Fernández
+ * Firma Digital: Servicio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.*
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package ec.gob.firmadigital.servicio.crl;
 
@@ -74,9 +73,9 @@ public class ServicioDescargaCrl {
         crearTablaSiNoExiste();
         importarCrls();
     }
+    @Schedule(minute = "0", hour = "*", persistent = false)
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
 
-    @Schedule(minute = "0", hour = "*", persistent = false)
     public void importarCrls() {
         logger.info("Iniciando el proceso de descarga de CRL");
 
@@ -104,15 +103,28 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de ANFAC...");
         X509CRL anfAcCrl = downloadCrl(ServicioCRL.ANFAC_CRL);
 
+        logger.info("Descargando CRL de DIGERCIC...");
+        X509CRL digercicCrl = downloadCrl(ServicioCRL.DIGERCIC_CRL);
+
+        logger.info("Descargando CRL de UANATACA1...");
+        X509CRL uanatacaCrl1 = downloadCrl(ServicioCRL.UANATACA_CRL1);
+
+        logger.info("Descargando CRL de UANATACA2...");
+        X509CRL uanatacaCrl2 = downloadCrl(ServicioCRL.UANATACA_CRL2);
+
         try (Connection conn = ds.getConnection();
-                Statement st = conn.createStatement();
                 PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO crl_new (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?)")) {
+                        "INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?) "
+                        + "ON CONFLICT (serial) DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora")) {
 
-            logger.info("Creando tabla temporal");
-            st.executeUpdate("CREATE TABLE crl_new (LIKE crl)");
+            logger.info("Iniciando actualizacion de CRLs...");
 
-            int contadorBCE = 0, contadorSD1 = 0, contadorSD2 = 0, contadorSD3 = 0, contadorSD4 = 0, contadorSD5 = 0, contadorCJ = 0, contadorANFAC = 0;
+            int contadorBCE = 0;
+            int contadorSD1 = 0, contadorSD2 = 0, contadorSD3 = 0, contadorSD4 = 0, contadorSD5 = 0;
+            int contadorCJ = 0;
+            int contadorANFAC = 0;
+            int contadorDIGERCIC = 0;
+            int contadorUANATACA1 = 0, contadorUANATACA2 = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -170,13 +182,29 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta ANFAC");
             }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC;
-            logger.info("Registros insertados Total: " + total);
+            if (uanatacaCrl1 != null) {
+                contadorUANATACA1 = insertarCrl(uanatacaCrl1, 5, ps);
+                logger.info("Registros insertados UANATACA 1: " + contadorUANATACA1);
+            } else {
+                logger.info("No se inserta UANATACA 1");
+            }
 
-            logger.info("Moviendo tabla temporal a definitiva");
-            st.execute("ALTER TABLE crl RENAME TO crl_old");
-            st.execute("ALTER TABLE crl_new RENAME TO crl");
-            st.execute("DROP TABLE crl_old");
+            if (uanatacaCrl2 != null) {
+                contadorUANATACA2 = insertarCrl(uanatacaCrl2, 6, ps);
+                logger.info("Registros insertados UANATACA 2: " + contadorUANATACA2);
+            } else {
+                logger.info("No se inserta UANATACA 2");
+            }
+
+            if (digercicCrl != null) {
+                contadorDIGERCIC = insertarCrl(digercicCrl, 7, ps);
+                logger.info("Registros insertados DIGERCIC: " + contadorDIGERCIC);
+            } else {
+                logger.info("No se inserta DIGERCIC");
+            }
+
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC;
+            logger.info("Registros insertados Total: " + total);
 
             logger.info("Finalizado!");
         } catch (SQLException e) {

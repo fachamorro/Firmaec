@@ -1,19 +1,17 @@
 /*
- * Copyright (C) 2020 
- * Authors: Ricardo Arguello, Misael Fernández
- *
+ * Firma Digital: Servicio
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.*
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package ec.gob.firmadigital.servicio;
 
@@ -46,10 +44,15 @@ import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.FileUtil;
+import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.DocumentoException;
 import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSignerItext;
+import io.rubrica.sign.pdf.PDFSigner;
+import io.rubrica.utils.FileUtils;
+import io.rubrica.utils.Utils;
+import java.io.File;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -165,7 +168,7 @@ public class ServicioDocumento {
     public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
             throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException,
             CertificadoRevocadoException, DocumentoNoExisteException {
-        
+
         Map<String, Object> parametros = servicioToken.parseToken(token);
 
         String ids = (String) parametros.get("ids");
@@ -236,16 +239,48 @@ public class ServicioDocumento {
             try {
                 X509Certificate certificado = null;
                 if (mimeType.contains("pdf")) {
-                    Signer signer = new PDFSignerItext();
+                    Signer signer = new PDFSigner();
                     List<SignInfo> singInfos = signer.getSigners(archivo);
                     SignInfo firma = singInfos.get(0);
                     certificado = firma.getCerts()[0];
                 }
 
-                String apiKeyRest=servicioSistemaTransversal.buscarApiKeyRest(nombreSistema);
-                if (apiKeyRest!=null) {
-                    servicioSistemaTransversal.almacenarDocumentoREST(documento.getCedula(), documento.getNombre(),
-                            archivoBase64, datosFirmante, url, apiKeyRest, certificado);
+                String apiKeyRest = servicioSistemaTransversal.buscarApiKeyRest(nombreSistema);
+                if (apiKeyRest != null) {
+                    //TODO
+                    //revisar                    
+                    // Obtener el nombre del firmante para almacenar el documento en el
+                    // sistema transversal
+                    io.rubrica.certificate.to.Documento documentoTo = null;
+                    try {
+                        File file = null;
+                        try {
+                            file = FileUtils.byteArrayConvertToFile(archivo);
+                        } catch (IOException e) {
+                            throw new IllegalArgumentException("Error al crear el archivo temporal");
+                        }
+                        // Se valida la extension del archivo
+                        String mimeTypeRest = FileUtil.getMimeType(archivo);
+                        if (mimeTypeRest.contains("pdf")) {
+                            documentoTo = Utils.pdfToDocumento(file);
+                        }
+                        if (mimeTypeRest.contains("xml")) {
+//                    Signer docSigner = Utils.documentSigner(file);
+//                    documentoTo = Utils.signInfosToCertificados(docSigner.getSigners(archivo));
+                        }
+                    } catch (InvalidFormatException | IOException e) {
+                        throw new IllegalArgumentException("Error en la verificacion de firma", e);
+                    } catch (DocumentoException ex) {
+                        Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (CertificadoInvalidoException ex) {
+                        Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    //revisar
+                    
+                    servicioSistemaTransversal.almacenarDocumentoREST(documentoTo, documento.getCedula(), documento.getNombre(),
+                            archivoBase64, url, apiKeyRest);
                 } else {
                     servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
                             archivoBase64, datosFirmante, url, certificado);

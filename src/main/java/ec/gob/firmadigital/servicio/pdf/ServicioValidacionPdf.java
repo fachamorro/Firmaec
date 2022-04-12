@@ -1,19 +1,17 @@
 /*
- * Copyright (C) 2020 
- * Authors: Ricardo Arguello, Misael Fernández
- *
+ * Firma Digital: Servicio
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.*
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package ec.gob.firmadigital.servicio.pdf;
 
@@ -49,7 +47,7 @@ import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.certificate.to.DatosUsuario;
-import io.rubrica.sign.pdf.PDFSignerItext;
+import io.rubrica.sign.pdf.PDFSigner;
 import io.rubrica.utils.Utils;
 
 /**
@@ -67,7 +65,7 @@ public class ServicioValidacionPdf {
     private static final Logger LOGGER = Logger.getLogger(ServicioValidacionPdf.class.getName());
 
     public String getNombre(byte[] pdf) throws IOException, InvalidFormatException, CertificadoRevocadoException {
-        Signer signer = new PDFSignerItext();
+        Signer signer = new PDFSigner();
         List<SignInfo> singInfos = signer.getSigners(pdf);
 
         if (!singInfos.isEmpty()) {
@@ -102,7 +100,7 @@ public class ServicioValidacionPdf {
             return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
         }
 
-        Signer signer = new PDFSignerItext();
+        Signer signer = new PDFSigner();
         List<SignInfo> firmas;
 
         try {
