@@ -35,7 +35,7 @@ import javax.json.JsonObjectBuilder;
  * federar la utilización de FirmaEC sobre otra infraestructura, consultando en
  * una lista de servidores permitidos.
  *
- * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>, Misael Fernández
  */
 @Stateless
 public class ServicioEstadisticaUsuarios {

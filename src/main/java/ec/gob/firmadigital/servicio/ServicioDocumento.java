@@ -49,7 +49,7 @@ import io.rubrica.exceptions.DocumentoException;
 import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSigner;
+import io.rubrica.sign.pdf.PDFSignerItext;
 import io.rubrica.utils.FileUtils;
 import io.rubrica.utils.Utils;
 import java.io.File;
@@ -239,7 +239,7 @@ public class ServicioDocumento {
             try {
                 X509Certificate certificado = null;
                 if (mimeType.contains("pdf")) {
-                    Signer signer = new PDFSigner();
+                    Signer signer = new PDFSignerItext();
                     List<SignInfo> singInfos = signer.getSigners(archivo);
                     SignInfo firma = singInfos.get(0);
                     certificado = firma.getCerts()[0];
