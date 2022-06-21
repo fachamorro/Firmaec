@@ -1,6 +1,18 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Firma Digital: Servicio
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package ec.gob.firmadigital.servicio.util;
 
@@ -38,15 +50,15 @@ import java.util.List;
 
 /**
  *
- * @author barckl3y
+ * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael Fernández
  */
 public class ValidadorCertificadoDigital {
-    
+
     public Certificado Certificate(KeyStore keyStore, String alias) throws RubricaException, ServicioValidarCertificadoDigitalException {
         Certificado certificado = null;
         try {
             X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-            if (x509CertificateUtils.validarX509Certificate( (X509Certificate) keyStore.getCertificate(alias), null)) {//validación de firmaEC
+            if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), null)) {//validación de firmaEC
                 X509Certificate x509Certificate = (X509Certificate) keyStore.getCertificate(alias);
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
                 TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null));
@@ -54,8 +66,6 @@ public class ValidadorCertificadoDigital {
                 //Validad certificado revocado
                 Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
                 if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
-//                    Toast.makeText(getBaseContext(), "Certificado revocado: " + fechaRevocado, Toast.LENGTH_LONG).show();
-                    //mensajes de repuesta
                     throw new ServicioValidarCertificadoDigitalException("Certificado revocado: " + fechaRevocado);
                 }
                 boolean caducado;
@@ -76,50 +86,34 @@ public class ValidadorCertificadoDigital {
                         caducado,
                         datosUsuario);
             } else {
-//                Toast.makeText(getContext(), "Certificado no válido", Toast.LENGTH_LONG).show();
-                //mensajes
                 throw new ServicioValidarCertificadoDigitalException("Certificado no válido");
             }
         } catch (BadPasswordException bpe) {
-//            Toast.makeText(getContext(), "Documento protegido con contraseña", Toast.LENGTH_LONG).show();
-            //mensajes
             throw new ServicioValidarCertificadoDigitalException("Documento protegido con contraseña");
         } catch (InvalidKeyException ie) {
-//            Toast.makeText(getContext(), "Problemas al abrir el documento", Toast.LENGTH_LONG).show();
             throw new ServicioValidarCertificadoDigitalException("Problemas al abrir el documento");
         } catch (EntidadCertificadoraNoValidaException ecnve) {
-//            Toast.makeText(getContext(), "Certificado no válido", Toast.LENGTH_LONG).show();
             throw new ServicioValidarCertificadoDigitalException("Certificado no válido");
         } catch (HoraServidorException hse) {
-//            Toast.makeText(getContext(), "Problemas en la red\nIntente nuevamente o verifique su conexión", Toast.LENGTH_LONG).show();
             throw new ServicioValidarCertificadoDigitalException("Problemas en la red\\nIntente nuevamente o verifique su conexión");
         } catch (KeyStoreException kse) {
-//            Toast.makeText(getContext(), "No se encontró archivo o la contraseña es inválida.", Toast.LENGTH_LONG).show();
             throw new ServicioValidarCertificadoDigitalException("No se encontró archivo o la contraseña es inválida.");
         } catch (CertificadoInvalidoException | IOException e) {
-//            Toast.makeText(getContext(), "Excepción no conocida: " + e, Toast.LENGTH_LONG).show();
             throw new ServicioValidarCertificadoDigitalException("Excepción no conocida: " + e);
         }
-        
         return certificado;
     }
 
+    public Certificado validarCertificado(String pkcs12, String password) throws Exception {
+        byte encodedPkcs12[] = Base64.getDecoder().decode(pkcs12);
+        InputStream inputStreamPkcs12 = new ByteArrayInputStream(encodedPkcs12);
 
-    public Certificado validarCertificado(String certificadoBase64, String contrasena) throws Exception {
-        
-        byte encodedCert[] = Base64.getDecoder().decode(certificadoBase64);
-//        ByteArrayInputStream inputStream  =  new ByteArrayInputStream(encodedCert);
-//        
-        InputStream ARCHIVO = new ByteArrayInputStream(encodedCert);
- 
+        KeyStoreProvider ksp = new FileKeyStoreProvider(inputStreamPkcs12);
+        KeyStore keyStore = ksp.getKeystore(password.toCharArray());
 
-        KeyStoreProvider ksp = new FileKeyStoreProvider(ARCHIVO);   //mandar un file 
-        KeyStore keyStore = ksp.getKeystore(contrasena.toCharArray());
-        
         List<Alias> signingAliases = KeyStoreUtilities.getSigningAliases(keyStore);
         String alias = signingAliases.get(0).getAlias();
         return Certificate(keyStore, alias);
-
     }
-    
+
 }
