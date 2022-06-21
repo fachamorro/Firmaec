@@ -5,7 +5,6 @@
 package ec.gob.firmadigital.servicio.apple;
 
 import com.google.gson.Gson;
-import ec.gob.firmadigital.servicio.util.CertificadoP12;
 import ec.gob.firmadigital.servicio.util.ValidadorCertificadoDigital;
 import io.rubrica.certificate.to.Certificado;
 import io.rubrica.utils.Json;
