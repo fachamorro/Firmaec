@@ -19,6 +19,7 @@ package ec.gob.firmadigital.servicio.rest;
 import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigital;
 import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigitalException;
 import java.io.StringReader;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -39,7 +40,7 @@ import javax.ws.rs.core.MediaType;
  * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael Fernández
  */
 @Stateless
-@Path("/validarCertificadoDigital")
+@Path("/validarcertificadodigital")
 public class ServicioValidarCertificadoDigitalRest {
 
     @EJB
@@ -50,10 +51,16 @@ public class ServicioValidarCertificadoDigitalRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String validar(@PathParam("json") String jsonParameter) {
+
+//        Decodificar String base 64
+//        byte[] decodedBytes = Base64.getDecoder().decode(jsonParameter);
+//        String decodedString = new String(decodedBytes);
+//        jsonParameter=decodedString;
+        
         if (jsonParameter == null || jsonParameter.isEmpty()) {
             return "Se debe incluir JSON con los parámetros: pkcs12, password";
         }
-
+        
         JsonReader jsonReader = javax.json.Json.createReader(new StringReader(jsonParameter));
         JsonObject json;
 
