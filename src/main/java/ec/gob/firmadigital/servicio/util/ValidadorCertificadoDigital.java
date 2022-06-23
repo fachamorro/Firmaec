@@ -16,6 +16,9 @@
  */
 package ec.gob.firmadigital.servicio.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.itextpdf.kernel.crypto.BadPasswordException;
 import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigitalException;
 import io.rubrica.certificate.CertEcUtils;
@@ -33,6 +36,8 @@ import io.rubrica.keystore.KeyStoreUtilities;
 import io.rubrica.utils.TiempoUtils;
 import io.rubrica.utils.Utils;
 import io.rubrica.utils.UtilsCrlOcsp;
+import static io.rubrica.utils.UtilsCrlOcsp.fechaString_Date;
+import static io.rubrica.utils.UtilsCrlOcsp.validarCertificado;
 import io.rubrica.utils.X509CertificateUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -41,21 +46,27 @@ import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
  *
- * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael Fernández
+ * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael
+ * Fernández
  */
 public class ValidadorCertificadoDigital {
 
-    public Certificado Certificate(KeyStore keyStore, String alias) throws RubricaException, ServicioValidarCertificadoDigitalException {
+    public String Certificate(KeyStore keyStore, String alias) throws RubricaException, ServicioValidarCertificadoDigitalException {
         Certificado certificado = null;
+        String retorno = null;
+        boolean caducado = true, revocado = true;
         try {
             X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
             if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), null)) {//validación de firmaEC
@@ -64,13 +75,18 @@ public class ValidadorCertificadoDigital {
                 TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null));
                 Date fechaHoraISO = Date.from(Instant.from(accessor));
                 //Validad certificado revocado
+//                Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
                 Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
                 if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
-                    throw new ServicioValidarCertificadoDigitalException("Certificado revocado: " + fechaRevocado);
+                    retorno = "Certificado revocado: " + fechaRevocado;
+                    revocado = true;
+                } else {
+                    revocado = false;
                 }
-                boolean caducado;
+
+//                if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(fechaString_Date("2022-06-21 10:00:16")) >= 0) {
                 if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(x509Certificate.getNotAfter()) >= 0) {
-//                    Toast.makeText(getBaseContext(), "Certificado caducado", Toast.LENGTH_LONG).show();
+                    retorno = "Certificado caducado";
                     caducado = true;
                 } else {
                     caducado = false;
@@ -82,29 +98,70 @@ public class ValidadorCertificadoDigital {
                         Utils.dateToCalendar(x509Certificate.getNotBefore()),
                         Utils.dateToCalendar(x509Certificate.getNotAfter()),
                         null,
+//                        Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
                         Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
                         caducado,
                         datosUsuario);
             } else {
-                throw new ServicioValidarCertificadoDigitalException("Certificado no válido");
+                retorno = "Certificado no válido";
             }
         } catch (BadPasswordException bpe) {
-            throw new ServicioValidarCertificadoDigitalException("Documento protegido con contraseña");
+            retorno = "Documento protegido con contraseña";
         } catch (InvalidKeyException ie) {
-            throw new ServicioValidarCertificadoDigitalException("Problemas al abrir el documento");
+            retorno = "Problemas al abrir el documento";
         } catch (EntidadCertificadoraNoValidaException ecnve) {
-            throw new ServicioValidarCertificadoDigitalException("Certificado no válido");
+            retorno = "Certificado no válido";
         } catch (HoraServidorException hse) {
-            throw new ServicioValidarCertificadoDigitalException("Problemas en la red\\nIntente nuevamente o verifique su conexión");
+            retorno = "Problemas en la red\\nIntente nuevamente o verifique su conexión";
         } catch (KeyStoreException kse) {
-            throw new ServicioValidarCertificadoDigitalException("No se encontró archivo o la contraseña es inválida.");
+            retorno = "No se encontró archivo o la contraseña es inválida.";
         } catch (CertificadoInvalidoException | IOException e) {
-            throw new ServicioValidarCertificadoDigitalException("Excepción no conocida: " + e);
+            retorno = "Excepción no conocida: " + e;
+        } finally {
+            Gson gson = new Gson();
+            JsonObject jsonDoc = new JsonObject();
+            jsonDoc.addProperty("error", retorno);
+            JsonArray arrayCer = new JsonArray();
+            if (certificado != null) {
+                boolean signValidate = true;
+                if (revocado || certificado.getValidated() || !certificado.getDatosUsuario().isCertificadoDigitalValido()) {
+                    signValidate = false;
+                } else {
+                    signValidate = true;
+
+                }
+                jsonDoc.addProperty("firmaValida", signValidate);
+                JsonObject jsonCer = new JsonObject();
+                jsonCer.addProperty("emitidoPara", certificado.getIssuedTo());
+                jsonCer.addProperty("emitidoPor", certificado.getIssuedBy());
+                jsonCer.addProperty("validoDesde", calendarToString(certificado.getValidFrom()));
+                jsonCer.addProperty("validoHasta", calendarToString(certificado.getValidTo()));
+                jsonCer.addProperty("fechaRevocado", certificado.getRevocated() != null ? calendarToString(certificado.getRevocated()) : "");
+                jsonCer.addProperty("certificadoVigente", !certificado.getValidated());
+                jsonCer.addProperty("clavesUso", certificado.getKeyUsages());
+                jsonCer.addProperty("integridadFirma", certificado.getSignVerify());
+                jsonCer.addProperty("cedula", certificado.getDatosUsuario().getCedula());
+                jsonCer.addProperty("nombre", certificado.getDatosUsuario().getNombre());
+                jsonCer.addProperty("apellido", certificado.getDatosUsuario().getApellido());
+                jsonCer.addProperty("institucion", certificado.getDatosUsuario().getInstitucion());
+                jsonCer.addProperty("cargo", certificado.getDatosUsuario().getCargo());
+                jsonCer.addProperty("entidadCertificadora", certificado.getDatosUsuario().getEntidadCertificadora());
+                jsonCer.addProperty("serial", certificado.getDatosUsuario().getSerial());
+                jsonCer.addProperty("certificadoDigitalValido", certificado.getDatosUsuario().isCertificadoDigitalValido());
+                arrayCer.add(jsonCer);
+                jsonDoc.add("certificado", arrayCer);
+            }
+            return gson.toJson(jsonDoc);
         }
-        return certificado;
     }
 
-    public Certificado validarCertificado(String pkcs12, String password) throws Exception {
+    private String calendarToString(Calendar calendar) {
+        Date date = calendar.getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
+    }
+
+    public String validarCertificado(String pkcs12, String password) throws Exception {
         byte encodedPkcs12[] = Base64.getDecoder().decode(pkcs12);
         InputStream inputStreamPkcs12 = new ByteArrayInputStream(encodedPkcs12);
 

@@ -17,11 +17,7 @@
 package ec.gob.firmadigital.servicio.rest;
 
 import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigital;
-import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigitalException;
 import java.io.StringReader;
-import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.json.JsonObject;
@@ -86,9 +82,7 @@ public class ServicioValidarCertificadoDigitalRest {
 
         try {
             return servicioValidarCertificadoDigital.validarCertificadoDigital(pkcs12, password);
-        } catch (ServicioValidarCertificadoDigitalException e) {
-            return "Url no encontrado";
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return "Problemas en libreria";
         }
     }

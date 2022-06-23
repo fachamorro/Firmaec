@@ -17,21 +17,17 @@
 package ec.gob.firmadigital.servicio;
 
 import ec.gob.firmadigital.servicio.util.ValidadorCertificadoDigital;
-import io.rubrica.certificate.to.Certificado;
-import io.rubrica.utils.Json;
-import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.validation.constraints.NotNull;
-
-import javax.ejb.EJB;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
  * federar la utilización de FirmaEC sobre otra infraestructura, consultando en
  * una lista de servidores permitidos.
  *
- * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael Fernández
+ * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael
+ * Fernández
  */
 @Stateless
 public class ServicioValidarCertificadoDigital {
@@ -41,24 +37,10 @@ public class ServicioValidarCertificadoDigital {
      *
      * @param pkcs12
      * @param password
-     * @return
-     * @throws ServicioValidarCertificadoDigitalException
+     * @return json
      */
-    public String validarCertificadoDigital(@NotNull String pkcs12, @NotNull String password) throws ServicioValidarCertificadoDigitalException, Exception {
-        String retorno = "";
-
-        System.out.println("DATOS");
-        System.out.println(pkcs12);
-        System.out.println(password);
-
+    public String validarCertificadoDigital(@NotNull String pkcs12, @NotNull String password) throws Exception {
         ValidadorCertificadoDigital validadorCertificadoDigital = new ValidadorCertificadoDigital();
-        Certificado certificado = validadorCertificadoDigital.validarCertificado(pkcs12, password);
-
-        if (certificado != null) {
-            return Json.generarJsonCertificado(certificado);
-        }
-
-        return retorno;
+        return validadorCertificadoDigital.validarCertificado(pkcs12, password);
     }
-
 }
