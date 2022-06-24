@@ -36,8 +36,6 @@ import io.rubrica.keystore.KeyStoreUtilities;
 import io.rubrica.utils.TiempoUtils;
 import io.rubrica.utils.Utils;
 import io.rubrica.utils.UtilsCrlOcsp;
-import static io.rubrica.utils.UtilsCrlOcsp.fechaString_Date;
-import static io.rubrica.utils.UtilsCrlOcsp.validarCertificado;
 import io.rubrica.utils.X509CertificateUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
