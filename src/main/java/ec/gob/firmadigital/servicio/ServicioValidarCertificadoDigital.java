@@ -114,7 +114,7 @@ public class ServicioValidarCertificadoDigital {
                         Utils.dateToCalendar(x509Certificate.getNotBefore()),
                         Utils.dateToCalendar(x509Certificate.getNotAfter()),
                         null,
-//                        Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
+                        //                        Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
                         Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
                         caducado,
                         datosUsuario);
@@ -126,7 +126,12 @@ public class ServicioValidarCertificadoDigital {
         } catch (HoraServidorException hse) {
             retorno = "Problemas en la red\\nIntente nuevamente o verifique su conexión";
         } catch (KeyStoreException kse) {
-            retorno = "La contraseña es inválida.";
+            if (kse.getCause().toString().contains("Invalid keystore format")) {
+                retorno = "Certificado digital es inválido.";
+            }
+            if (kse.getCause().toString().contains("keystore password was incorrect")) {
+                retorno = "La contraseña es inválida.";
+            }
         } catch (IOException ioe) {
             retorno = "Excepción no conocida: " + ioe;
         } finally {
