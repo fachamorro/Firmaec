@@ -33,7 +33,8 @@ import javax.ws.rs.core.MediaType;
 /**
  * REST Web Service
  *
- * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael Fernández
+ * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael
+ * Fernández
  */
 @Stateless
 @Path("/validarcertificadodigital")
@@ -47,16 +48,10 @@ public class ServicioValidarCertificadoDigitalRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String validar(@PathParam("json") String jsonParameter) {
-
-//        Decodificar String base 64
-//        byte[] decodedBytes = Base64.getDecoder().decode(jsonParameter);
-//        String decodedString = new String(decodedBytes);
-//        jsonParameter=decodedString;
-        
         if (jsonParameter == null || jsonParameter.isEmpty()) {
             return "Se debe incluir JSON con los parámetros: pkcs12, password";
         }
-        
+
         JsonReader jsonReader = javax.json.Json.createReader(new StringReader(jsonParameter));
         JsonObject json;
 
@@ -71,20 +66,21 @@ public class ServicioValidarCertificadoDigitalRest {
 
         try {
             pkcs12 = json.getString("pkcs12");
-        } catch (NullPointerException e) {
-            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"pkcs12\"";
+        } catch (NullPointerException npe) {
+            return "Error al decodificar JSON: Se debe incluir \"pkcs12\"";
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"pkcs12\"";
         }
         try {
             password = json.getString("password");
-        } catch (NullPointerException e) {
-            return getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"password\"";
+        } catch (NullPointerException npe) {
+            return "Error al decodificar JSON: Se debe incluir \"password\"";
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"password\"";
         }
 
-        try {
-            return servicioValidarCertificadoDigital.validarCertificadoDigital(pkcs12, password);
-        } catch (Exception e) {
-            return "Problemas en libreria";
-        }
+        return servicioValidarCertificadoDigital.validarCertificadoDigital(pkcs12, password);
+
     }
 
 }
