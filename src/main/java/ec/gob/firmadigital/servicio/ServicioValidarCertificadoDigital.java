@@ -22,10 +22,6 @@ import com.google.gson.JsonObject;
 import io.rubrica.certificate.CertEcUtils;
 import io.rubrica.certificate.to.Certificado;
 import io.rubrica.certificate.to.DatosUsuario;
-//        Decodificar String base 64
-//        byte[] decodedBytes = Base64.getDecoder().decode(jsonParameter);
-//        String decodedString = new String(decodedBytes);
-//        jsonParameter=decodedString;
 import io.rubrica.core.Util;
 import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
@@ -104,7 +100,6 @@ public class ServicioValidarCertificadoDigital {
                 } else {
                     revocado = false;
                 }
-
 //                if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(fechaString_Date("2022-06-21 10:00:16")) >= 0) {
                 if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(x509Certificate.getNotAfter()) >= 0) {
                     retorno = "Certificado caducado";
@@ -119,7 +114,7 @@ public class ServicioValidarCertificadoDigital {
                         Utils.dateToCalendar(x509Certificate.getNotBefore()),
                         Utils.dateToCalendar(x509Certificate.getNotAfter()),
                         null,
-                        //                        Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
+//                        Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
                         Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
                         caducado,
                         datosUsuario);
