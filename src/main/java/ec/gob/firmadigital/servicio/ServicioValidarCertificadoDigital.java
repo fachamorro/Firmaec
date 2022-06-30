@@ -74,6 +74,9 @@ public class ServicioValidarCertificadoDigital {
         Certificado certificado = null;
         String retorno = null;
         boolean caducado = true, revocado = true;
+        
+        System.out.println("ENTRANDO A validarCertificadoDigital");
+        
         try {
             byte encodedPkcs12[] = Base64.getDecoder().decode(pkcs12);
             InputStream inputStreamPkcs12 = new ByteArrayInputStream(encodedPkcs12);
@@ -94,6 +97,7 @@ public class ServicioValidarCertificadoDigital {
                 //Validad certificado revocado
 //                Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
                 Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
+                System.out.println("ENTRO A 1");
                 if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
                     retorno = "Certificado revocado: " + fechaRevocado;
                     revocado = true;
@@ -134,6 +138,8 @@ public class ServicioValidarCertificadoDigital {
             }
         } catch (IOException ioe) {
             retorno = "Excepción no conocida: " + ioe;
+        } catch (Exception ex) {
+            retorno = "Excepción no conocida: " + ex;
         } finally {
             Gson gson = new Gson();
             JsonObject jsonDoc = new JsonObject();

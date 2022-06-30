@@ -16,6 +16,7 @@
  */
 package ec.gob.firmadigital.servicio.rest;
 
+import com.google.gson.Gson;
 import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigital;
 import java.io.StringReader;
 import javax.ejb.EJB;
@@ -25,7 +26,9 @@ import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
@@ -43,42 +46,20 @@ public class ServicioValidarCertificadoDigitalRest {
     @EJB
     private ServicioValidarCertificadoDigital servicioValidarCertificadoDigital;
 
-    @GET
-    @Path("{json}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String validar(@PathParam("json") String jsonParameter) {
-        if (jsonParameter == null || jsonParameter.isEmpty()) {
-            return "Se debe incluir JSON con los parámetros: pkcs12, password";
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public String validar(@FormParam("pkcs12") String pkcs12,@FormParam("password") String password) {
+        
+    
+        if (pkcs12 == null || pkcs12.isEmpty()) {
+            return "Se debe incluir el parametro pkcs12";
         }
-
-        JsonReader jsonReader = javax.json.Json.createReader(new StringReader(jsonParameter));
-        JsonObject json;
-
-        try {
-            json = (JsonObject) jsonReader.read();
-        } catch (JsonParsingException e) {
-            return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
+        
+        if (password == null || password.isEmpty()) {
+            return "Se debe incluir el parametro password";
         }
-
-        String pkcs12;
-        String password;
-
-        try {
-            pkcs12 = json.getString("pkcs12");
-        } catch (NullPointerException npe) {
-            return "Error al decodificar JSON: Se debe incluir \"pkcs12\"";
-        } catch (ClassCastException cce) {
-            return "Error al decodificar JSON: No coincide el tipo de dato \"pkcs12\"";
-        }
-        try {
-            password = json.getString("password");
-        } catch (NullPointerException npe) {
-            return "Error al decodificar JSON: Se debe incluir \"password\"";
-        } catch (ClassCastException cce) {
-            return "Error al decodificar JSON: No coincide el tipo de dato \"password\"";
-        }
-
+        
         return servicioValidarCertificadoDigital.validarCertificadoDigital(pkcs12, password);
 
     }
