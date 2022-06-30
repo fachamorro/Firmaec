@@ -114,7 +114,7 @@ public class ServicioValidarCertificadoDigital {
                         Utils.dateToCalendar(x509Certificate.getNotBefore()),
                         Utils.dateToCalendar(x509Certificate.getNotAfter()),
                         null,
-                        //                        Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
+                        //Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
                         Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
                         caducado,
                         datosUsuario);

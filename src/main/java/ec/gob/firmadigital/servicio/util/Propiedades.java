@@ -8,7 +8,8 @@ import io.rubrica.sign.pdf.RectanguloUtil;
 import io.rubrica.utils.TiempoUtils;
 
 public class Propiedades {
-    public static Properties propiedades(String version, String llx, String lly, String pagina, String url, String fechaHora) throws IOException {
+
+    public static Properties propiedades(String version, String llx, String lly, String pagina, String tipoEstampa, String url, String fechaHora) throws IOException {
         Properties properties = new Properties();
         properties.setProperty(PDFSignerItext.SIGNING_LOCATION, "");
         properties.setProperty(PDFSignerItext.SIGNING_REASON, "Firmado digitalmente con FirmaEC mobile " + version);
@@ -27,7 +28,11 @@ public class Propiedades {
         if (pagina != null) {
             properties.setProperty(PDFSignerItext.LAST_PAGE, pagina);
         }
-        properties.setProperty(PDFSignerItext.TYPE_SIG, "information2"); //no funciona con QR
+        if (pagina != null) {
+            properties.setProperty(PDFSignerItext.TYPE_SIG, tipoEstampa);
+        } else {
+            properties.setProperty(PDFSignerItext.TYPE_SIG, "information2"); //no funciona con QR
+        }
         return properties;
     }
 }
