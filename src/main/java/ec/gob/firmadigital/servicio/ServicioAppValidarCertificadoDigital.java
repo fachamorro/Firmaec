@@ -61,7 +61,7 @@ import javax.validation.constraints.NotNull;
  * Fernández
  */
 @Stateless
-public class ServicioValidarCertificadoDigital {
+public class ServicioAppValidarCertificadoDigital {
 
     /**
      * Busca un ApiUrl por URL.
@@ -70,13 +70,11 @@ public class ServicioValidarCertificadoDigital {
      * @param password
      * @return json
      */
-    public String validarCertificadoDigital(@NotNull String pkcs12, @NotNull String password) {
+    public String appValidarCertificadoDigital(@NotNull String pkcs12, @NotNull String password) {
         Certificado certificado = null;
         String retorno = null;
         boolean caducado = true, revocado = true;
-        
-        System.out.println("ENTRANDO A validarCertificadoDigital");
-        
+
         try {
             byte encodedPkcs12[] = Base64.getDecoder().decode(pkcs12);
             InputStream inputStreamPkcs12 = new ByteArrayInputStream(encodedPkcs12);

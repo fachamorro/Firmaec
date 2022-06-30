@@ -16,21 +16,14 @@
  */
 package ec.gob.firmadigital.servicio.rest;
 
-import com.google.gson.Gson;
-import ec.gob.firmadigital.servicio.ServicioValidarCertificadoDigital;
-import java.io.StringReader;
+import ec.gob.firmadigital.servicio.ServicioAppValidarCertificadoDigital;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -40,27 +33,26 @@ import javax.ws.rs.core.MediaType;
  * Fernández
  */
 @Stateless
-@Path("/validarcertificadodigital")
-public class ServicioValidarCertificadoDigitalRest {
+@Path("/appvalidarcertificadodigital")
+public class ServicioAppValidarCertificadoDigitalRest {
 
     @EJB
-    private ServicioValidarCertificadoDigital servicioValidarCertificadoDigital;
+    private ServicioAppValidarCertificadoDigital appValidarCertificadoDigital;
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String validar(@FormParam("pkcs12") String pkcs12,@FormParam("password") String password) {
-        
-    
+    public String validar(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password) {
+
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
         }
-        
+
         if (password == null || password.isEmpty()) {
             return "Se debe incluir el parametro password";
         }
-        
-        return servicioValidarCertificadoDigital.validarCertificadoDigital(pkcs12, password);
+
+        return appValidarCertificadoDigital.appValidarCertificadoDigital(pkcs12, password);
 
     }
 
