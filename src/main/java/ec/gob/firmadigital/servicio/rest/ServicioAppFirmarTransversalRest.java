@@ -16,11 +16,10 @@
  */
 package ec.gob.firmadigital.servicio.rest;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import ec.gob.firmadigital.servicio.ServicioFirmarTransversal;
+import ec.gob.firmadigital.servicio.ServicioAppFirmarDocumentoTransversal;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Produces;
@@ -37,16 +36,16 @@ import javax.ws.rs.core.MediaType;
  * Fernández
  */
 @Stateless
-@Path("/firmartransversal")
-public class ServicioFirmarTransversalRest {
+@Path("/appfirmardocumentotransversal")
+public class ServicioAppFirmarTransversalRest {
 
     @EJB
-    private ServicioFirmarTransversal servicioFirmarTransversal;
+    private ServicioAppFirmarDocumentoTransversal servicioAppFirmarDocumentoTransversal;
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String validar(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password, @FormParam("jsonMetaData") String jsonMetaData) throws Exception {
+    public String firmarDocumentoTransversal(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password, @FormParam("json") String json) throws Exception {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
@@ -56,13 +55,13 @@ public class ServicioFirmarTransversalRest {
             return "Se debe incluir el parametro password";
         }
 
-        if (jsonMetaData == null || jsonMetaData.isEmpty()) {
+        if (json == null || json.isEmpty()) {
             return "Se debe incluir el parametro jsonMetaData";
         }
 
         JsonObject jsonObject;
         try {
-            jsonObject = new JsonParser().parse(jsonMetaData).getAsJsonObject();
+            jsonObject = new JsonParser().parse(json).getAsJsonObject();
         } catch (JsonSyntaxException e) {
             return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
         }
@@ -81,6 +80,20 @@ public class ServicioFirmarTransversalRest {
         boolean pre = false;
         boolean des = false;
 
+        try {
+            pkcs12 = jsonObject.get("pkcs12").getAsString();
+        } catch (NullPointerException npe) {
+            return "Error al decodificar JSON: Se debe incluir \"pkcs12\"";
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"pkcs12\"";
+        }
+        try {
+            password = jsonObject.get("password").getAsString();
+        } catch (NullPointerException npe) {
+            return "Error al decodificar JSON: Se debe incluir \"password\"";
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"password\"";
+        }
         try {
             sistema = jsonObject.get("sistema").getAsString();
         } catch (NullPointerException npe) {
@@ -167,14 +180,7 @@ public class ServicioFirmarTransversalRest {
             return "Error al decodificar JSON: No coincide el tipo de dato \"des\"";
         }
 
-        Gson gson = new Gson();
-        JsonObject jsonResponse = new JsonObject();
-        jsonResponse.addProperty("error", "");
-        jsonResponse.addProperty("documento", pkcs12);
-
-        return gson.toJson(jsonResponse);
-
-//        return servicioFirmarTransversal.firmarTransversal(pkcs12, password, sistema, operacion, url, versionFirmaEC, formatoDocumento, tokenJwt, llx, lly, pagina, tipoEstampado, razon, pre, des);
+        return servicioAppFirmarDocumentoTransversal.firmarTransversal(pkcs12, password, sistema, operacion, url, versionFirmaEC, formatoDocumento, tokenJwt, llx, lly, pagina, tipoEstampado, razon, pre, des);
     }
 
 }

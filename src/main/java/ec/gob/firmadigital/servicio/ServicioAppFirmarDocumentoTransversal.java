@@ -75,14 +75,14 @@ import javax.ejb.Stateless;
  * Fernández
  */
 @Stateless
-public class ServicioFirmarTransversal {
+public class ServicioAppFirmarDocumentoTransversal {
 
     private final int TIME_OUT = 5000; //set timeout to 5 seconds
     private final int BUFFER_SIZE = 8192;
 
     private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
-    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8080/api";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://desapi.firmadigital.gob.ec/api";
+    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8080/api";
+//    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8080/api";
     private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
     private String restServiceUrl;
 

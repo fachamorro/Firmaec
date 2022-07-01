@@ -37,12 +37,12 @@ import javax.ws.rs.core.MediaType;
 public class ServicioAppValidarCertificadoDigitalRest {
 
     @EJB
-    private ServicioAppValidarCertificadoDigital appValidarCertificadoDigital;
+    private ServicioAppValidarCertificadoDigital servicioAppValidarCertificadoDigital;
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String validar(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password) {
+    public String validarCertificadoDigital(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password) {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
@@ -52,7 +52,7 @@ public class ServicioAppValidarCertificadoDigitalRest {
             return "Se debe incluir el parametro password";
         }
 
-        return appValidarCertificadoDigital.appValidarCertificadoDigital(pkcs12, password);
+        return servicioAppValidarCertificadoDigital.appValidarCertificadoDigital(pkcs12, password);
 
     }
 

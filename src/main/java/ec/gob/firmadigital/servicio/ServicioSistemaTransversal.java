@@ -15,7 +15,6 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.io.StringWriter;
@@ -56,8 +55,6 @@ import org.w3c.dom.NodeList;
 import ec.gob.firmadigital.servicio.model.Sistema;
 import io.rubrica.certificate.CertEcUtils;
 import io.rubrica.certificate.to.Certificado;
-import io.rubrica.certificate.to.Documento;
-import io.rubrica.utils.Utils;
 import java.text.DateFormat;
 import java.util.Calendar;
 import javax.ws.rs.client.Client;
