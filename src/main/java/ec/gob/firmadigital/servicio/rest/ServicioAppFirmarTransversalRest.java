@@ -56,7 +56,7 @@ public class ServicioAppFirmarTransversalRest {
         }
 
         if (json == null || json.isEmpty()) {
-            return "Se debe incluir el parametro jsonMetaData";
+            return "Se debe incluir el parametro json";
         }
 
         JsonObject jsonObject;
@@ -80,20 +80,6 @@ public class ServicioAppFirmarTransversalRest {
         boolean pre = false;
         boolean des = false;
 
-        try {
-            pkcs12 = jsonObject.get("pkcs12").getAsString();
-        } catch (NullPointerException npe) {
-            return "Error al decodificar JSON: Se debe incluir \"pkcs12\"";
-        } catch (ClassCastException cce) {
-            return "Error al decodificar JSON: No coincide el tipo de dato \"pkcs12\"";
-        }
-        try {
-            password = jsonObject.get("password").getAsString();
-        } catch (NullPointerException npe) {
-            return "Error al decodificar JSON: Se debe incluir \"password\"";
-        } catch (ClassCastException cce) {
-            return "Error al decodificar JSON: No coincide el tipo de dato \"password\"";
-        }
         try {
             sistema = jsonObject.get("sistema").getAsString();
         } catch (NullPointerException npe) {
