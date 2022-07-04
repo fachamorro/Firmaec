@@ -16,7 +16,15 @@
  */
 package ec.gob.firmadigital.servicio;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import javax.ejb.Stateless;
+
+import io.rubrica.certificate.to.Documento;
+import io.rubrica.exceptions.SignatureVerificationException;
+import io.rubrica.utils.Json;
+import java.io.InputStream;
 
 /**
  *
@@ -26,16 +34,31 @@ import javax.ejb.Stateless;
 @Stateless
 public class ServicioAppVerificarDocumento {
 
-    public String verificarDocumento(){
-//        try {
-//            documento = io.rubrica.utils.Utils.pdfToDocumento(pdf);
-//        } catch (java.lang.UnsupportedOperationException uoe) {
-//            Toast.makeText(getBaseContext(), "No es posible procesar el documento desde dispositivo móvil", Toast.LENGTH_LONG).show();
-//            Toast.makeText(getBaseContext(), "Intentar en FirmaEC de Escritorio", Toast.LENGTH_LONG).show();
-//        } catch (com.itextpdf.io.IOException ioe) {
-//            Toast.makeText(getBaseContext(), "El archivo no es PDF", Toast.LENGTH_LONG).show();
-//        }
-        return "";
+    public String verificarDocumento(InputStream inputStreamDocumento) {
+        String retorno = null;
+        Documento documento = null;
+        try {
+            documento = io.rubrica.utils.Utils.pdfToDocumento(inputStreamDocumento);
+        } catch (java.lang.UnsupportedOperationException uoe) {
+            retorno = "No es posible procesar el documento desde dispositivo móvil\nIntentar en FirmaEC de Escritorio";
+        } catch (com.itextpdf.io.IOException ioe) {
+            retorno = "El archivo no es PDF";
+        } catch (SignatureVerificationException sve) {
+            retorno = sve.toString();
+        } catch (Exception ex) {
+            retorno = ex.toString();
+        }
+
+        Gson gson = new Gson();
+        JsonObject jsonDoc = new JsonObject();
+        jsonDoc.addProperty("error", retorno);
+        JsonArray arrayCer = new JsonArray();
+        if (documento != null) {
+            jsonDoc.addProperty("documentoValida", "por resolver");
+            arrayCer.add(Json.generarJsonDocumento(documento));
+            jsonDoc.add("certificado", arrayCer);
+        }
+        return gson.toJson(jsonDoc);
     }
-    
+
 }

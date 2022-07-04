@@ -42,11 +42,11 @@ public class ServicioAppFirmarDocumentoRest {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String firmarDocumento(@FormParam("documentoPdf") String documentoPdf,
+    public String firmarDocumento(@FormParam("documento") String documento,
             @FormParam("pkcs12") String pkcs12, @FormParam("password") String password) throws Exception {
 
-        if (documentoPdf == null || documentoPdf.isEmpty()) {
-            return "Se debe incluir el parametro documentoPdf";
+        if (documento == null || documento.isEmpty()) {
+            return "Se debe incluir el parametro documento";
         }
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
