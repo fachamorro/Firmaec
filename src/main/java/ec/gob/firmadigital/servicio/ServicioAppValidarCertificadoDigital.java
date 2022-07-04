@@ -48,6 +48,7 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import io.rubrica.utils.Json;
 
 import javax.ejb.Stateless;
 import javax.validation.constraints.NotNull;
@@ -152,24 +153,25 @@ public class ServicioAppValidarCertificadoDigital {
 
                 }
                 jsonDoc.addProperty("firmaValida", signValidate);
-                JsonObject jsonCer = new JsonObject();
-                jsonCer.addProperty("emitidoPara", certificado.getIssuedTo());
-                jsonCer.addProperty("emitidoPor", certificado.getIssuedBy());
-                jsonCer.addProperty("validoDesde", calendarToString(certificado.getValidFrom()));
-                jsonCer.addProperty("validoHasta", calendarToString(certificado.getValidTo()));
-                jsonCer.addProperty("fechaRevocado", certificado.getRevocated() != null ? calendarToString(certificado.getRevocated()) : "");
-                jsonCer.addProperty("certificadoVigente", !certificado.getValidated());
-                jsonCer.addProperty("clavesUso", certificado.getKeyUsages());
-                jsonCer.addProperty("integridadFirma", certificado.getSignVerify());
-                jsonCer.addProperty("cedula", certificado.getDatosUsuario().getCedula());
-                jsonCer.addProperty("nombre", certificado.getDatosUsuario().getNombre());
-                jsonCer.addProperty("apellido", certificado.getDatosUsuario().getApellido());
-                jsonCer.addProperty("institucion", certificado.getDatosUsuario().getInstitucion());
-                jsonCer.addProperty("cargo", certificado.getDatosUsuario().getCargo());
-                jsonCer.addProperty("entidadCertificadora", certificado.getDatosUsuario().getEntidadCertificadora());
-                jsonCer.addProperty("serial", certificado.getDatosUsuario().getSerial());
-                jsonCer.addProperty("certificadoDigitalValido", certificado.getDatosUsuario().isCertificadoDigitalValido());
-                arrayCer.add(jsonCer);
+                arrayCer.add(Json.generarJsonCertificado(certificado));
+//                JsonObject jsonCer = new JsonObject();
+//                jsonCer.addProperty("emitidoPara", certificado.getIssuedTo());
+//                jsonCer.addProperty("emitidoPor", certificado.getIssuedBy());
+//                jsonCer.addProperty("validoDesde", calendarToString(certificado.getValidFrom()));
+//                jsonCer.addProperty("validoHasta", calendarToString(certificado.getValidTo()));
+//                jsonCer.addProperty("fechaRevocado", certificado.getRevocated() != null ? calendarToString(certificado.getRevocated()) : "");
+//                jsonCer.addProperty("certificadoVigente", !certificado.getValidated());
+//                jsonCer.addProperty("clavesUso", certificado.getKeyUsages());
+//                jsonCer.addProperty("integridadFirma", certificado.getSignVerify());
+//                jsonCer.addProperty("cedula", certificado.getDatosUsuario().getCedula());
+//                jsonCer.addProperty("nombre", certificado.getDatosUsuario().getNombre());
+//                jsonCer.addProperty("apellido", certificado.getDatosUsuario().getApellido());
+//                jsonCer.addProperty("institucion", certificado.getDatosUsuario().getInstitucion());
+//                jsonCer.addProperty("cargo", certificado.getDatosUsuario().getCargo());
+//                jsonCer.addProperty("entidadCertificadora", certificado.getDatosUsuario().getEntidadCertificadora());
+//                jsonCer.addProperty("serial", certificado.getDatosUsuario().getSerial());
+//                jsonCer.addProperty("certificadoDigitalValido", certificado.getDatosUsuario().isCertificadoDigitalValido());
+//                arrayCer.add(jsonCer);
                 jsonDoc.add("certificado", arrayCer);
             }
             return gson.toJson(jsonDoc);

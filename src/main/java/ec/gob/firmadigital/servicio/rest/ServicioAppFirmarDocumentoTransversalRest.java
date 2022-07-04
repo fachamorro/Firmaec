@@ -37,7 +37,7 @@ import javax.ws.rs.core.MediaType;
  */
 @Stateless
 @Path("/appfirmardocumentotransversal")
-public class ServicioAppFirmarTransversalRest {
+public class ServicioAppFirmarDocumentoTransversalRest {
 
     @EJB
     private ServicioAppFirmarDocumentoTransversal servicioAppFirmarDocumentoTransversal;

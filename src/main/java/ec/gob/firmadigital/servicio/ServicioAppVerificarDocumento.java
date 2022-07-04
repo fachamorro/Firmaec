@@ -24,9 +24,9 @@ import javax.ejb.Stateless;
  * Fernández
  */
 @Stateless
-public class ServicioAppFirmarDocumento {
+public class ServicioAppVerificarDocumento {
 
-    public String firmarDocumento() {
+    public String verificarDocumento(){
 //        try {
 //            documento = io.rubrica.utils.Utils.pdfToDocumento(pdf);
 //        } catch (java.lang.UnsupportedOperationException uoe) {
@@ -35,7 +35,7 @@ public class ServicioAppFirmarDocumento {
 //        } catch (com.itextpdf.io.IOException ioe) {
 //            Toast.makeText(getBaseContext(), "El archivo no es PDF", Toast.LENGTH_LONG).show();
 //        }
-        return "Se ha firmado correctamente campeón";
+        return "";
     }
-
+    
 }
