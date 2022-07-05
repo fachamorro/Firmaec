@@ -19,6 +19,7 @@ package ec.gob.firmadigital.servicio;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import javax.ejb.Stateless;
 
@@ -39,7 +40,7 @@ import javax.validation.constraints.NotNull;
 public class ServicioAppVerificarDocumento {
 
     private final int BUFFER_SIZE = 8192;
-    
+
     public String verificarDocumento(@NotNull String base64Documento) {
         String retorno = null;
         Documento documento = null;
@@ -75,7 +76,6 @@ public class ServicioAppVerificarDocumento {
 //        byte[] byteDocumento = base64.getBytes();
 //        InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
 //        documento = io.rubrica.utils.Utils.pdfToDocumento(inputStreamDocumento);
-
             documento = io.rubrica.utils.Utils.pdfToDocumento(FileUtils.byteArrayConvertToFile(byteDocumento));
         } catch (java.lang.UnsupportedOperationException uoe) {
             retorno = "No es posible procesar el documento desde dispositivo móvil\nIntentar en FirmaEC de Escritorio";
@@ -87,16 +87,11 @@ public class ServicioAppVerificarDocumento {
             retorno = ex.toString();
         }
 
-        Gson gson = new Gson();
-        JsonObject jsonDoc = new JsonObject();
-        jsonDoc.addProperty("error", retorno);
-        JsonArray arrayCer = new JsonArray();
-        if (documento != null) {
-            jsonDoc.addProperty("documentoValida", "por resolver");
-            arrayCer.add(Json.generarJsonDocumento(documento));
-            jsonDoc.add("certificado", arrayCer);
+        if (documento == null) {
+            documento = new Documento(false, false, null, retorno);
         }
-        return gson.toJson(jsonDoc);
+        
+        return Json.generarJsonDocumento(documento);
     }
 
 }

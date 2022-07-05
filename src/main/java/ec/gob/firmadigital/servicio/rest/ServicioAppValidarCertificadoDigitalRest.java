@@ -51,9 +51,7 @@ public class ServicioAppValidarCertificadoDigitalRest {
         if (password == null || password.isEmpty()) {
             return "Se debe incluir el parametro password";
         }
-
         return servicioAppValidarCertificadoDigital.appValidarCertificadoDigital(pkcs12, password);
-
     }
 
 }

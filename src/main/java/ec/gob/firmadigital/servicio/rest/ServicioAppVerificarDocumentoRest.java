@@ -31,7 +31,7 @@ import javax.ws.rs.core.MediaType;
  * @author Christian Espinosa <christian.espinosa@mintel.gob.ec>, Misael
  * Fernández
  */
-@Path("appverificardocumento")
+@Path("/appverificardocumento")
 public class ServicioAppVerificarDocumentoRest {
 
     @EJB

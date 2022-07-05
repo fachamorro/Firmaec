@@ -36,7 +36,7 @@ import javax.ws.rs.core.MediaType;
  * Fernández
  */
 @Stateless
-@Path("appfirmardocumento")
+@Path("/appfirmardocumento")
 public class ServicioAppFirmarDocumentoRest {
 
     @EJB
