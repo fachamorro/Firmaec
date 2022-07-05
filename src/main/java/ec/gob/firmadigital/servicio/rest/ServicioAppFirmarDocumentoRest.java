@@ -16,6 +16,9 @@
  */
 package ec.gob.firmadigital.servicio.rest;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -42,12 +45,8 @@ public class ServicioAppFirmarDocumentoRest {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String firmarDocumento(@FormParam("documento") String documento,
-            @FormParam("pkcs12") String pkcs12, @FormParam("password") String password) throws Exception {
-
-        if (documento == null || documento.isEmpty()) {
-            return "Se debe incluir el parametro documento";
-        }
+    public String firmarDocumento(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password,
+            String documento, @FormParam("json") String json) throws Exception {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
@@ -56,8 +55,73 @@ public class ServicioAppFirmarDocumentoRest {
         if (password == null || password.isEmpty()) {
             return "Se debe incluir el parametro password";
         }
+        
+        if (documento == null || documento.isEmpty()) {
+            return "Se debe incluir el parametro documento";
+        }
+        
+        if (json == null || json.isEmpty()) {
+            return "Se debe incluir el parametro json";
+        }
 
-        return servicioAppFirmarDocumento.firmarDocumento();
+        JsonObject jsonObject;
+        try {
+            jsonObject = new JsonParser().parse(json).getAsJsonObject();
+        } catch (JsonSyntaxException e) {
+            return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
+        }
+
+        String versionFirmaEC = null;
+        String formatoDocumento = null;
+        String llx = null;
+        String lly = null;
+        String pagina = null;
+        String tipoEstampado = null;
+        String razon = null;
+
+        try {
+            versionFirmaEC = jsonObject.get("versionFirmaEC").getAsString();
+        } catch (NullPointerException npe) {
+            return "Error al decodificar JSON: Se debe incluir \"versionFirmaEC\"";
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"versionFirmaEC\"";
+        }
+        try {
+            formatoDocumento = jsonObject.get("formatoDocumento").getAsString();
+        } catch (NullPointerException npe) {
+            formatoDocumento = "pdf";
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"formatoDocumento\"";
+        }
+        try {
+            if (jsonObject.get("llx") != null) {
+                llx = jsonObject.get("llx").getAsString();
+            }
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"llx\"";
+        }
+        try {
+            if (jsonObject.get("lly") != null) {
+                lly = jsonObject.get("lly").getAsString();
+            }
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"lly\"";
+        }
+        try {
+            if (jsonObject.get("pagina") != null) {
+                pagina = jsonObject.get("pagina").getAsString();
+            }
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"pagina\"";
+        }
+        try {
+            if (jsonObject.get("tipoEstampado") != null) {
+                tipoEstampado = jsonObject.get("tipoEstampado").getAsString();
+            }
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"tipoEstampado\"";
+        }
+        
+        return servicioAppFirmarDocumento.firmarDocumento(pkcs12, password, documento, versionFirmaEC, formatoDocumento, llx, lly, pagina, tipoEstampado, razon);
     }
-
 }

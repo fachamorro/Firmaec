@@ -16,9 +16,9 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import ec.gob.firmadigital.servicio.util.X509CertificateUtils;
 import io.rubrica.certificate.CertEcUtils;
 import io.rubrica.certificate.to.Certificado;
@@ -39,13 +39,10 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import io.rubrica.utils.Json;
@@ -96,7 +93,6 @@ public class ServicioAppValidarCertificadoDigital {
                 //Validad certificado revocado
 //                Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
                 Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
-                System.out.println("ENTRO A 1");
                 if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
                     retorno = "Certificado revocado: " + fechaRevocado;
                     revocado = true;
@@ -140,47 +136,29 @@ public class ServicioAppValidarCertificadoDigital {
         } catch (Exception ex) {
             retorno = "Excepción no conocida: " + ex;
         } finally {
-            Gson gson = new Gson();
-            JsonObject jsonDoc = new JsonObject();
-            jsonDoc.addProperty("error", retorno);
-            JsonArray arrayCer = new JsonArray();
+            JsonObject jsonObject = new JsonObject();
+            boolean signValidate = true;
             if (certificado != null) {
-                boolean signValidate = true;
                 if (revocado || certificado.getValidated() || !certificado.getDatosUsuario().isCertificadoDigitalValido()) {
                     signValidate = false;
                 } else {
                     signValidate = true;
-
                 }
-                jsonDoc.addProperty("firmaValida", signValidate);
-                arrayCer.add(Json.generarJsonCertificado(certificado));
-//                JsonObject jsonCer = new JsonObject();
-//                jsonCer.addProperty("emitidoPara", certificado.getIssuedTo());
-//                jsonCer.addProperty("emitidoPor", certificado.getIssuedBy());
-//                jsonCer.addProperty("validoDesde", calendarToString(certificado.getValidFrom()));
-//                jsonCer.addProperty("validoHasta", calendarToString(certificado.getValidTo()));
-//                jsonCer.addProperty("fechaRevocado", certificado.getRevocated() != null ? calendarToString(certificado.getRevocated()) : "");
-//                jsonCer.addProperty("certificadoVigente", !certificado.getValidated());
-//                jsonCer.addProperty("clavesUso", certificado.getKeyUsages());
-//                jsonCer.addProperty("integridadFirma", certificado.getSignVerify());
-//                jsonCer.addProperty("cedula", certificado.getDatosUsuario().getCedula());
-//                jsonCer.addProperty("nombre", certificado.getDatosUsuario().getNombre());
-//                jsonCer.addProperty("apellido", certificado.getDatosUsuario().getApellido());
-//                jsonCer.addProperty("institucion", certificado.getDatosUsuario().getInstitucion());
-//                jsonCer.addProperty("cargo", certificado.getDatosUsuario().getCargo());
-//                jsonCer.addProperty("entidadCertificadora", certificado.getDatosUsuario().getEntidadCertificadora());
-//                jsonCer.addProperty("serial", certificado.getDatosUsuario().getSerial());
-//                jsonCer.addProperty("certificadoDigitalValido", certificado.getDatosUsuario().isCertificadoDigitalValido());
-//                arrayCer.add(jsonCer);
-                jsonDoc.add("certificado", arrayCer);
+                jsonObject.addProperty("signValidate", signValidate);
+                jsonObject.addProperty("docValidate", false);
+                jsonObject.addProperty("error", retorno);
+                String jsonCertificado = Json.generarJsonCertificado(certificado);
+                JsonParser jsonParser = new JsonParser();
+                jsonObject.add("certificado", (JsonArray) jsonParser.parse(jsonCertificado));
+            } else {
+                jsonObject.addProperty("signValidate", false);
+                jsonObject.addProperty("docValidate", false);
+                jsonObject.addProperty("error", retorno);
+                jsonObject.add("certificado", null);
             }
-            return gson.toJson(jsonDoc);
+            JsonArray jsonArray = new JsonArray();
+            jsonArray.add(jsonObject);
+            return jsonArray.toString();
         }
-    }
-
-    private String calendarToString(Calendar calendar) {
-        Date date = calendar.getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.format(date);
     }
 }

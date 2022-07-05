@@ -134,7 +134,7 @@ public class ServicioAppFirmarDocumentoTransversalRest {
                 lly = jsonObject.get("lly").getAsString();
             }
         } catch (ClassCastException cce) {
-            return "Error al decodificar JSON: No coincide el tipo de dato \"jwt\"";
+            return "Error al decodificar JSON: No coincide el tipo de dato \"lly\"";
         }
         try {
             if (jsonObject.get("pagina") != null) {
@@ -150,7 +150,6 @@ public class ServicioAppFirmarDocumentoTransversalRest {
         } catch (ClassCastException cce) {
             return "Error al decodificar JSON: No coincide el tipo de dato \"tipoEstampado\"";
         }
-
         try {
             if (jsonObject.get("pre") != null) {
                 pre = jsonObject.get("pre").getAsBoolean();

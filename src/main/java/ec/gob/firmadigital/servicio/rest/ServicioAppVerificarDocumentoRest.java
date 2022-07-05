@@ -17,12 +17,6 @@
 package ec.gob.firmadigital.servicio.rest;
 
 import ec.gob.firmadigital.servicio.ServicioAppVerificarDocumento;
-import io.rubrica.exceptions.InvalidFormatException;
-import io.rubrica.model.Document;
-import io.rubrica.model.InMemoryDocument;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Base64;
 import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -50,40 +44,6 @@ public class ServicioAppVerificarDocumentoRest {
         if (documento == null || documento.isEmpty()) {
             return "Se debe incluir el parametro documento";
         }
-//        byte[] bs = DocumentoUtils.loadFile(documento);
-//        FileNameMap MIMETYPES = URLConnection.getFileNameMap();
-//        System.out.println("MIMETYPES: " + MIMETYPES.getContentTypeFor(documento));
-//        if (MIMETYPES.getContentTypeFor(documento).equals("application/pdf")) {
-//            Document document = new InMemoryDocument(bs);
-//            InputStream is = document.openStream();
-//            Documento documento = Utils.pdfToDocumento(is);
-//            System.out.println("JSON:");
-//            System.out.println(Json.GenerarJsonDocumento(documento));
-//            System.out.println("Documento: " + documento);
-//            if (documento.getCertificados() != null) {
-//                documento.getCertificados().forEach((certificado) -> {
-//                    System.out.println(certificado.toString());
-//                });
-//            }
-//        }
-        System.out.println("documento: " + documento);
-        byte encodedPkcs12[] = Base64.getDecoder().decode(documento);
-        System.out.println("encodedPkcs12: " + encodedPkcs12);
-        try {
-            InputStream inputStream = new ByteArrayInputStream(encodedPkcs12);
-            return servicioAppVerificarDocumento.verificarDocumento(inputStream);
-        } catch (Exception e) {
-            throw new InvalidFormatException("No se ha podido leer el PDF: "+e.toString(), e);
-        }
-//        try {
-//            Document document = new InMemoryDocument(encodedPkcs12);
-//            System.out.println("document: "+document.toString());
-//            try (InputStream is = document.openStream()) {
-//                return servicioAppVerificarDocumento.verificarDocumento(is);
-//            }
-//        } catch (Exception e) {
-//            throw new InvalidFormatException("No se ha podido leer el PDF: ", e);
-//        }
-//        return servicioAppVerificarDocumento.verificarDocumento(inputStreamDocumento);
+        return servicioAppVerificarDocumento.verificarDocumento(documento);
     }
 }
