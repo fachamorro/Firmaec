@@ -50,7 +50,6 @@ public class ServicioAppVerificarDocumento {
             java.util.List<SignInfo> signInfos;
             signInfos = signer.getSigners(byteDocumento);
             documento = pdfToDocumento(pdfReader, signInfos);
-//            documento = io.rubrica.utils.Utils.pdfToDocumento(inputStreamDocumento);
         } catch (java.lang.UnsupportedOperationException uoe) {
             retorno = "No es posible procesar el documento desde dispositivo móvil\nIntentar en FirmaEC de Escritorio";
         } catch (com.itextpdf.io.IOException ioe) {

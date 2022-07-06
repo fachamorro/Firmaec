@@ -15,6 +15,7 @@
  */
 package ec.gob.firmadigital.servicio;
 
+import com.itextpdf.kernel.pdf.PdfReader;
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT;
 
 import java.io.IOException;
@@ -50,9 +51,9 @@ import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.sign.pdf.PDFSignerItext;
-import io.rubrica.utils.FileUtils;
 import io.rubrica.utils.Utils;
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -213,18 +214,19 @@ public class ServicioDocumento {
                 throw new DocumentoNoExisteException("El documento " + primaryKey + " no existe en la base de datos");
             }
 
-            byte[] archivo = decodificarBase64(archivoBase64);
+            byte[] byteDocumento = java.util.Base64.getDecoder().decode(archivoBase64);
+            java.util.List<SignInfo> signInfos;
 
             // Obtener el nombre del firmante para almacenar el documento en el
             // sistema transversal
             String datosFirmante = "";
-            String mimeType = FileUtil.getMimeType(archivo);
+            String mimeType = FileUtil.getMimeType(byteDocumento);
 
             try {
                 // Se valida la extension del archivo
                 System.out.println("MimeType: " + mimeType); // TODO: Eliminar
                 if (mimeType.contains("pdf")) {
-                    datosFirmante = servicioValidacionPdf.getNombre(archivo);
+                    datosFirmante = servicioValidacionPdf.getNombre(byteDocumento);
                 }
                 if (mimeType.contains("xml")) {
                     datosFirmante = ""; // TODO: Implementar el validador XML
@@ -240,8 +242,8 @@ public class ServicioDocumento {
                 X509Certificate certificado = null;
                 if (mimeType.contains("pdf")) {
                     Signer signer = new PDFSignerItext();
-                    List<SignInfo> singInfos = signer.getSigners(archivo);
-                    SignInfo firma = singInfos.get(0);
+                    signInfos = signer.getSigners(byteDocumento);
+                    SignInfo firma = signInfos.get(0);
                     certificado = firma.getCerts()[0];
                 }
 
@@ -253,16 +255,15 @@ public class ServicioDocumento {
                     // sistema transversal
                     io.rubrica.certificate.to.Documento documentoTo = null;
                     try {
-                        File file = null;
-                        try {
-                            file = FileUtils.byteArrayConvertToFile(archivo);
-                        } catch (IOException e) {
-                            throw new IllegalArgumentException("Error al crear el archivo temporal");
-                        }
+                        InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
+                        PdfReader pdfReader = new PdfReader(inputStreamDocumento);
+                        Signer signer = new PDFSignerItext();
+                        
+                        signInfos = signer.getSigners(byteDocumento);
                         // Se valida la extension del archivo
-                        String mimeTypeRest = FileUtil.getMimeType(archivo);
+                        String mimeTypeRest = FileUtil.getMimeType(byteDocumento);
                         if (mimeTypeRest.contains("pdf")) {
-                            documentoTo = Utils.pdfToDocumento(file);
+                            documentoTo = Utils.pdfToDocumento(pdfReader, signInfos);
                         }
                         if (mimeTypeRest.contains("xml")) {
 //                    Signer docSigner = Utils.documentSigner(file);
@@ -278,7 +279,7 @@ public class ServicioDocumento {
                         Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     //revisar
-                    
+
                     servicioSistemaTransversal.almacenarDocumentoREST(documentoTo, documento.getCedula(), documento.getNombre(),
                             archivoBase64, url, apiKeyRest);
                 } else {
