@@ -16,19 +16,19 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import ec.gob.firmadigital.servicio.util.Base64Util;
+import com.itextpdf.kernel.pdf.PdfReader;
 import javax.ejb.Stateless;
 
 import io.rubrica.certificate.to.Documento;
 import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.utils.FileUtils;
+import io.rubrica.sign.SignInfo;
+import io.rubrica.sign.Signer;
+import io.rubrica.sign.pdf.PDFSignerItext;
 import io.rubrica.utils.Json;
+import static io.rubrica.utils.Utils.pdfToDocumento;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -39,44 +39,18 @@ import javax.validation.constraints.NotNull;
 @Stateless
 public class ServicioAppVerificarDocumento {
 
-    private final int BUFFER_SIZE = 8192;
-
     public String verificarDocumento(@NotNull String base64Documento) {
         String retorno = null;
         Documento documento = null;
         try {
-            byte[] byteDocumento = Base64Util.decode(base64Documento);
-
-//        byte[] buffer = new byte[BUFFER_SIZE];
-//        int count;
-//        String jsonRespuesta;
-//        // Leer la respuesta del sw
-//        try (InputStream in = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-//            while ((count = in.read(buffer)) != -1) {
-//                out.write(buffer, 0, count);
-//            }
-//            jsonRespuesta = out.toString();
-//        }
-//        System.out.println("documento: " + documento);
-//        byte encodedPkcs12[] = Base64.getDecoder().decode(documento);
-//        System.out.println("encodedPkcs12: " + encodedPkcs12);
-//        InputStream inputStream = new ByteArrayInputStream(encodedPkcs12);
-//        System.out.println("inputStream: " + inputStream);
-//
-//        byte[] buffer = new byte[BUFFER_SIZE];
-//        int count;
-//        String base64;
-//        try (InputStream in = inputStream; ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-//            while ((count = in.read(buffer)) != -1) {
-//                out.write(buffer, 0, count);
-//            }
-//            base64 = out.toString();
-//            System.out.println("out.toString(): " + out.toString());
-//        }
-//        byte[] byteDocumento = base64.getBytes();
-//        InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
-//        documento = io.rubrica.utils.Utils.pdfToDocumento(inputStreamDocumento);
-            documento = io.rubrica.utils.Utils.pdfToDocumento(FileUtils.byteArrayConvertToFile(byteDocumento));
+            byte[] byteDocumento = java.util.Base64.getDecoder().decode(base64Documento);
+            InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
+            PdfReader pdfReader = new PdfReader(inputStreamDocumento);
+            Signer signer = new PDFSignerItext();
+            java.util.List<SignInfo> signInfos;
+            signInfos = signer.getSigners(byteDocumento);
+            documento = pdfToDocumento(pdfReader, signInfos);
+//            documento = io.rubrica.utils.Utils.pdfToDocumento(inputStreamDocumento);
         } catch (java.lang.UnsupportedOperationException uoe) {
             retorno = "No es posible procesar el documento desde dispositivo móvil\nIntentar en FirmaEC de Escritorio";
         } catch (com.itextpdf.io.IOException ioe) {
@@ -88,9 +62,9 @@ public class ServicioAppVerificarDocumento {
         }
 
         if (documento == null) {
-            documento = new Documento(false, false, null, retorno);
+            documento = new Documento(false, false, new ArrayList<>(), retorno);
         }
-        
+
         return Json.generarJsonDocumento(documento);
     }
 
