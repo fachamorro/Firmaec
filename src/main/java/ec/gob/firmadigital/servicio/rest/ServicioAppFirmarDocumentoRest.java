@@ -46,7 +46,7 @@ public class ServicioAppFirmarDocumentoRest {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String firmarDocumento(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password,
-            String documento, @FormParam("json") String json) throws Exception {
+            @FormParam("documento") String documento, @FormParam("json") String json) throws Exception {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
