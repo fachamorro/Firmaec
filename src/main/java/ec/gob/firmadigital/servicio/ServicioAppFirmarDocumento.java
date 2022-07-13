@@ -72,8 +72,15 @@ public class ServicioAppFirmarDocumento {
         this.pagina = pagina;
         Documento documento = null;
         String retorno = null;
+        KeyStore keyStore=null;
 
-        KeyStore keyStore = getKeyStore(pkcs12, password);
+        try{
+            keyStore = getKeyStore(pkcs12, password);
+        } catch (java.security.KeyStoreException ejs){
+            resultado = "{\"signValidate\": false,\"docValidate\": false,\"docSigned\": \"\",\"error\": \"Certificado o credenciales incorrectos\",\"certificado\": []}";
+            return resultado;
+        }
+        
         String alias = getAlias(keyStore);
         byte[] byteDocumentoSigned = null;
         try {
@@ -83,6 +90,7 @@ public class ServicioAppFirmarDocumento {
         } catch (Exception ex) {
             Logger.getLogger(ServicioAppFirmarDocumento.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         if (byteDocumentoSigned != null) {
 
             try {
