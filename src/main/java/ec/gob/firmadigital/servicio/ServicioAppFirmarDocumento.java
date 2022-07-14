@@ -52,7 +52,6 @@ import javax.validation.constraints.NotNull;
 @Stateless
 public class ServicioAppFirmarDocumento {
 
-    String resultado = null;
     private String versionFirmaEC = null;
     private String formatoDocumento = null;
     private String llx = null;
@@ -72,25 +71,24 @@ public class ServicioAppFirmarDocumento {
         this.pagina = pagina;
         Documento documento = null;
         String retorno = null;
-        KeyStore keyStore=null;
 
-        try{
+        KeyStore keyStore;
+        try {
             keyStore = getKeyStore(pkcs12, password);
-        } catch (java.security.KeyStoreException ejs){
-            resultado = "{\"signValidate\": false,\"docValidate\": false,\"docSigned\": \"\",\"error\": \"Certificado o credenciales incorrectos\",\"certificado\": []}";
-            return resultado;
+        } catch (java.security.KeyStoreException kse) {
+            retorno = "La contraseña es inválida.";
+            return retorno;
         }
-        
         String alias = getAlias(keyStore);
         byte[] byteDocumentoSigned = null;
         try {
             byteDocumentoSigned = firmarDocumentos(documentoBase64, keyStore, password, alias);
         } catch (java.security.UnrecoverableKeyException e) {
-            resultado = "Certificado Corrupto";
+            retorno = "Certificado Corrupto";
         } catch (Exception ex) {
+            retorno = ex.getMessage();
             Logger.getLogger(ServicioAppFirmarDocumento.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         if (byteDocumentoSigned != null) {
 
             try {
@@ -101,7 +99,6 @@ public class ServicioAppFirmarDocumento {
                 java.util.List<SignInfo> signInfos;
                 signInfos = signer.getSigners(byteDocumentoSigned);
                 documento = pdfToDocumento(pdfReader, signInfos);
-                resultado = Json.generarJsonDocumentoFirmado(byteDocumentoSigned, documento);
             } catch (java.lang.UnsupportedOperationException uoe) {
                 retorno = "No es posible procesar el documento desde dispositivo móvil\nIntentar en FirmaEC de Escritorio";
             } catch (com.itextpdf.io.IOException ioe) {
@@ -111,13 +108,11 @@ public class ServicioAppFirmarDocumento {
             } catch (Exception ex) {
                 retorno = ex.toString();
             }
-
-            if (documento == null) {
-                documento = new Documento(false, false, new ArrayList<>(), retorno);
-                System.out.println("documento: " + documento.toString());
-            }
         }
-        return resultado;
+        if (documento == null) {
+            documento = new Documento(false, false, new ArrayList<>(), retorno);
+        }
+        return Json.generarJsonDocumentoFirmado(byteDocumentoSigned, documento);
     }
 
     private byte[] firmarDocumentos(String documentoBase64, KeyStore keyStore, String keyStorePassword, String alias)
