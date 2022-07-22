@@ -91,8 +91,9 @@ public class JsonProcessor {
         // Documentos a retornar
         JsonArray jsonArray = new JsonArray();
         JsonObject jsonObject = new JsonObject();
-        JsonObject documentosEncoder = new JsonObject();
+        JsonObject documentosEncoder = null;
         for (Long id : documentos.keySet()) {
+            documentosEncoder = new JsonObject();
             byte[] documento = documentos.get(id);
             String base64 = BASE64_ENCODER.encodeToString(documento);
             documentosEncoder.addProperty("id", id);
