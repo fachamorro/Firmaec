@@ -90,14 +90,14 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de Security Data 2...");
         X509CRL sdCrl2 = downloadCrl(ServicioCRL.SD_CRL2);
 
-//        logger.info("Descargando CRL de Security Data 3...");
-//        X509CRL sdCrl3 = downloadCrl(ServicioCRL.SD_CRL3);
+        logger.info("Descargando CRL de Security Data 3...");
+        X509CRL sdCrl3 = downloadCrl(ServicioCRL.SD_CRL3);
 
         logger.info("Descargando CRL de Security Data 4...");
         X509CRL sdCrl4 = downloadCrl(ServicioCRL.SD_CRL4);
 
-//        logger.info("Descargando CRL de Security Data 5...");
-//        X509CRL sdCrl5 = downloadCrl(ServicioCRL.SD_CRL5);
+        logger.info("Descargando CRL de Security Data 5...");
+        X509CRL sdCrl5 = downloadCrl(ServicioCRL.SD_CRL5);
 
         logger.info("Descargando CRL de CJ...");
         X509CRL cjCrl = downloadCrl(ServicioCRL.CJ_CRL);
@@ -117,8 +117,8 @@ public class ServicioDescargaCrl {
         try (Connection conn = ds.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
                         "INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?) "
-                                + "ON CONFLICT (serial) "
-                                + "DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora")) {
+                        + "ON CONFLICT (serial) "
+                        + "DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora")) {
 
             logger.info("Iniciando actualizacion de CRLs...");
 
@@ -131,91 +131,96 @@ public class ServicioDescargaCrl {
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
-                logger.info("Registros insertados BCE: " + contadorBCE);
+                logger.info("Registros insertados/actualizados BCE: " + contadorBCE);
             } else {
                 logger.info("No se inserta BCE");
             }
 
             if (sdCrl1 != null) {
                 contadorSD1 = insertarCrl(sdCrl1, 2, ps);
-                logger.info("Registros insertados Security Data 1: " + contadorSD1);
+                logger.info("Registros insertados/actualizados Security Data 1: " + contadorSD1);
             } else {
                 logger.info("No se inserta Security Data 1");
             }
 
             if (sdCrl2 != null) {
                 contadorSD2 = insertarCrl(sdCrl2, 2, ps);
-                logger.info("Registros insertados Security Data 2: " + contadorSD2);
+                logger.info("Registros insertados/actualizados Security Data 2: " + contadorSD2);
             } else {
                 logger.info("No se inserta Security Data 2");
             }
 
-//            if (sdCrl3 != null) {
-//                contadorSD3 = insertarCrl(sdCrl3, 2, ps);
-//                logger.info("Registros insertados Security Data 3: " + contadorSD3);
-//            } else {
-//                logger.info("No se inserta Security Data 3");
-//            }
+            if (sdCrl3 != null) {
+                contadorSD3 = insertarCrl(sdCrl3, 2, ps);
+                logger.info("Registros insertados/actualizados Security Data 3: " + contadorSD3);
+            } else {
+                logger.info("No se inserta Security Data 3");
+            }
 
             if (sdCrl4 != null) {
                 contadorSD4 = insertarCrl(sdCrl4, 2, ps);
-                logger.info("Registros insertados Security Data 4: " + contadorSD4);
+                logger.info("Registros insertados/actualizados Security Data 4: " + contadorSD4);
             } else {
                 logger.info("No se inserta Security Data 4");
             }
 
-//            if (sdCrl5 != null) {
-//                contadorSD5 = insertarCrl(sdCrl5, 2, ps);
-//                logger.info("Registros insertados Security Data 5: " + contadorSD5);
-//            } else {
-//                logger.info("No se inserta Security Data 5");
-//            }
+            if (sdCrl5 != null) {
+                contadorSD5 = insertarCrl(sdCrl5, 2, ps);
+                logger.info("Registros insertados/actualizados Security Data 5: " + contadorSD5);
+            } else {
+                logger.info("No se inserta Security Data 5");
+            }
 
             if (cjCrl != null) {
                 contadorCJ = insertarCrl(cjCrl, 3, ps);
-                logger.info("Registros insertados CJ: " + contadorCJ);
+                logger.info("Registros insertados/actualizados CJ: " + contadorCJ);
             } else {
                 logger.info("No se inserta CJ");
             }
 
             if (anfAcCrl != null) {
                 contadorANFAC = insertarCrl(anfAcCrl, 4, ps);
-                logger.info("Registros insertados ANFAC: " + contadorANFAC);
+                logger.info("Registros insertados/actualizados ANFAC: " + contadorANFAC);
             } else {
                 logger.info("No se inserta ANFAC");
             }
 
             if (uanatacaCrl1 != null) {
                 contadorUANATACA1 = insertarCrl(uanatacaCrl1, 5, ps);
-                logger.info("Registros insertados UANATACA 1: " + contadorUANATACA1);
+                logger.info("Registros insertados/actualizados UANATACA 1: " + contadorUANATACA1);
             } else {
                 logger.info("No se inserta UANATACA 1");
             }
 
             if (uanatacaCrl2 != null) {
                 contadorUANATACA2 = insertarCrl(uanatacaCrl2, 6, ps);
-                logger.info("Registros insertados UANATACA 2: " + contadorUANATACA2);
+                logger.info("Registros insertados/actualizados UANATACA 2: " + contadorUANATACA2);
             } else {
                 logger.info("No se inserta UANATACA 2");
             }
 
             if (digercicCrl != null) {
                 contadorDIGERCIC = insertarCrl(digercicCrl, 7, ps);
-                logger.info("Registros insertados DIGERCIC: " + contadorDIGERCIC);
+                logger.info("Registros insertados/actualizados DIGERCIC: " + contadorDIGERCIC);
             } else {
                 logger.info("No se inserta DIGERCIC");
             }
 
             int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC;
-            logger.info("Registros insertados Total: " + total);
+            logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error al insertar certificado", e);
+            logger.log(Level.SEVERE, "Error al insertar/actualizar certificados revocados", e);
             throw new EJBException(e);
         }
     }
 
+    /*
+    SELECT count(*), entidadcertificadora FROM crl
+    GROUP BY entidadcertificadora 
+    ORDER by entidadcertificadora
+     */
     private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
         // Existen CRLs?
         if (crl.getRevokedCertificates() == null) {
@@ -271,7 +276,7 @@ public class ServicioDescargaCrl {
 
         try (Connection conn = ds.getConnection(); Statement st = conn.createStatement()) {
             st.executeUpdate("CREATE TABLE IF NOT EXISTS crl ("
-                    + "\"serial\" varchar(2000) NOT NULL, "
+                    + "serial varchar(2000) NOT NULL, "
                     + "fecharevocacion varchar(2000) NULL, "
                     + "razonrevocacion varchar(2000) NULL, "
                     + "entidadcertificadora varchar(2000) NULL,	"
