@@ -40,7 +40,6 @@ import javax.ejb.EJBException;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.TimerService;
 import javax.sql.DataSource;
 
 import io.rubrica.crl.ServicioCRL;
@@ -59,9 +58,6 @@ import java.util.regex.Pattern;
 //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
 public class ServicioDescargaCrl {
 
-    @Resource
-    private TimerService timerService;
-
     @Resource(lookup = "java:/FirmaDigitalDS")
     private DataSource ds;
 
@@ -73,7 +69,13 @@ public class ServicioDescargaCrl {
         crearTablaSiNoExiste();
         importarCrls();
     }
-    @Schedule(minute = "0", hour = "*", persistent = false)
+
+    //10 segundos
+    //@Schedule(hour = "*", minute = "*", second = "*/10", persistent = false)
+    //5 minutos
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
+    //1 hora
+    //@Schedule(minute = "0", hour = "*", persistent = false)
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
 
     public void importarCrls() {
@@ -88,14 +90,14 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de Security Data 2...");
         X509CRL sdCrl2 = downloadCrl(ServicioCRL.SD_CRL2);
 
-        logger.info("Descargando CRL de Security Data 3...");
-        X509CRL sdCrl3 = downloadCrl(ServicioCRL.SD_CRL3);
+//        logger.info("Descargando CRL de Security Data 3...");
+//        X509CRL sdCrl3 = downloadCrl(ServicioCRL.SD_CRL3);
 
         logger.info("Descargando CRL de Security Data 4...");
         X509CRL sdCrl4 = downloadCrl(ServicioCRL.SD_CRL4);
 
-        logger.info("Descargando CRL de Security Data 5...");
-        X509CRL sdCrl5 = downloadCrl(ServicioCRL.SD_CRL5);
+//        logger.info("Descargando CRL de Security Data 5...");
+//        X509CRL sdCrl5 = downloadCrl(ServicioCRL.SD_CRL5);
 
         logger.info("Descargando CRL de CJ...");
         X509CRL cjCrl = downloadCrl(ServicioCRL.CJ_CRL);
@@ -115,7 +117,8 @@ public class ServicioDescargaCrl {
         try (Connection conn = ds.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
                         "INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?) "
-                        + "ON CONFLICT (serial) DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora")) {
+                                + "ON CONFLICT (serial) "
+                                + "DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora")) {
 
             logger.info("Iniciando actualizacion de CRLs...");
 
@@ -147,12 +150,12 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta Security Data 2");
             }
 
-            if (sdCrl3 != null) {
-                contadorSD3 = insertarCrl(sdCrl3, 2, ps);
-                logger.info("Registros insertados Security Data 3: " + contadorSD3);
-            } else {
-                logger.info("No se inserta Security Data 3");
-            }
+//            if (sdCrl3 != null) {
+//                contadorSD3 = insertarCrl(sdCrl3, 2, ps);
+//                logger.info("Registros insertados Security Data 3: " + contadorSD3);
+//            } else {
+//                logger.info("No se inserta Security Data 3");
+//            }
 
             if (sdCrl4 != null) {
                 contadorSD4 = insertarCrl(sdCrl4, 2, ps);
@@ -161,12 +164,12 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta Security Data 4");
             }
 
-            if (sdCrl5 != null) {
-                contadorSD5 = insertarCrl(sdCrl5, 2, ps);
-                logger.info("Registros insertados Security Data 5: " + contadorSD5);
-            } else {
-                logger.info("No se inserta Security Data 5");
-            }
+//            if (sdCrl5 != null) {
+//                contadorSD5 = insertarCrl(sdCrl5, 2, ps);
+//                logger.info("Registros insertados Security Data 5: " + contadorSD5);
+//            } else {
+//                logger.info("No se inserta Security Data 5");
+//            }
 
             if (cjCrl != null) {
                 contadorCJ = insertarCrl(cjCrl, 3, ps);
@@ -267,8 +270,13 @@ public class ServicioDescargaCrl {
         logger.info("Creando tabla CRL si es que no existe...");
 
         try (Connection conn = ds.getConnection(); Statement st = conn.createStatement()) {
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS crl (serial VARCHAR(2000), fecharevocacion VARCHAR(2000), "
-                    + "razonrevocacion VARCHAR(2000), entidadcertificadora VARCHAR(2000))");
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS crl ("
+                    + "\"serial\" varchar(2000) NOT NULL, "
+                    + "fecharevocacion varchar(2000) NULL, "
+                    + "razonrevocacion varchar(2000) NULL, "
+                    + "entidadcertificadora varchar(2000) NULL,	"
+                    + "CONSTRAINT pk_serial PRIMARY KEY (serial))");
+            logger.info("Tabla CRL creada");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error al crear tabla CRL", e);
             throw new EJBException(e);

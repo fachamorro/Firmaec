@@ -182,9 +182,11 @@ public class ServicioDocumentoRest {
         try {
             documentos = servicioDocumento.obtenerDocumentos(token);
         } catch (TokenInvalidoException e) {
+//            System.out.println("ServicioDocumentoRest::obtenerDocumentos Token invalido: " + token);
             servicioLog.error("ServicioDocumentoRest::obtenerDocumentos", "Token invalido: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token invalido").build();
         } catch (TokenExpiradoException e) {
+//            System.out.println("ServicioDocumentoRest::obtenerDocumentos Token expirado: " + token);
             servicioLog.error("ServicioDocumentoRest::obtenerDocumentos", "Token expirado: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token expirado").build();
         }
