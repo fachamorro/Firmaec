@@ -17,14 +17,11 @@
 package ec.gob.firmadigital.servicio;
 
 import com.itextpdf.kernel.pdf.PdfReader;
+import ec.gob.firmadigital.servicio.util.Pkcs12;
 import ec.gob.firmadigital.servicio.util.FirmaDigitalPdf;
 import ec.gob.firmadigital.servicio.util.Propiedades;
 import io.rubrica.certificate.to.Documento;
 import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.keystore.Alias;
-import io.rubrica.keystore.FileKeyStoreProvider;
-import io.rubrica.keystore.KeyStoreProvider;
-import io.rubrica.keystore.KeyStoreUtilities;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.sign.pdf.PDFSignerItext;
@@ -36,8 +33,6 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,13 +68,14 @@ public class ServicioAppFirmarDocumento {
         String retorno = null;
 
         KeyStore keyStore;
+        String alias;
         try {
-            keyStore = getKeyStore(pkcs12, password);
+            keyStore = Pkcs12.getKeyStore(pkcs12, password);
+            alias = Pkcs12.getAlias(keyStore);
         } catch (java.security.KeyStoreException kse) {
             retorno = "La contraseña es inválida.";
             return retorno;
         }
-        String alias = getAlias(keyStore);
         byte[] byteDocumentoSigned = null;
         try {
             byteDocumentoSigned = firmarDocumentos(documentoBase64, keyStore, password, alias);
@@ -135,16 +131,4 @@ public class ServicioAppFirmarDocumento {
         return byteDocumentoSign;
     }
 
-    private KeyStore getKeyStore(String pkcs12, String password) throws KeyStoreException {
-        byte encodedPkcs12[] = Base64.getDecoder().decode(pkcs12);
-        InputStream inputStreamPkcs12 = new ByteArrayInputStream(encodedPkcs12);
-
-        KeyStoreProvider ksp = new FileKeyStoreProvider(inputStreamPkcs12);
-        return ksp.getKeystore(password.toCharArray());
-    }
-
-    private String getAlias(KeyStore keyStore) {
-        List<Alias> signingAliases = KeyStoreUtilities.getSigningAliases(keyStore);
-        return signingAliases.get(0).getAlias();
-    }
 }

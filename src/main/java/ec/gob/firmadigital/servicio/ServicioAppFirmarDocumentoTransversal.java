@@ -16,26 +16,10 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import ec.gob.firmadigital.servicio.util.FirmaDigitalPdf;
 import ec.gob.firmadigital.servicio.util.JsonProcessor;
+import ec.gob.firmadigital.servicio.util.Pkcs12;
 import ec.gob.firmadigital.servicio.util.Propiedades;
-import io.rubrica.certificate.CertEcUtils;
-import io.rubrica.certificate.to.Certificado;
-import io.rubrica.certificate.to.DatosUsuario;
-import io.rubrica.core.Util;
-import io.rubrica.exceptions.CertificadoInvalidoException;
-import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
-import io.rubrica.exceptions.HoraServidorException;
-import io.rubrica.keystore.Alias;
-import io.rubrica.keystore.FileKeyStoreProvider;
-import io.rubrica.keystore.KeyStoreProvider;
-import io.rubrica.keystore.KeyStoreUtilities;
-import io.rubrica.utils.TiempoUtils;
-import io.rubrica.utils.Utils;
-import io.rubrica.utils.UtilsCrlOcsp;
 import io.rubrica.utils.X509CertificateUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -49,18 +33,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -87,15 +61,10 @@ public class ServicioAppFirmarDocumentoTransversal {
     private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
     private String restServiceUrl;
 
-    String resultado = null;
-
-//    private String pkcs12 = null;
-//    private String password = null;
+    private String resultado = null;
     private String sistema = null;
-//    private String operacion = null;
     private String versionFirmaEC = null;
     private String formatoDocumento = null;
-//    private String tokenJwt = null;
     private String llx = null;
     private String lly = null;
     private String tipoEstampado = null;
@@ -125,15 +94,19 @@ public class ServicioAppFirmarDocumentoTransversal {
             // comprobar api
             comprobarApi(url);
         }
-
-        KeyStore keyStore = getKeyStore(pkcs12, password);
-        String alias = getAlias(keyStore);
-
+        KeyStore keyStore = null;
+        String alias = null;
+        try {
+            keyStore = Pkcs12.getKeyStore(pkcs12, password);
+            alias = Pkcs12.getAlias(keyStore);
+        } catch (java.security.KeyStoreException kse) {
+            resultado = "La contraseña es inválida.";
+        }
         Map<Long, byte[]> documentosFirmados;
         try {
             //bajar documentos a firmar
             String json = bajarDocumentos(tokenJwt);
-            if (json != null) {
+            if (json != null && keyStore != null && alias != null) {
                 //firmando documentos descargados
                 documentosFirmados = firmarDocumentos(json, keyStore, password, alias);
                 // Cedula de identidad contenida en el certificado:
@@ -146,7 +119,6 @@ public class ServicioAppFirmarDocumentoTransversal {
             resultado = "Certificado Corrupto";
             throw e;
         }
-
         return resultado;
     }
 
@@ -356,136 +328,5 @@ public class ServicioAppFirmarDocumentoTransversal {
             resultado = "Problemas con los servicios web.\nComuníquese con el administrador de su sistema.";
         }
         return error;
-    }
-
-    private Certificado getCertificado(X509Certificate x509Certificate, boolean caducado) throws CertificadoInvalidoException, IOException {
-        DatosUsuario datosUsuario = CertEcUtils.getDatosUsuarios(x509Certificate);
-        return new Certificado(
-                Util.getCN(x509Certificate),
-                CertEcUtils.getNombreCA(x509Certificate),
-                Utils.dateToCalendar(x509Certificate.getNotBefore()),
-                Utils.dateToCalendar(x509Certificate.getNotAfter()),
-                null,
-                //Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
-                Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
-                caducado,
-                datosUsuario);
-    }
-
-    private KeyStore getKeyStore(String pkcs12, String password) throws KeyStoreException {
-        byte encodedPkcs12[] = Base64.getDecoder().decode(pkcs12);
-        InputStream inputStreamPkcs12 = new ByteArrayInputStream(encodedPkcs12);
-
-        KeyStoreProvider ksp = new FileKeyStoreProvider(inputStreamPkcs12);
-        return ksp.getKeystore(password.toCharArray());
-    }
-
-    private String getAlias(KeyStore keyStore) {
-        List<Alias> signingAliases = KeyStoreUtilities.getSigningAliases(keyStore);
-        return signingAliases.get(0).getAlias();
-    }
-
-    public String validarCertificadoDigital(String pkcs12, String password) {
-        String resultado;
-        resultado = validarPKCS12(pkcs12, password);
-        return resultado;
-    }
-
-    /**
-     * Busca un ApiUrl por URL.
-     *
-     * @param pkcs12
-     * @param password
-     * @return json
-     */
-    public String validarPKCS12(String pkcs12, String password) {
-        Certificado certificado = null;
-        String retorno = null;
-        boolean caducado = true, revocado = true;
-        try {
-            KeyStore keyStore = getKeyStore(pkcs12, password);
-            String alias = getAlias(keyStore);
-
-            X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-            if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), null)) {//validación de firmaEC
-                X509Certificate x509Certificate = (X509Certificate) keyStore.getCertificate(alias);
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-                TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null));
-                Date fechaHoraISO = Date.from(Instant.from(accessor));
-                //Validad certificado revocado
-//                Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
-                Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
-                if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
-                    retorno = "Certificado revocado: " + fechaRevocado;
-                    revocado = true;
-                } else {
-                    revocado = false;
-                }
-//                if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(fechaString_Date("2022-06-21 10:00:16")) >= 0) {
-                if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(x509Certificate.getNotAfter()) >= 0) {
-                    retorno = "Certificado caducado";
-                    caducado = true;
-                } else {
-                    caducado = false;
-                }
-                certificado = getCertificado(x509Certificate, caducado);
-            } else {
-                retorno = "Certificado no válido";
-            }
-        } catch (EntidadCertificadoraNoValidaException ecnve) {
-            retorno = "Certificado no válido";
-        } catch (HoraServidorException hse) {
-            retorno = "Problemas en la red\\nIntente nuevamente o verifique su conexión";
-        } catch (KeyStoreException kse) {
-            if (kse.getCause().toString().contains("Invalid keystore format")) {
-                retorno = "Certificado digital es inválido.";
-            }
-            if (kse.getCause().toString().contains("keystore password was incorrect")) {
-                retorno = "La contraseña es inválida.";
-            }
-        } catch (IOException ioe) {
-            retorno = "Excepción no conocida: " + ioe;
-        } finally {
-            Gson gson = new Gson();
-            JsonObject jsonDoc = new JsonObject();
-            jsonDoc.addProperty("error", retorno);
-            JsonArray arrayCer = new JsonArray();
-            if (certificado != null) {
-                boolean signValidate = true;
-                if (revocado || certificado.getValidated() || !certificado.getDatosUsuario().isCertificadoDigitalValido()) {
-                    signValidate = false;
-                } else {
-                    signValidate = true;
-
-                }
-                jsonDoc.addProperty("firmaValida", signValidate);
-                JsonObject jsonCer = new JsonObject();
-                jsonCer.addProperty("emitidoPara", certificado.getIssuedTo());
-                jsonCer.addProperty("emitidoPor", certificado.getIssuedBy());
-                jsonCer.addProperty("validoDesde", calendarToString(certificado.getValidFrom()));
-                jsonCer.addProperty("validoHasta", calendarToString(certificado.getValidTo()));
-                jsonCer.addProperty("fechaRevocado", certificado.getRevocated() != null ? calendarToString(certificado.getRevocated()) : "");
-                jsonCer.addProperty("certificadoVigente", !certificado.getValidated());
-                jsonCer.addProperty("clavesUso", certificado.getKeyUsages());
-                jsonCer.addProperty("integridadFirma", certificado.getSignVerify());
-                jsonCer.addProperty("cedula", certificado.getDatosUsuario().getCedula());
-                jsonCer.addProperty("nombre", certificado.getDatosUsuario().getNombre());
-                jsonCer.addProperty("apellido", certificado.getDatosUsuario().getApellido());
-                jsonCer.addProperty("institucion", certificado.getDatosUsuario().getInstitucion());
-                jsonCer.addProperty("cargo", certificado.getDatosUsuario().getCargo());
-                jsonCer.addProperty("entidadCertificadora", certificado.getDatosUsuario().getEntidadCertificadora());
-                jsonCer.addProperty("serial", certificado.getDatosUsuario().getSerial());
-                jsonCer.addProperty("certificadoDigitalValido", certificado.getDatosUsuario().isCertificadoDigitalValido());
-                arrayCer.add(jsonCer);
-                jsonDoc.add("certificado", arrayCer);
-            }
-            return gson.toJson(jsonDoc);
-        }
-    }
-
-    private String calendarToString(Calendar calendar) {
-        Date date = calendar.getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.format(date);
     }
 }
