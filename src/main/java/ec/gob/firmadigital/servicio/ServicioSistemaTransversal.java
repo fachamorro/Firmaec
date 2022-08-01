@@ -227,11 +227,9 @@ public class ServicioSistemaTransversal {
      * @param archivo
      * @param datosFirmante
      * @param url
-     * @param certificate
      * @throws SistemaTransversalException
      */
-    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url,
-            X509Certificate certificate) throws SistemaTransversalException {
+    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url) throws SistemaTransversalException {
         try {
             MessageFactory factory = MessageFactory.newInstance();
             SOAPMessage soapMessage = factory.createMessage();
@@ -245,18 +243,8 @@ public class ServicioSistemaTransversal {
             bodyElement.addChildElement("set_var_archivo").addTextNode(archivo);
             bodyElement.addChildElement("set_var_datos_firmante").addTextNode(datosFirmante);
             bodyElement.addChildElement("set_var_fecha").addTextNode(sdf.format(new Date()));
-
             String institucion = "";
             String cargo = "";
-            if (certificate == null) {
-                System.out.println("Advertencia: El certificado es nulo");
-                institucion = "No encontrado";
-                cargo = "No encontrado";
-            } else {
-                institucion = CertEcUtils.getDatosUsuarios(certificate).getInstitucion();
-                cargo = CertEcUtils.getDatosUsuarios(certificate).getCargo();
-            }
-
             bodyElement.addChildElement("set_var_institucion").addTextNode(institucion);
             bodyElement.addChildElement("set_var_cargo").addTextNode(cargo);
 

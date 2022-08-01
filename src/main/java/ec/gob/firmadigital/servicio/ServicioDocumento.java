@@ -51,6 +51,7 @@ import io.rubrica.exceptions.InvalidFormatException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
 import io.rubrica.sign.pdf.PDFSignerItext;
+import io.rubrica.sign.xades.XAdESSigner;
 import io.rubrica.utils.Utils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -111,7 +112,8 @@ public class ServicioDocumento {
 
             // Almacenar
             em.persist(documento);
-
+            ;
+//            String cargo = "";
             // Agregar a la lista de Ids
             ids.add(documento.getId().toString());
         }
@@ -220,71 +222,41 @@ public class ServicioDocumento {
             // Obtener el nombre del firmante para almacenar el documento en el
             // sistema transversal
             String datosFirmante = "";
-            String mimeType = FileUtil.getMimeType(byteDocumento);
-
             try {
-                // Se valida la extension del archivo
-                System.out.println("MimeType: " + mimeType); // TODO: Eliminar
-                if (mimeType.contains("pdf")) {
-                    datosFirmante = servicioValidacionPdf.getNombre(byteDocumento);
-                }
-                if (mimeType.contains("xml")) {
-                    datosFirmante = ""; // TODO: Implementar el validador XML
-                }										// (XAdES)
-                // else
-                // datosFirmante = ""; //TODO: Implementar el validador de
-                // binario (CAdES), si aplica
-            } catch (InvalidFormatException | IOException e) {
-                throw new IllegalArgumentException("Error en la verificacion de firma", e);
-            }
-
-            try {
-                X509Certificate certificado = null;
-                if (mimeType.contains("pdf")) {
-                    Signer signer = new PDFSignerItext();
-                    signInfos = signer.getSigners(byteDocumento);
-                    SignInfo firma = signInfos.get(0);
-                    certificado = firma.getCerts()[0];
-                }
-
-                String apiKeyRest = servicioSistemaTransversal.buscarApiKeyRest(nombreSistema);
-                if (apiKeyRest != null) {
-                    //TODO
-                    //revisar                    
-                    // Obtener el nombre del firmante para almacenar el documento en el
-                    // sistema transversal
-                    io.rubrica.certificate.to.Documento documentoTo = null;
-                    try {
+                io.rubrica.certificate.to.Documento documentoTo = null;
+                try {
+                    // Se valida la extension del archivo
+                    String mimeTypeRest = FileUtil.getMimeType(byteDocumento);
+                    if (mimeTypeRest.contains("pdf")) {
                         InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
                         PdfReader pdfReader = new PdfReader(inputStreamDocumento);
                         Signer signer = new PDFSignerItext();
-                        
                         signInfos = signer.getSigners(byteDocumento);
-                        // Se valida la extension del archivo
-                        String mimeTypeRest = FileUtil.getMimeType(byteDocumento);
-                        if (mimeTypeRest.contains("pdf")) {
-                            documentoTo = Utils.pdfToDocumento(pdfReader, signInfos);
-                        }
-                        if (mimeTypeRest.contains("xml")) {
-//                    Signer docSigner = Utils.documentSigner(file);
-//                    documentoTo = Utils.signInfosToCertificados(docSigner.getSigners(archivo));
-                        }
-                    } catch (InvalidFormatException | IOException e) {
-                        throw new IllegalArgumentException("Error en la verificacion de firma", e);
-                    } catch (DocumentoException ex) {
-                        Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (CertificadoInvalidoException ex) {
-                        Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (Exception ex) {
-                        Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                        documentoTo = Utils.pdfToDocumento(pdfReader, signInfos);
+                        datosFirmante = documentoTo.getCertificados().get(documentoTo.getCertificados().size() - 1).getDatosUsuario().getNombre()
+                                + documentoTo.getCertificados().get(documentoTo.getCertificados().size() - 1).getDatosUsuario().getApellido();
                     }
-                    //revisar
-
+                    if (mimeTypeRest.contains("xml")) {
+                        datosFirmante = "";
+                        XAdESSigner xAdESSigner = new XAdESSigner();
+                        documentoTo = Utils.signInfosToCertificados(xAdESSigner.getSigners(byteDocumento));
+                    }
+                } catch (InvalidFormatException | IOException e) {
+                    throw new IllegalArgumentException("Error en la verificacion de firma", e);
+                } catch (DocumentoException ex) {
+                    Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (CertificadoInvalidoException ex) {
+                    Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String apiKeyRest = servicioSistemaTransversal.buscarApiKeyRest(nombreSistema);
+                if (apiKeyRest != null) {
                     servicioSistemaTransversal.almacenarDocumentoREST(documentoTo, documento.getCedula(), documento.getNombre(),
                             archivoBase64, url, apiKeyRest);
                 } else {
                     servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
-                            archivoBase64, datosFirmante, url, certificado);
+                            archivoBase64, datosFirmante, url);
                 }
                 documentosFirmados++;
 
@@ -297,8 +269,6 @@ public class ServicioDocumento {
                 String mensajeError = "No se pudo enviar el documento al sistema " + nombreSistema;
                 servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
                 logger.log(Level.SEVERE, mensajeError);
-            } catch (InvalidFormatException | IOException e) {
-                throw new IllegalArgumentException("Error al obtener información del firmante", e);
             }
 
             // Eliminar el documento

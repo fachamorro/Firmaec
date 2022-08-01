@@ -14,7 +14,6 @@ import io.rubrica.model.InMemoryDocument;
 import io.rubrica.sign.DigestAlgorithm;
 import io.rubrica.sign.PrivateKeySigner;
 import io.rubrica.sign.pdf.PadesBasicSigner;
-import ec.gob.firmadigital.servicio.util.X509CertificateUtils;
 
 public class FirmaDigitalPdf {
 
