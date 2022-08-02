@@ -19,7 +19,6 @@ package ec.gob.firmadigital.servicio;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import ec.gob.firmadigital.servicio.util.X509CertificateUtils;
 import io.rubrica.certificate.CertEcUtils;
 import io.rubrica.certificate.to.Certificado;
 import io.rubrica.certificate.to.DatosUsuario;
@@ -46,6 +45,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import io.rubrica.utils.Json;
+import io.rubrica.utils.X509CertificateUtils;
 
 import javax.ejb.Stateless;
 import javax.validation.constraints.NotNull;

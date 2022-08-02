@@ -16,11 +16,16 @@
  */
 package ec.gob.firmadigital.servicio;
 
+import com.itextpdf.kernel.crypto.BadPasswordException;
 import com.itextpdf.kernel.pdf.PdfReader;
 import ec.gob.firmadigital.servicio.util.Pkcs12;
-import ec.gob.firmadigital.servicio.util.FirmaDigitalPdf;
+import ec.gob.firmadigital.servicio.util.FirmaDigital;
 import ec.gob.firmadigital.servicio.util.Propiedades;
 import io.rubrica.certificate.to.Documento;
+import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
+import io.rubrica.exceptions.HoraServidorException;
+import io.rubrica.exceptions.RubricaException;
 import io.rubrica.exceptions.SignatureVerificationException;
 import io.rubrica.sign.SignInfo;
 import io.rubrica.sign.Signer;
@@ -29,9 +34,13 @@ import io.rubrica.utils.Json;
 import io.rubrica.utils.TiempoUtils;
 import static io.rubrica.utils.Utils.pdfToDocumento;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -47,43 +56,55 @@ import javax.validation.constraints.NotNull;
 @Stateless
 public class ServicioAppFirmarDocumento {
 
-    private String versionFirmaEC = null;
-    private String formatoDocumento = null;
-    private String llx = null;
-    private String lly = null;
-    private String tipoEstampado = null;
-    private String pagina = null;
-
     public String firmarDocumento(@NotNull String pkcs12, @NotNull String password,
             @NotNull String documentoBase64, String versionFirmaEC, String formatoDocumento,
-            String llx, String lly, String pagina, String tipoEstampado, String razon) throws KeyStoreException {
-        // Parametros opcionales
-        this.versionFirmaEC = versionFirmaEC;
-        this.formatoDocumento = formatoDocumento;
-        this.llx = llx;
-        this.lly = lly;
-        this.tipoEstampado = tipoEstampado;
-        this.pagina = pagina;
+            String llx, String lly, String pagina, String tipoEstampado, String razon) {
+        
         Documento documento = null;
         String retorno = null;
 
-        KeyStore keyStore;
-        String alias;
-        try {
-            keyStore = Pkcs12.getKeyStore(pkcs12, password);
-            alias = Pkcs12.getAlias(keyStore);
-        } catch (java.security.KeyStoreException kse) {
-            retorno = "La contraseña es inválida.";
-            return retorno;
-        }
         byte[] byteDocumentoSigned = null;
+        byte[] byteDocumento = java.util.Base64.getDecoder().decode(documentoBase64);
         try {
-            byteDocumentoSigned = firmarDocumentos(documentoBase64, keyStore, password, alias);
-        } catch (java.security.UnrecoverableKeyException e) {
+            // Obtener keyStore
+            KeyStore keyStore = Pkcs12.getKeyStore(pkcs12, password);
+            String alias = Pkcs12.getAlias(keyStore);
+
+            String fechaHora = TiempoUtils.getFechaHoraServidor(null);
+
+            FirmaDigital firmador = new FirmaDigital();
+            if ("xml".equalsIgnoreCase(formatoDocumento)) {
+                byteDocumentoSigned = firmador.firmarXML(keyStore, alias, byteDocumento, password.toCharArray(), null, null);
+            }
+            if ("pdf".equalsIgnoreCase(formatoDocumento)) {
+                Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora);
+                byteDocumentoSigned = firmador.firmarPDF(keyStore, alias, byteDocumento, password.toCharArray(), properties, null);
+            }
+        } catch (BadPasswordException bpe) {
+            retorno = "Documento protegido con contraseña";
+            throw bpe;
+        } catch (InvalidKeyException ie) {
+            retorno = "Problemas al abrir el documento";
+            return retorno;
+        } catch (EntidadCertificadoraNoValidaException ecnve) {
+            retorno = "Certificado no válido";
+            return retorno;
+        } catch (HoraServidorException hse) {
+            retorno = "Problemas en la red\nIntente nuevamente o verifique su conexión";
+            return retorno;
+        } catch (UnrecoverableKeyException uke) {
             retorno = "Certificado Corrupto";
-        } catch (Exception ex) {
-            retorno = ex.getMessage();
-            Logger.getLogger(ServicioAppFirmarDocumento.class.getName()).log(Level.SEVERE, null, ex);
+            return retorno;
+        } catch (KeyStoreException kse) {
+            retorno = "La contraseña es inválida";
+            return retorno;
+        } catch (RubricaException re) {
+            retorno = "No es posible procesar el documento";
+            return retorno;
+        } catch (CertificadoInvalidoException | IOException | NoSuchAlgorithmException e) {
+            retorno = "Excepción no conocida: " + e.getMessage();
+            System.out.println("resultado: " + retorno);
+            return retorno;
         }
         if (byteDocumentoSigned != null) {
 
@@ -110,25 +131,4 @@ public class ServicioAppFirmarDocumento {
         }
         return Json.generarJsonDocumentoFirmado(byteDocumentoSigned, documento);
     }
-
-    private byte[] firmarDocumentos(String documentoBase64, KeyStore keyStore, String keyStorePassword, String alias)
-            throws Exception {
-        byte[] byteDocumentoSign = null;
-        // Firmar!
-//            if ("xml".equalsIgnoreCase(formato)) {
-//                FirmaDigitalXml firmador = new FirmaDigitalXml();
-//                // FIXME
-//                documentoFirmado = firmador.firmar(keyStore, documento, clave);
-//            }
-        if ("pdf".equalsIgnoreCase(formatoDocumento)) {
-            byte[] byteDocumento = java.util.Base64.getDecoder().decode(documentoBase64);
-            FirmaDigitalPdf firmador = new FirmaDigitalPdf();
-
-            String fechaHora = TiempoUtils.getFechaHoraServidor(null);
-            Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora);
-            byteDocumentoSign = firmador.firmar(keyStore, alias, byteDocumento, keyStorePassword.toString().toCharArray(), properties, null);
-        }
-        return byteDocumentoSign;
-    }
-
 }

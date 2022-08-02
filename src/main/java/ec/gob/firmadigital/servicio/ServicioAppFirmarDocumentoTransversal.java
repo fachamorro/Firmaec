@@ -16,10 +16,15 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import ec.gob.firmadigital.servicio.util.FirmaDigitalPdf;
+import com.itextpdf.kernel.crypto.BadPasswordException;
+import ec.gob.firmadigital.servicio.util.FirmaDigital;
 import ec.gob.firmadigital.servicio.util.JsonProcessor;
 import ec.gob.firmadigital.servicio.util.Pkcs12;
 import ec.gob.firmadigital.servicio.util.Propiedades;
+import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
+import io.rubrica.exceptions.HoraServidorException;
+import io.rubrica.exceptions.RubricaException;
 import io.rubrica.utils.X509CertificateUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -32,7 +37,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +81,8 @@ public class ServicioAppFirmarDocumentoTransversal {
     private boolean pre = false;
     private boolean des = false;
     private String url = null;
+    
+    private String cedula;
 
     public String firmarTransversal(String pkcs12, String password, String sistema,
             String operacion, String url, String versionFirmaEC, String formatoDocumento,
@@ -94,32 +105,19 @@ public class ServicioAppFirmarDocumentoTransversal {
             // comprobar api
             comprobarApi(url);
         }
-        KeyStore keyStore = null;
-        String alias = null;
-        try {
-            keyStore = Pkcs12.getKeyStore(pkcs12, password);
-            alias = Pkcs12.getAlias(keyStore);
-        } catch (java.security.KeyStoreException kse) {
-            resultado = "La contraseña es inválida.";
-        }
         Map<Long, byte[]> documentosFirmados;
         try {
             //bajar documentos a firmar
             String json = bajarDocumentos(tokenJwt);
-            if (json != null && keyStore != null && alias != null) {
+            if (json != null) {
                 //firmando documentos descargados
-                documentosFirmados = firmarDocumentos(json, keyStore, password, alias);
-                // Cedula de identidad contenida en el certificado:
-                X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-                String cedula = x509CertificateUtils.getCedula(keyStore, alias);
+                documentosFirmados = firmarDocumentos(json, pkcs12, password);
                 // Actualizar documentos
                 actualizarDocumentos(tokenJwt, documentosFirmados, cedula);
             }
-        } catch (java.security.UnrecoverableKeyException e) {
-            resultado = "Certificado Corrupto";
-            throw e;
+        } finally {
+            return resultado;
         }
-        return resultado;
     }
 
     private void comprobarApi(String apiUrl) {
@@ -212,7 +210,7 @@ public class ServicioAppFirmarDocumentoTransversal {
         }
     }
 
-    private Map<Long, byte[]> firmarDocumentos(String json, KeyStore keyStore, String keyStorePassword, String alias)
+    private Map<Long, byte[]> firmarDocumentos(String json, String pkcs12, String password)
             throws Exception {
         Map<Long, byte[]> documentos = JsonProcessor.parseJsonDocumentos(json);
         Map<Long, byte[]> documentosFirmados = new HashMap<>();
@@ -221,15 +219,46 @@ public class ServicioAppFirmarDocumentoTransversal {
         for (Long id : documentos.keySet()) {
             byte[] documento = documentos.get(id);
             byte[] documentoFirmado = null;
-//            if ("xml".equalsIgnoreCase(formato)) {
-//                FirmaDigitalXml firmador = new FirmaDigitalXml();
-//                // FIXME
-//                documentoFirmado = firmador.firmar(keyStore, documento, clave);
-//            }
-            if ("pdf".equalsIgnoreCase(formatoDocumento)) {
-                FirmaDigitalPdf firmador = new FirmaDigitalPdf();
-                Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora);
-                documentoFirmado = firmador.firmar(keyStore, alias, documento, keyStorePassword.toString().toCharArray(), properties, url);
+            FirmaDigital firmador = new FirmaDigital();
+            try {
+                // Obtener keyStore
+                KeyStore keyStore = Pkcs12.getKeyStore(pkcs12, password);
+                String alias = Pkcs12.getAlias(keyStore);
+
+                // Cedula de identidad contenida en el certificado:
+                cedula = X509CertificateUtils.getCedula(keyStore, alias);
+
+                if ("xml".equalsIgnoreCase(formatoDocumento)) {
+                    documentoFirmado = firmador.firmarXML(keyStore, alias, documento, password.toCharArray(), null, url);
+                }
+                if ("pdf".equalsIgnoreCase(formatoDocumento)) {
+                    Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora);
+                    documentoFirmado = firmador.firmarPDF(keyStore, alias, documento, password.toCharArray(), properties, url);
+                }
+            } catch (BadPasswordException bpe) {
+                resultado = "Documento protegido con contraseña";
+                throw bpe;
+            } catch (InvalidKeyException ie) {
+                resultado = "Problemas al abrir el documento";
+                throw ie;
+            } catch (EntidadCertificadoraNoValidaException ecnve) {
+                resultado = "Certificado no válido";
+                throw ecnve;
+            } catch (HoraServidorException hse) {
+                resultado = "Problemas en la red\nIntente nuevamente o verifique su conexión";
+                throw hse;
+            } catch (UnrecoverableKeyException uke) {
+                resultado = "Certificado Corrupto";
+                throw uke;
+            } catch (KeyStoreException kse) {
+                resultado = "La contraseña es inválida";
+                throw kse;
+            } catch (RubricaException re) {
+                resultado = "No es posible procesar el documento";
+                throw re;
+            } catch (CertificadoInvalidoException | IOException | NoSuchAlgorithmException e) {
+                resultado = "Excepción no conocida: " + e.getMessage();
+                System.out.println("resultado: " + resultado);
             }
             documentosFirmados.put(id, documentoFirmado);
         }
