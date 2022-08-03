@@ -23,8 +23,7 @@ import io.rubrica.certificate.CertEcUtils;
 import io.rubrica.certificate.to.Certificado;
 import io.rubrica.certificate.to.DatosUsuario;
 import io.rubrica.core.Util;
-import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
-import io.rubrica.exceptions.HoraServidorException;
+import io.rubrica.exceptions.CertificadoInvalidoException;
 import io.rubrica.keystore.Alias;
 import io.rubrica.keystore.FileKeyStoreProvider;
 import io.rubrica.keystore.KeyStoreProvider;
@@ -45,7 +44,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import io.rubrica.utils.Json;
-import io.rubrica.utils.X509CertificateUtils;
 
 import javax.ejb.Stateless;
 import javax.validation.constraints.NotNull;
@@ -84,46 +82,37 @@ public class ServicioAppValidarCertificadoDigital {
             List<Alias> signingAliases = KeyStoreUtilities.getSigningAliases(keyStore);
             String alias = signingAliases.get(0).getAlias();
 
-            X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-            if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), null)) {//validación de firmaEC
-                X509Certificate x509Certificate = (X509Certificate) keyStore.getCertificate(alias);
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-                TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null));
-                Date fechaHoraISO = Date.from(Instant.from(accessor));
-                //Validad certificado revocado
-//                Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
-                Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
-                if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
-                    retorno = "Certificado revocado: " + fechaRevocado;
-                    revocado = true;
-                } else {
-                    revocado = false;
-                }
-//                if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(fechaString_Date("2022-06-21 10:00:16")) >= 0) {
-                if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(x509Certificate.getNotAfter()) >= 0) {
-                    retorno = "Certificado caducado";
-                    caducado = true;
-                } else {
-                    caducado = false;
-                }
-                DatosUsuario datosUsuario = CertEcUtils.getDatosUsuarios(x509Certificate);
-                certificado = new Certificado(
-                        Util.getCN(x509Certificate),
-                        CertEcUtils.getNombreCA(x509Certificate),
-                        Utils.dateToCalendar(x509Certificate.getNotBefore()),
-                        Utils.dateToCalendar(x509Certificate.getNotAfter()),
-                        null,
-                        //Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
-                        Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
-                        caducado,
-                        datosUsuario);
+            X509Certificate x509Certificate = (X509Certificate) keyStore.getCertificate(alias);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+            TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null));
+            Date fechaHoraISO = Date.from(Instant.from(accessor));
+            //Validad certificado revocado
+            //Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
+            Date fechaRevocado = UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null);
+            if (fechaRevocado != null && fechaRevocado.compareTo(fechaHoraISO) <= 0) {
+                retorno = "Certificado revocado: " + fechaRevocado;
+                revocado = true;
             } else {
-                retorno = "Certificado no válido";
+                revocado = false;
             }
-        } catch (EntidadCertificadoraNoValidaException ecnve) {
-            retorno = "Certificado no válido";
-        } catch (HoraServidorException hse) {
-            retorno = "Problemas en la red\\nIntente nuevamente o verifique su conexión";
+            //if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(fechaString_Date("2022-06-21 10:00:16")) >= 0) {
+            if (fechaHoraISO.compareTo(x509Certificate.getNotBefore()) <= 0 || fechaHoraISO.compareTo(x509Certificate.getNotAfter()) >= 0) {
+                retorno = "Certificado caducado";
+                caducado = true;
+            } else {
+                caducado = false;
+            }
+            DatosUsuario datosUsuario = CertEcUtils.getDatosUsuarios(x509Certificate);
+            certificado = new Certificado(
+                    Util.getCN(x509Certificate),
+                    CertEcUtils.getNombreCA(x509Certificate),
+                    Utils.dateToCalendar(x509Certificate.getNotBefore()),
+                    Utils.dateToCalendar(x509Certificate.getNotAfter()),
+                    null,
+                    //Utils.dateToCalendar(fechaString_Date("2022-06-01 10:00:16")),
+                    Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
+                    caducado,
+                    datosUsuario);
         } catch (KeyStoreException kse) {
             if (kse.getCause().toString().contains("Invalid keystore format")) {
                 retorno = "Certificado digital es inválido.";
@@ -131,10 +120,9 @@ public class ServicioAppValidarCertificadoDigital {
             if (kse.getCause().toString().contains("keystore password was incorrect")) {
                 retorno = "La contraseña es inválida.";
             }
-        } catch (IOException ioe) {
-            retorno = "Excepción no conocida: " + ioe;
-        } catch (Exception ex) {
+        } catch (CertificadoInvalidoException | IOException ex) {
             retorno = "Excepción no conocida: " + ex;
+            ex.printStackTrace();
         } finally {
             JsonObject jsonObject = new JsonObject();
             boolean signValidate = true;

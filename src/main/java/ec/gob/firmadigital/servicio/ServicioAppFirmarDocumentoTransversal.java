@@ -241,7 +241,7 @@ public class ServicioAppFirmarDocumentoTransversal {
             } catch (InvalidKeyException ie) {
                 resultado = "Problemas al abrir el documento";
                 throw ie;
-            } catch (EntidadCertificadoraNoValidaException ecnve) {
+            } catch (EntidadCertificadoraNoValidaException | CertificadoInvalidoException ecnve) {
                 resultado = "Certificado no válido";
                 throw ecnve;
             } catch (HoraServidorException hse) {
@@ -256,7 +256,7 @@ public class ServicioAppFirmarDocumentoTransversal {
             } catch (RubricaException re) {
                 resultado = "No es posible procesar el documento";
                 throw re;
-            } catch (CertificadoInvalidoException | IOException | NoSuchAlgorithmException e) {
+            } catch (IOException | NoSuchAlgorithmException e) {
                 resultado = "Excepción no conocida: " + e.getMessage();
                 System.out.println("resultado: " + resultado);
             }

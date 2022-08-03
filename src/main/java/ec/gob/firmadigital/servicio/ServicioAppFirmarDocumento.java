@@ -43,8 +43,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.validation.constraints.NotNull;
 
@@ -59,7 +57,7 @@ public class ServicioAppFirmarDocumento {
     public String firmarDocumento(@NotNull String pkcs12, @NotNull String password,
             @NotNull String documentoBase64, String versionFirmaEC, String formatoDocumento,
             String llx, String lly, String pagina, String tipoEstampado, String razon) {
-        
+
         Documento documento = null;
         String retorno = null;
 
@@ -86,7 +84,7 @@ public class ServicioAppFirmarDocumento {
         } catch (InvalidKeyException ie) {
             retorno = "Problemas al abrir el documento";
             return retorno;
-        } catch (EntidadCertificadoraNoValidaException ecnve) {
+        } catch (EntidadCertificadoraNoValidaException | CertificadoInvalidoException ecnve) {
             retorno = "Certificado no válido";
             return retorno;
         } catch (HoraServidorException hse) {
@@ -101,7 +99,7 @@ public class ServicioAppFirmarDocumento {
         } catch (RubricaException re) {
             retorno = "No es posible procesar el documento";
             return retorno;
-        } catch (CertificadoInvalidoException | IOException | NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             retorno = "Excepción no conocida: " + e.getMessage();
             System.out.println("resultado: " + retorno);
             return retorno;

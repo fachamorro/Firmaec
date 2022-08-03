@@ -46,13 +46,13 @@ public class FirmaDigital {
      * @throws io.rubrica.exceptions.CertificadoInvalidoException
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
+     * @throws io.rubrica.exceptions.RubricaException
      */
     final private String hashAlgorithm = "SHA512";
 
     public byte[] firmarPDF(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api) throws
-            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException {
+            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException {
         byte[] signed = null;
-//        try {
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
         X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
@@ -69,24 +69,8 @@ public class FirmaDigital {
 //                    Toast.makeText(context, "El archivo no es PDF", Toast.LENGTH_LONG).show();
             }
         } else {
-//                Toast.makeText(context, "Certificado no válido", Toast.LENGTH_LONG).show();
+            throw new CertificadoInvalidoException();
         }
-//        } catch (BadPasswordException bpe) {
-////            Toast.makeText(context, "Documento protegido con contraseña", Toast.LENGTH_LONG).show();
-//        } catch (InvalidKeyException ie) {
-////            Toast.makeText(context, "Problemas al abrir el documento", Toast.LENGTH_LONG).show();
-//        } catch (EntidadCertificadoraNoValidaException ecnve) {
-////            Toast.makeText(context, "Certificado no válido", Toast.LENGTH_LONG).show();
-//        } catch (HoraServidorException hse) {
-////            Toast.makeText(context, "Problemas en la red\nIntente nuevamente o verifique su conexión", Toast.LENGTH_LONG).show();
-//        } catch (UnrecoverableKeyException uke) {
-////            Toast.makeText(context, "Certificado Corrupto", Toast.LENGTH_LONG).show();
-//        } catch (KeyStoreException kse) {
-////            Toast.makeText(context, "No se encontró archivo o la contraseña es inválida.", Toast.LENGTH_LONG).show();
-//        } catch (CertificadoInvalidoException | IOException | NoSuchAlgorithmException e) {
-////            Toast.makeText(context, "Excepción no conocida: " + e, Toast.LENGTH_LONG).show();
-//            //e.printStackTrace();
-//        }
         return signed;
     }
 
@@ -108,9 +92,10 @@ public class FirmaDigital {
      * @throws io.rubrica.exceptions.CertificadoInvalidoException
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
+     * @throws io.rubrica.exceptions.RubricaException
      */
     public byte[] firmarXML(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api) throws
-            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException {
+            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
