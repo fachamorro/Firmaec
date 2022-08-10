@@ -65,7 +65,8 @@ public class ServicioAppFirmarDocumentoTransversal {
 
     private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
 //    private final String REST_SERVICE_URL_PREPRODUCCION = "http://impapi.firmadigital.gob.ec:8080/api";
-    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8080/api";
+//    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8080/api";
+    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8181/api";
 //    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8080/api";
     private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
     private String restServiceUrl;

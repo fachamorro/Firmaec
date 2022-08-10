@@ -2,9 +2,11 @@ package ec.gob.firmadigital.servicio.util;
 
 import com.itextpdf.kernel.crypto.BadPasswordException;
 import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.DocumentoException;
 import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
 import io.rubrica.exceptions.RubricaException;
+import io.rubrica.exceptions.SignatureVerificationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -51,7 +53,7 @@ public class FirmaDigital {
     final private String hashAlgorithm = "SHA512";
 
     public byte[] firmarPDF(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api) throws
-            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException {
+            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, DocumentoException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
@@ -66,10 +68,13 @@ public class FirmaDigital {
                 // Firmar el documento
                 signed = pdfSigner.sign(is, signer, certChain, properties);
             } catch (com.itextpdf.io.IOException ioe) {
-//                    Toast.makeText(context, "El archivo no es PDF", Toast.LENGTH_LONG).show();
+                throw new DocumentoException("El archivo no es PDF");
             }
         } else {
-            throw new CertificadoInvalidoException();
+            throw new CertificadoInvalidoException(x509CertificateUtils.getError());
+        }
+        if (x509CertificateUtils.getError() != null) {
+            throw new SignatureVerificationException(x509CertificateUtils.getError());
         }
         return signed;
     }
@@ -93,9 +98,10 @@ public class FirmaDigital {
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
      * @throws io.rubrica.exceptions.RubricaException
+     * @throws io.rubrica.exceptions.SignatureVerificationException
      */
     public byte[] firmarXML(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api) throws
-            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException {
+            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
@@ -104,7 +110,10 @@ public class FirmaDigital {
             XAdESSigner signer = new XAdESSigner();
             signed = signer.sign(docByteArry, SignConstants.SIGN_ALGORITHM_SHA512WITHRSA, key, certChain, null);
         } else {
-//                Toast.makeText(context, "Certificado no válido", Toast.LENGTH_LONG).show();
+            throw new CertificadoInvalidoException(x509CertificateUtils.getError());
+        }
+        if (x509CertificateUtils.getError() != null) {
+            throw new SignatureVerificationException(x509CertificateUtils.getError());
         }
         return signed;
     }

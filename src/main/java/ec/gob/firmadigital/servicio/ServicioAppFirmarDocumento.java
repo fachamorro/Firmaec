@@ -23,6 +23,7 @@ import ec.gob.firmadigital.servicio.util.FirmaDigital;
 import ec.gob.firmadigital.servicio.util.Propiedades;
 import io.rubrica.certificate.to.Documento;
 import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.DocumentoException;
 import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
 import io.rubrica.exceptions.RubricaException;
@@ -84,7 +85,7 @@ public class ServicioAppFirmarDocumento {
         } catch (InvalidKeyException ie) {
             retorno = "Problemas al abrir el documento";
             return retorno;
-        } catch (EntidadCertificadoraNoValidaException | CertificadoInvalidoException ecnve) {
+        } catch (EntidadCertificadoraNoValidaException ecnve) {
             retorno = "Certificado no válido";
             return retorno;
         } catch (HoraServidorException hse) {
@@ -98,6 +99,9 @@ public class ServicioAppFirmarDocumento {
             return retorno;
         } catch (RubricaException re) {
             retorno = "No es posible procesar el documento";
+            return retorno;
+        } catch (CertificadoInvalidoException | SignatureVerificationException | DocumentoException e) {
+            retorno = e.getMessage();
             return retorno;
         } catch (IOException | NoSuchAlgorithmException e) {
             retorno = "Excepción no conocida: " + e.getMessage();

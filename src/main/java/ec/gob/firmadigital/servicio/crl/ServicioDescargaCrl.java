@@ -288,3 +288,7 @@ public class ServicioDescargaCrl {
         }
     }
 }
+
+//INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES ('995449664435670766937528091','2022-08-05 17:07:35','Test FirmaEC',4) 
+//ON CONFLICT (serial) 
+//DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora
