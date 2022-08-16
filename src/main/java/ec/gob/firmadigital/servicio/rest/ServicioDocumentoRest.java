@@ -54,6 +54,8 @@ import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
+import java.util.Arrays;
+import javax.ejb.EJBTransactionRolledbackException;
 
 /**
  * Servicio REST para almacenar, actualizar y obtener documentos desde los
@@ -203,6 +205,14 @@ public class ServicioDocumentoRest {
 
         String json = Json.createObjectBuilder().add("fecha_hora", fechaHora).add("documentos", array).build()
                 .toString();
+        
+        System.out.println("array: "+array.getClass());
+        
+//        if (array.build().isEmpty()) {
+//            return Response.status(Status.BAD_REQUEST).entity("Token gestionado").build();
+//        } else {
+//            return Response.ok(json).build();
+//        }
         return Response.ok(json).build();
     }
 

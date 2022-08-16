@@ -20,7 +20,6 @@ import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -148,8 +147,11 @@ public class ServicioDocumento {
         for (String id : convertirEnList(ids)) {
             Long primaryKey = Long.parseLong(id);
             Documento documento = em.find(Documento.class, primaryKey);
-            String archivo = codificarBase64(documento.getArchivo());
-            archivos.put(primaryKey, archivo);
+            String archivo = null;
+            if (documento != null) {
+                archivo = codificarBase64(documento.getArchivo());
+                archivos.put(primaryKey, archivo);
+            }
         }
 
         return archivos;
