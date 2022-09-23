@@ -113,6 +113,12 @@ public class ServicioDescargaCrl {
 
         logger.info("Descargando CRL de UANATACA2...");
         X509CRL uanatacaCrl2 = downloadCrl(ServicioCRL.UANATACA_CRL2);
+        
+        logger.info("Descargando CRL de DATIL...");
+        X509CRL datilCrl = downloadCrl(ServicioCRL.DATIL_CRL);
+        
+        logger.info("Descargando CRL de ARGOSDATA...");
+        X509CRL argosDataCrl = downloadCrl(ServicioCRL.ARGOSDATA_CRL);
 
         try (Connection conn = ds.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
@@ -128,6 +134,8 @@ public class ServicioDescargaCrl {
             int contadorANFAC = 0;
             int contadorDIGERCIC = 0;
             int contadorUANATACA1 = 0, contadorUANATACA2 = 0;
+            int contadorDATIL = 0;
+            int contadorARGOSDATA = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -205,8 +213,22 @@ public class ServicioDescargaCrl {
             } else {
                 logger.info("No se inserta DIGERCIC");
             }
+            
+            if (datilCrl != null) {
+                contadorDATIL = insertarCrl(datilCrl, 8, ps);
+                logger.info("Registros insertados/actualizados DATIL: " + contadorDATIL);
+            } else {
+                logger.info("No se inserta DATIL");
+            }
+            
+            if (argosDataCrl != null) {
+                contadorARGOSDATA = insertarCrl(argosDataCrl, 9, ps);
+                logger.info("Registros insertados/actualizados ARGOSDATA: " + contadorARGOSDATA);
+            } else {
+                logger.info("No se inserta ARGOSDATA");
+            }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC;
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA;
             logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");

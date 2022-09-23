@@ -33,16 +33,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -103,8 +100,7 @@ public class ServicioAppFirmarDocumentoTransversal {
         ambiente();
         //en caso de ser firma descentralizada
         if (url != null) {
-            // comprobar api
-            comprobarApi(url);
+            restServiceUrl = url;
         }
         Map<Long, byte[]> documentosFirmados;
         try {
@@ -119,85 +115,6 @@ public class ServicioAppFirmarDocumentoTransversal {
         } finally {
             return resultado;
         }
-    }
-
-    private void comprobarApi(String apiUrl) {
-        String jsonApi = JsonProcessor.buildJsonApi(this.sistema, apiUrl);
-        try {
-            jsonApi = Base64.getEncoder().encodeToString((URLEncoder.encode(jsonApi, "UTF-8")).getBytes());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        try {
-            URL url = new URL(restServiceUrl + "/url/" + jsonApi);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setConnectTimeout(TIME_OUT);
-
-            int responseCode = con.getResponseCode();
-            if (responseCode >= 300 && responseCode < 400) {
-                con = (HttpURLConnection) new URL(con.getHeaderField("Location")).openConnection();
-                con.setConnectTimeout(TIME_OUT);
-                responseCode = con.getResponseCode();
-            }
-            if (responseCode >= 400) {
-                resultado = "Problemas con los servicios web.";
-                throw new RuntimeException("Failed : HTTP error code : " + responseCode);
-            }
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int count;
-            String jsonRespuesta;
-            // Leer la respuesta del sw
-            try (InputStream in = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                while ((count = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, count);
-                }
-                jsonRespuesta = out.toString();
-            }
-            con.disconnect();
-            //validar respuesta (apiUrl)
-            if (!jsonRespuesta.equals("Url habilitada")) {
-//                // make a handler that throws a runtime exception when a message is received
-//                @SuppressLint("HandlerLeak") final Handler handler = new Handler() {
-//                    @Override
-//                    public void handleMessage(Message message) {
-//                        throw new RuntimeException();
-//                    }
-//                };
-//                // dialog and show it
-//                AlertDialog.Builder builder = new AlertDialog.Builder(context, THEME_DEVICE_DEFAULT_LIGHT);
-//                builder.setTitle("Alerta");
-                if (jsonRespuesta.isEmpty()) {
-                    resultado = "Revisar el estado de la url registrada\n" + apiUrl + "\nDesea continuar firmando bajo su propio riesgo?";
-                } else {
-                    resultado = jsonRespuesta + " y sin autorización de FirmaEC:\n" + apiUrl + "\nDesea continuar firmando bajo su propio riesgo?";
-                }
-//                builder.setMessage(resultado);
-//                builder.setPositiveButton("Aceptar", (dialog, whichButton) -> handler.sendMessage(handler.obtainMessage()));
-//                builder.setNegativeButton("Cancelar", (dialog, whichButton) -> {
-//                    handler.sendMessage(handler.obtainMessage());
-//                    Toast.makeText(context, "Cancelado por el usuario", Toast.LENGTH_LONG).show();
-//                });
-//                builder.show();
-//                // loop till a runtime exception is triggered.
-//                try {
-//                    Looper.loop();
-//                } catch (RuntimeException e) {
-//                }
-            }
-            restServiceUrl = apiUrl;
-        } catch (java.net.SocketTimeoutException | java.net.UnknownHostException | java.net.SocketException ex) {
-            resultado = "Problemas con los servicios web.";
-        } catch (IOException ex) {
-            resultado = "Problemas con el estandar JWT.\nComuníquese con el administrador de su sistema.";
-        } catch (RuntimeException ex) {
-            resultado = "Error desconocido\nNo es posible verificar la url:\n" + url + "\nDesea continuar firmando bajo su propio riesgo?";
-        }
-//        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-//            Toast.makeText(context, "El tiempo de vida del documento en el servidor, se encuentra expirado", Toast.LENGTH_LONG).show();
-//        } catch (io.jsonwebtoken.UnsupportedJwtException | io.jsonwebtoken.MalformedJwtException ex) {
-//            Toast.makeText(context, "No se incluye estandar JWT.\nComuníquese con el administrador de su sistema.", Toast.LENGTH_LONG).show();
-//        }
     }
 
     private void ambiente() {
@@ -336,6 +253,9 @@ public class ServicioAppFirmarDocumentoTransversal {
                 }
 
                 String body = response.toString();
+                if (body.contains("Token gestionado")) {
+                    error = "El/Los documento(s) fueron gestionados";
+                }
                 if (body.contains("Token expirado")) {
                     error = "El tiempo de vida del documento en el servidor, se encuentra expirado";
                 }

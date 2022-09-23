@@ -200,19 +200,17 @@ public class ServicioDocumentoRest {
             array.add(Json.createObjectBuilder().add("id", id).add("documento", documento));
         }
 
+//        System.out.println("array: "+array.build().toString());
+//        System.out.println("array: "+array.build().size());
+//        if (array.build().isEmpty()) {
+//            return Response.status(Status.BAD_REQUEST).entity("Token gestionado").build();
+//        }
+        
         // La fecha actual en formato ISO-8601 (2017-08-27T17:54:43.562-05:00)
         String fechaHora = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         String json = Json.createObjectBuilder().add("fecha_hora", fechaHora).add("documentos", array).build()
                 .toString();
-        
-        System.out.println("array: "+array.getClass());
-        
-//        if (array.build().isEmpty()) {
-//            return Response.status(Status.BAD_REQUEST).entity("Token gestionado").build();
-//        } else {
-//            return Response.ok(json).build();
-//        }
         return Response.ok(json).build();
     }
 
