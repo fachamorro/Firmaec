@@ -4,7 +4,7 @@
 
     <groupId>ec.gob.firmadigital</groupId>
     <artifactId>servicio</artifactId>
-    <version>2.11.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>firmadigital-servicio</name>
@@ -54,12 +54,6 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>8.0.1</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>jakarta.xml.ws</groupId>
             <artifactId>jakarta.xml.ws-api</artifactId>
             <version>4.0.0</version>
@@ -69,12 +63,6 @@
             <artifactId>jaxws-rt</artifactId>
             <version>4.0.0</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
-            <version>3.15.3.Final</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -97,6 +85,12 @@
             <groupId>io.rubrica</groupId>
             <artifactId>rubrica</artifactId>
             <version>3.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>8.0.1</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

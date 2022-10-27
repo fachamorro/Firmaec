@@ -14,7 +14,6 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-
 import io.rubrica.model.Document;
 import io.rubrica.model.InMemoryDocument;
 import io.rubrica.sign.DigestAlgorithm;
@@ -39,6 +38,7 @@ public class FirmaDigital {
      * @param keyStorePassword
      * @param properties
      * @param api
+     * @param base64
      * @return
      * @throws java.security.InvalidKeyException
      * @throws io.rubrica.exceptions.EntidadCertificadoraNoValidaException
@@ -52,13 +52,13 @@ public class FirmaDigital {
      */
     final private String hashAlgorithm = "SHA512";
 
-    public byte[] firmarPDF(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api) throws
+    public byte[] firmarPDF(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api, String base64) throws
             BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, DocumentoException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
         X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-        if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), api)) {//validación de firmaEC
+        if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), api, base64)) {//validación de firmaEC
             Document document = new InMemoryDocument(docByteArry);
             try (InputStream is = document.openStream()) {
                 // Crear un RubricaSigner para firmar el MessageDigest del documento
@@ -88,6 +88,7 @@ public class FirmaDigital {
      * @param keyStorePassword
      * @param properties
      * @param api
+     * @param base64
      * @return
      * @throws java.security.InvalidKeyException
      * @throws io.rubrica.exceptions.EntidadCertificadoraNoValidaException
@@ -100,15 +101,15 @@ public class FirmaDigital {
      * @throws io.rubrica.exceptions.RubricaException
      * @throws io.rubrica.exceptions.SignatureVerificationException
      */
-    public byte[] firmarXML(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api) throws
+    public byte[] firmarXML(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api, String base64) throws
             BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
         X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-        if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), api)) {//validación de firmaEC
+        if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), api, base64)) {//validación de firmaEC
             XAdESSigner signer = new XAdESSigner();
-            signed = signer.sign(docByteArry, SignConstants.SIGN_ALGORITHM_SHA512WITHRSA, key, certChain, null);
+            signed = signer.sign(docByteArry, SignConstants.SIGN_ALGORITHM_SHA512WITHRSA, key, certChain, null, base64);
         } else {
             throw new CertificadoInvalidoException(x509CertificateUtils.getError());
         }

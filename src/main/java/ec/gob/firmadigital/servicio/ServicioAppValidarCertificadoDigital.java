@@ -64,9 +64,10 @@ public class ServicioAppValidarCertificadoDigital {
      *
      * @param pkcs12
      * @param password
+     * @param base64
      * @return json
      */
-    public String appValidarCertificadoDigital(@NotNull String pkcs12, @NotNull String password) {
+    public String appValidarCertificadoDigital(@NotNull String pkcs12, @NotNull String password, @NotNull String base64) {
         Certificado certificado = null;
         String retorno = null;
         boolean caducado = true, revocado = true;
@@ -84,7 +85,7 @@ public class ServicioAppValidarCertificadoDigital {
 
             X509Certificate x509Certificate = (X509Certificate) keyStore.getCertificate(alias);
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-            TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null));
+            TemporalAccessor accessor = dateTimeFormatter.parse(TiempoUtils.getFechaHoraServidor(null, base64));
             Date fechaHoraISO = Date.from(Instant.from(accessor));
             //Validad certificado revocado
             //Date fechaRevocado = fechaString_Date("2022-06-01 10:00:16");
@@ -127,6 +128,7 @@ public class ServicioAppValidarCertificadoDigital {
             JsonObject jsonObject = new JsonObject();
             boolean signValidate = true;
             if (certificado != null) {
+                //TODO reparar al verificar un certificado no encontrado
                 if (revocado || certificado.getValidated() || !certificado.getDatosUsuario().isCertificadoDigitalValido()) {
                     signValidate = false;
                 } else {

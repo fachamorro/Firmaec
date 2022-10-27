@@ -29,15 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.constraints.NotNull;
-
 import ec.gob.firmadigital.servicio.model.Documento;
-import ec.gob.firmadigital.servicio.pdf.ServicioValidacionPdf;
 import ec.gob.firmadigital.servicio.token.ServicioToken;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
@@ -54,6 +51,10 @@ import io.rubrica.sign.xades.XAdESSigner;
 import io.rubrica.utils.Utils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringReader;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -69,9 +70,6 @@ public class ServicioDocumento {
 
     @EJB
     private ServicioSistemaTransversal servicioSistemaTransversal;
-
-    @EJB
-    private ServicioValidacionPdf servicioValidacionPdf;
 
     @EJB
     private ServicioLog servicioLog;
@@ -162,6 +160,7 @@ public class ServicioDocumento {
      * @param token
      * @param archivos
      * @param cedulaJson
+     * @param base64
      * @return
      * @throws ec.gob.firmadigital.servicio.token.TokenInvalidoException
      * @throws ec.gob.firmadigital.servicio.CedulaInvalidaException
@@ -170,7 +169,7 @@ public class ServicioDocumento {
      * @throws ec.gob.firmadigital.servicio.CertificadoRevocadoException
      * @throws ec.gob.firmadigital.servicio.DocumentoNoExisteException
      */
-    public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson)
+    public int actualizarDocumentos(String token, Map<Long, String> archivos, String cedulaJson, String base64)
             throws TokenInvalidoException, CedulaInvalidaException, TokenExpiradoException, Base64InvalidoException,
             CertificadoRevocadoException, DocumentoNoExisteException {
 
@@ -262,10 +261,11 @@ public class ServicioDocumento {
                 }
                 documentosFirmados++;
 
-                logger.info("Documento enviado al sistema " + nombreSistema);
+                logger.log(Level.INFO, "Documento enviado al sistema {0}, firmado por {1}, sistema operativo {2}, tamano documento (bytes) {3}", new Object[]{nombreSistema, FileUtil.hashMD5(cedulaToken), obtenerSO(base64), documento.getArchivo().length});
                 servicioLog.info("ServicioDocumento::actualizarDocumentos",
                         "Documento enviado al sistema " + nombreSistema
                         + ", firmado por " + FileUtil.hashMD5(cedulaToken)
+                        + ", sistema operativo " + obtenerSO(base64)
                         + ", tamano documento (bytes) " + documento.getArchivo().length);
             } catch (SistemaTransversalException e) {
                 String mensajeError = "No se pudo enviar el documento al sistema " + nombreSistema;
@@ -302,5 +302,14 @@ public class ServicioDocumento {
 
     private String codificarBase64(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
+    }
+
+    private String obtenerSO(String base64) {
+        String toString = new String(Base64.getDecoder().decode(base64));
+        JsonObject jsonObjectBase64;
+        try (JsonReader jsonReader = Json.createReader(new StringReader(toString))) {
+            jsonObjectBase64 = jsonReader.readObject();
+        }
+        return jsonObjectBase64.getString("sistemaOperativo");
     }
 }

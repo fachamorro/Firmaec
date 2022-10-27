@@ -46,7 +46,7 @@ public class ServicioAppFirmarDocumentoRest {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String firmarDocumento(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password,
-            @FormParam("documento") String documento, @FormParam("json") String json) throws Exception {
+            @FormParam("documento") String documento, @FormParam("json") String json, @FormParam("base64") String base64) throws Exception {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
@@ -122,6 +122,10 @@ public class ServicioAppFirmarDocumentoRest {
             return "Error al decodificar JSON: No coincide el tipo de dato \"tipoEstampado\"";
         }
         
-        return servicioAppFirmarDocumento.firmarDocumento(pkcs12, password, documento, versionFirmaEC, formatoDocumento, llx, lly, pagina, tipoEstampado, razon);
+        if (base64 == null || base64.isEmpty()) {
+            return "Se debe incluir el parametro base64";
+        }
+        
+        return servicioAppFirmarDocumento.firmarDocumento(pkcs12, password, documento, versionFirmaEC, formatoDocumento, llx, lly, pagina, tipoEstampado, razon, base64);
     }
 }

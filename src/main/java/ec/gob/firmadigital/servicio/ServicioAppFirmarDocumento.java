@@ -57,7 +57,7 @@ public class ServicioAppFirmarDocumento {
 
     public String firmarDocumento(@NotNull String pkcs12, @NotNull String password,
             @NotNull String documentoBase64, String versionFirmaEC, String formatoDocumento,
-            String llx, String lly, String pagina, String tipoEstampado, String razon) {
+            String llx, String lly, String pagina, String tipoEstampado, String razon, String base64) {
 
         Documento documento = null;
         String retorno = null;
@@ -69,15 +69,15 @@ public class ServicioAppFirmarDocumento {
             KeyStore keyStore = Pkcs12.getKeyStore(pkcs12, password);
             String alias = Pkcs12.getAlias(keyStore);
 
-            String fechaHora = TiempoUtils.getFechaHoraServidor(null);
+            String fechaHora = TiempoUtils.getFechaHoraServidor(null, base64);
 
             FirmaDigital firmador = new FirmaDigital();
             if ("xml".equalsIgnoreCase(formatoDocumento)) {
-                byteDocumentoSigned = firmador.firmarXML(keyStore, alias, byteDocumento, password.toCharArray(), null, null);
+                byteDocumentoSigned = firmador.firmarXML(keyStore, alias, byteDocumento, password.toCharArray(), null, null, base64);
             }
             if ("pdf".equalsIgnoreCase(formatoDocumento)) {
-                Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora);
-                byteDocumentoSigned = firmador.firmarPDF(keyStore, alias, byteDocumento, password.toCharArray(), properties, null);
+                Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora, base64);
+                byteDocumentoSigned = firmador.firmarPDF(keyStore, alias, byteDocumento, password.toCharArray(), properties, null, base64);
             }
         } catch (BadPasswordException bpe) {
             

@@ -45,7 +45,7 @@ public class ServicioAppFirmarDocumentoTransversalRest {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String firmarDocumentoTransversal(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password, @FormParam("json") String json) throws Exception {
+    public String firmarDocumentoTransversal(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password, @FormParam("json") String json, @FormParam("base64") String base64) throws Exception {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";
@@ -164,8 +164,12 @@ public class ServicioAppFirmarDocumentoTransversalRest {
         } catch (ClassCastException cce) {
             return "Error al decodificar JSON: No coincide el tipo de dato \"des\"";
         }
+        
+        if (base64 == null || base64.isEmpty()) {
+            return "Se debe incluir el parametro base64";
+        }
 
-        return servicioAppFirmarDocumentoTransversal.firmarTransversal(pkcs12, password, sistema, operacion, url, versionFirmaEC, formatoDocumento, tokenJwt, llx, lly, pagina, tipoEstampado, razon, pre, des);
+        return servicioAppFirmarDocumentoTransversal.firmarTransversal(pkcs12, password, sistema, operacion, url, versionFirmaEC, formatoDocumento, tokenJwt, llx, lly, pagina, tipoEstampado, razon, pre, des, base64);
     }
 
 }

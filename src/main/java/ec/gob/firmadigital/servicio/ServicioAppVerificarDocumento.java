@@ -39,7 +39,7 @@ import javax.validation.constraints.NotNull;
 @Stateless
 public class ServicioAppVerificarDocumento {
 
-    public String verificarDocumento(@NotNull String base64Documento) {
+    public String verificarDocumento(@NotNull String base64Documento, @NotNull String base64) {
         String retorno = null;
         Documento documento = null;
         try {

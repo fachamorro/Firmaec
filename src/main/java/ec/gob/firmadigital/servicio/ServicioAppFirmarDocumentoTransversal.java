@@ -26,15 +26,8 @@ import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
 import io.rubrica.exceptions.RubricaException;
 import io.rubrica.utils.X509CertificateUtils;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -43,8 +36,18 @@ import java.security.UnrecoverableKeyException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -57,9 +60,6 @@ import javax.ejb.Stateless;
 @Stateless
 public class ServicioAppFirmarDocumentoTransversal {
 
-    private final int TIME_OUT = 5000; //set timeout to 5 seconds
-    private final int BUFFER_SIZE = 8192;
-
     private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
 //    private final String REST_SERVICE_URL_PREPRODUCCION = "http://impapi.firmadigital.gob.ec:8080/api";
 //    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8080/api";
@@ -67,6 +67,7 @@ public class ServicioAppFirmarDocumentoTransversal {
 //    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8080/api";
     private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
     private String restServiceUrl;
+    private static final Logger logger = Logger.getLogger(ServicioAppFirmarDocumentoTransversal.class.getName());
 
     private String resultado = null;
     private String sistema = null;
@@ -78,14 +79,15 @@ public class ServicioAppFirmarDocumentoTransversal {
     private String pagina = null;
     private boolean pre = false;
     private boolean des = false;
+    private String base64 = null;
     private String url = null;
-    
+
     private String cedula;
 
     public String firmarTransversal(String pkcs12, String password, String sistema,
             String operacion, String url, String versionFirmaEC, String formatoDocumento,
             String tokenJwt, String llx, String lly, String pagina, String tipoEstampado,
-            String razon, boolean pre, boolean des) throws Exception {
+            String razon, boolean pre, boolean des, String base64) throws Exception {
         // Parametros opcionales
         this.sistema = sistema;
         this.versionFirmaEC = versionFirmaEC;
@@ -97,6 +99,7 @@ public class ServicioAppFirmarDocumentoTransversal {
         this.url = url;
         this.pre = pre;
         this.des = des;
+        this.base64 = base64;
         ambiente();
         //en caso de ser firma descentralizada
         if (url != null) {
@@ -147,11 +150,11 @@ public class ServicioAppFirmarDocumentoTransversal {
                 cedula = X509CertificateUtils.getCedula(keyStore, alias);
 
                 if ("xml".equalsIgnoreCase(formatoDocumento)) {
-                    documentoFirmado = firmador.firmarXML(keyStore, alias, documento, password.toCharArray(), null, url);
+                    documentoFirmado = firmador.firmarXML(keyStore, alias, documento, password.toCharArray(), null, url, base64);
                 }
                 if ("pdf".equalsIgnoreCase(formatoDocumento)) {
-                    Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora);
-                    documentoFirmado = firmador.firmarPDF(keyStore, alias, documento, password.toCharArray(), properties, url);
+                    Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora, base64);
+                    documentoFirmado = firmador.firmarPDF(keyStore, alias, documento, password.toCharArray(), properties, url, base64);
                 }
             } catch (BadPasswordException bpe) {
                 resultado = "Documento protegido con contraseña";
@@ -184,98 +187,73 @@ public class ServicioAppFirmarDocumentoTransversal {
     }
 
     private String bajarDocumentos(String tokenJwt) throws Exception {
-        String json = null;
-        URL url = new URL(restServiceUrl + "/firmadigital/" + tokenJwt);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setConnectTimeout(TIME_OUT);
-        resultado = leerBodyErrores(con);
-        if (resultado.isEmpty()) {
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int count;
-
-            try (InputStream in = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                while ((count = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, count);
-                }
-                con.disconnect();
-                json = out.toString();
-            }
-        }
-        return json;
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(restServiceUrl + "/firmadigital/" + tokenJwt);
+        Invocation.Builder builder = target.request();
+        Invocation invocation = builder.buildGet();
+        Response response = invocation.invoke();
+        // Leer la respuesta
+        int statusCode = response.getStatus();
+        String body = null;
+        body = response.readEntity(String.class);
+        resultado = leerBodyErrores(statusCode, body);
+        return body;
     }
 
     private void actualizarDocumentos(String tokenJwt, Map<Long, byte[]> documentosFirmados, String cedula)
             throws Exception {
         String json = JsonProcessor.buildJson(documentosFirmados, cedula);
 
-        URL url = new URL(restServiceUrl + "/firmadigital/" + tokenJwt);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("PUT");
-        con.setDoOutput(true);
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setConnectTimeout(TIME_OUT);
-
-        byte[] buffer = new byte[BUFFER_SIZE];
-        int count;
-        try (InputStream in = new ByteArrayInputStream(json.getBytes()); OutputStream out = con.getOutputStream()) {
-            while ((count = in.read(buffer)) != -1) {
-                out.write(buffer, 0, count);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(restServiceUrl + "/firmadigital/" + tokenJwt);
+        Invocation.Builder builder = target.request();
+        Form form = new Form();
+        form.param("json", json);
+        form.param("base64", base64);
+        Invocation invocation = builder.buildPut(Entity.form(form));
+        String body = null;
+        try {
+            Response response = invocation.invoke();
+            // Leer la respuesta
+            int statusCode = response.getStatus();
+            body = response.readEntity(String.class);
+            resultado = leerBodyErrores(statusCode, body);
+            if (resultado.isEmpty()) {
+                resultado = JsonProcessor.parseJsonDocumentoFirmado(body);
             }
-        }
-        resultado = leerBodyErrores(con);
-        if (resultado.isEmpty()) {
-            buffer = new byte[BUFFER_SIZE];
-            String parametroJson;
-            if (con.getResponseCode() == 200) {
-                // Leer la respuesta
-                try (InputStream in = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    while ((count = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, count);
-                    }
-                    parametroJson = out.toString();
-                }
-                resultado = JsonProcessor.parseJsonDocumentoFirmado(parametroJson);
-            }
-            con.disconnect();
+        } catch (BadRequestException e) {
+            String respuesta = e.getResponse().readEntity(String.class);
+            logger.log(Level.SEVERE, "BadRequestException: " + respuesta);
+        } catch (WebApplicationException e) {
+            String respuesta = e.getResponse().readEntity(String.class);
+            logger.log(Level.SEVERE, "WebApplicationException: " + respuesta);
         }
     }
 
-    private String leerBodyErrores(HttpURLConnection con) {
+    private String leerBodyErrores(int statusCode, String body) {
         String error = "";
-        try {
-            if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-                String inputLine;
-                StringBuilder response = new StringBuilder();
-                while ((inputLine = bufferedReader.readLine()) != null) {
-                    response.append(inputLine);
-                }
-
-                String body = response.toString();
-                if (body.contains("Token gestionado")) {
-                    error = "El/Los documento(s) fueron gestionados";
-                }
-                if (body.contains("Token expirado")) {
-                    error = "El tiempo de vida del documento en el servidor, se encuentra expirado";
-                }
-                if (body.contains("Token invalido")
-                        || body.contains("Error al invocar servicio de obtencion de documentos")
-                        || body.contains("Base 64 inválido")) {
-                    error = "No se encontraron documentos para firmar.";
-                }
-                if (body.contains("Cedula invalida")) {
-                    error = "Certificado no corresponde al usuario.\nVuelva a intentarlo.";
-                }
-                if (body.contains("Certificado revocado")) {
-                    error = "Certificado puede estar caducado o revocado.\nVuelva a intentarlo.";
-                }
-                if (response.toString().contains("Request Entity Too Large")) {
-                    error = "Problemas con los servicios web.\nComuníquese con el administrador de su sistema.";
-                }
+        if (statusCode != HttpURLConnection.HTTP_OK) {
+            if (body.contains("Token expirado")) {
+                error = "El tiempo de vida del documento en el servidor, se encuentra expirado";
             }
-        } catch (IOException ex) {
-            resultado = "Problemas con los servicios web.\nComuníquese con el administrador de su sistema.";
+            if (body.contains("Token gestionado")) {
+                error = "El/Los documento(s) fueron gestionados";
+            }
+            if (body.contains("Token invalido")
+                    || body.contains("No se encuentran documentos")
+                    || body.contains("Error al invocar servicio de obtencion de documentos")
+                    || body.contains("Base 64 inválido")) {
+                error = "No se encontraron documentos para firmar.";
+            }
+            if (body.contains("Cedula invalida")) {
+                error = "Certificado no corresponde al usuario.\nVuelva a intentarlo.";
+            }
+            if (body.contains("Certificado revocado")) {
+                error = "Certificado puede estar caducado o revocado.\nVuelva a intentarlo.";
+            }
+            if (body.contains("Request Entity Too Large")) {
+                error = "Problemas con los servicios web.\nComuníquese con el administrador de su sistema.";
+            }
         }
         return error;
     }

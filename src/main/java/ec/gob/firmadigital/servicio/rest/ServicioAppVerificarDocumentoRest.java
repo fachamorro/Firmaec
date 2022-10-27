@@ -40,10 +40,13 @@ public class ServicioAppVerificarDocumentoRest {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String validarDocumento(@FormParam("documento") String documento) throws Exception {
+    public String validarDocumento(@FormParam("documento") String documento, @FormParam("base64") String base64) throws Exception {
         if (documento == null || documento.isEmpty()) {
             return "Se debe incluir el parametro documento";
         }
-        return servicioAppVerificarDocumento.verificarDocumento(documento);
+        if (base64 == null || base64.isEmpty()) {
+            return "Se debe incluir el parametro base64";
+        }
+        return servicioAppVerificarDocumento.verificarDocumento(documento, base64);
     }
 }
