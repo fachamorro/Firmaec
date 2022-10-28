@@ -222,11 +222,9 @@ public class ServicioAppFirmarDocumentoTransversal {
                 resultado = JsonProcessor.parseJsonDocumentoFirmado(body);
             }
         } catch (BadRequestException e) {
-            String respuesta = e.getResponse().readEntity(String.class);
-            logger.log(Level.SEVERE, "BadRequestException: " + respuesta);
+            logger.log(Level.SEVERE, "BadRequestException: " + e.getResponse().readEntity(String.class));
         } catch (WebApplicationException e) {
-            String respuesta = e.getResponse().readEntity(String.class);
-            logger.log(Level.SEVERE, "WebApplicationException: " + respuesta);
+            logger.log(Level.SEVERE, "WebApplicationException: " + e.getResponse().readEntity(String.class));
         }
     }
 

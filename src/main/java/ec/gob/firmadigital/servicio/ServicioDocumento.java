@@ -244,9 +244,7 @@ public class ServicioDocumento {
                     }
                 } catch (InvalidFormatException | IOException e) {
                     throw new IllegalArgumentException("Error en la verificacion de firma", e);
-                } catch (DocumentoException ex) {
-                    Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (CertificadoInvalidoException ex) {
+                } catch (DocumentoException | CertificadoInvalidoException ex) {
                     Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (Exception ex) {
                     Logger.getLogger(ServicioDocumento.class.getName()).log(Level.SEVERE, null, ex);
