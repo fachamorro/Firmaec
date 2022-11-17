@@ -22,6 +22,7 @@ import ec.gob.firmadigital.servicio.util.JsonProcessor;
 import ec.gob.firmadigital.servicio.util.Pkcs12;
 import ec.gob.firmadigital.servicio.util.Propiedades;
 import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.ConexionException;
 import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
 import io.rubrica.exceptions.RubricaException;
@@ -156,6 +157,9 @@ public class ServicioAppFirmarDocumentoTransversal {
                     Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora, base64);
                     documentoFirmado = firmador.firmarPDF(keyStore, alias, documento, password.toCharArray(), properties, url, base64);
                 }
+            } catch (ConexionException ce) {
+                resultado = "Servidor FirmaEC: " + ce.getMessage();
+                throw ce;
             } catch (BadPasswordException bpe) {
                 resultado = "Documento protegido con contraseña";
                 throw bpe;

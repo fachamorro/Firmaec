@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
  */
 @Singleton
 //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
-//@Startup
+@Startup
 //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
 public class ServicioDescargaCrl {
 
@@ -62,18 +62,18 @@ public class ServicioDescargaCrl {
     private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
-//    @PostConstruct
-//    public void init() {
-//        crearTablaSiNoExiste();
-//        importarCrls();
-//    }
-//
-//    //10 segundos
-//    //@Schedule(hour = "*", minute = "*", second = "*/10", persistent = false)
-//    //5 minutos
-//    @Schedule(hour = "*", minute = "*/5", persistent = false)
-//    //1 hora
-//    //@Schedule(minute = "0", hour = "*", persistent = false)
+    @PostConstruct
+    public void init() {
+        crearTablaSiNoExiste();
+        importarCrls();
+    }
+
+    //10 segundos
+    //@Schedule(hour = "*", minute = "*", second = "*/10", persistent = false)
+    //5 minutos
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
+    //1 hora
+    //@Schedule(minute = "0", hour = "*", persistent = false)
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
 
     public void importarCrls() {
@@ -111,12 +111,15 @@ public class ServicioDescargaCrl {
 
         logger.info("Descargando CRL de UANATACA2...");
         X509CRL uanatacaCrl2 = downloadCrl(ServicioCRL.UANATACA_CRL2);
-        
+
         logger.info("Descargando CRL de DATIL...");
         X509CRL datilCrl = downloadCrl(ServicioCRL.DATIL_CRL);
-        
+
         logger.info("Descargando CRL de ARGOSDATA...");
         X509CRL argosDataCrl = downloadCrl(ServicioCRL.ARGOSDATA_CRL);
+
+        logger.info("Descargando CRL de LAZZATE...");
+        X509CRL lazzateCrl = downloadCrl(ServicioCRL.LAZZATE_CRL);
 
         try (Connection conn = ds.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
@@ -134,6 +137,7 @@ public class ServicioDescargaCrl {
             int contadorUANATACA1 = 0, contadorUANATACA2 = 0;
             int contadorDATIL = 0;
             int contadorARGOSDATA = 0;
+            int contadorLAZZATE = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -211,14 +215,14 @@ public class ServicioDescargaCrl {
             } else {
                 logger.info("No se inserta DIGERCIC");
             }
-            
+
             if (datilCrl != null) {
                 contadorDATIL = insertarCrl(datilCrl, 8, ps);
                 logger.info("Registros insertados/actualizados DATIL: " + contadorDATIL);
             } else {
                 logger.info("No se inserta DATIL");
             }
-            
+
             if (argosDataCrl != null) {
                 contadorARGOSDATA = insertarCrl(argosDataCrl, 9, ps);
                 logger.info("Registros insertados/actualizados ARGOSDATA: " + contadorARGOSDATA);
@@ -226,7 +230,14 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta ARGOSDATA");
             }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA;
+            if (lazzateCrl != null) {
+                contadorLAZZATE = insertarCrl(lazzateCrl, 10, ps);
+                logger.info("Registros insertados/actualizados ARGOSDATA: " + contadorLAZZATE);
+            } else {
+                logger.info("No se inserta LAZZATE");
+            }
+
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE;
             logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");
@@ -235,12 +246,7 @@ public class ServicioDescargaCrl {
             throw new EJBException(e);
         }
     }
-
-    /*
-    SELECT count(*), entidadcertificadora FROM crl
-    GROUP BY entidadcertificadora 
-    ORDER by entidadcertificadora
-     */
+    
     private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
         // Existen CRLs?
         if (crl.getRevokedCertificates() == null) {
@@ -308,7 +314,3 @@ public class ServicioDescargaCrl {
         }
     }
 }
-
-//INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES ('995449664435670766937528091','2022-08-05 17:07:35','Test FirmaEC',4) 
-//ON CONFLICT (serial) 
-//DO UPDATE SET fecharevocacion = EXCLUDED.fecharevocacion, razonrevocacion = EXCLUDED.razonrevocacion, entidadcertificadora = EXCLUDED.entidadcertificadora

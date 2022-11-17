@@ -23,6 +23,7 @@ import ec.gob.firmadigital.servicio.util.FirmaDigital;
 import ec.gob.firmadigital.servicio.util.Propiedades;
 import io.rubrica.certificate.to.Documento;
 import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.ConexionException;
 import io.rubrica.exceptions.DocumentoException;
 import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
@@ -80,7 +81,7 @@ public class ServicioAppFirmarDocumento {
                 byteDocumentoSigned = firmador.firmarPDF(keyStore, alias, byteDocumento, password.toCharArray(), properties, null, base64);
             }
         } catch (BadPasswordException bpe) {
-            
+
             //2022-08-19 11:38:00,549 ERROR [org.jboss.as.ejb3.invocation] (default task-1) WFLYEJB0034: Jakarta Enterprise Beans Invocation failed on component ServicioAppFirmarDocumento for method public java.lang.String ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento.firmarDocumento(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String): javax.ejb.EJBTransactionRolledbackException: PdfReader is not opened with owner password
 //        Caused by: com.itextpdf.kernel.crypto.BadPasswordException: PdfReader is not opened with owner password
 //        at deployment.servicio.war//com.itextpdf.kernel.pdf.PdfDocument.open(PdfDocument.java:1943)
@@ -91,10 +92,11 @@ public class ServicioAppFirmarDocumento {
 //        at deployment.servicio.war//io.rubrica.sign.pdf.BasePdfSigner.sign(BasePdfSigner.java:86)
 //        at deployment.servicio.war//ec.gob.firmadigital.servicio.util.FirmaDigital.firmarPDF(FirmaDigital.java:69)
 //        at deployment.servicio.war//ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento.firmarDocumento(ServicioAppFirmarDocumento.java:80)
-
-            
             retorno = "Documento protegido con contraseña";
             throw bpe;
+        } catch (ConexionException ce) {
+            retorno = "Servidor FirmaEC: " + ce.getMessage();
+            return retorno;
         } catch (InvalidKeyException ie) {
             retorno = "Problemas al abrir el documento";
             return retorno;

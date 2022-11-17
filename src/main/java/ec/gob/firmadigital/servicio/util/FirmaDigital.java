@@ -2,6 +2,7 @@ package ec.gob.firmadigital.servicio.util;
 
 import com.itextpdf.kernel.crypto.BadPasswordException;
 import io.rubrica.exceptions.CertificadoInvalidoException;
+import io.rubrica.exceptions.ConexionException;
 import io.rubrica.exceptions.DocumentoException;
 import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
 import io.rubrica.exceptions.HoraServidorException;
@@ -53,7 +54,7 @@ public class FirmaDigital {
     final private String hashAlgorithm = "SHA512";
 
     public byte[] firmarPDF(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api, String base64) throws
-            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, DocumentoException {
+            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, DocumentoException, ConexionException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
@@ -102,7 +103,7 @@ public class FirmaDigital {
      * @throws io.rubrica.exceptions.SignatureVerificationException
      */
     public byte[] firmarXML(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api, String base64) throws
-            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException {
+            BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, ConexionException {
         byte[] signed = null;
         PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
         Certificate[] certChain = keyStore.getCertificateChain(alias);
