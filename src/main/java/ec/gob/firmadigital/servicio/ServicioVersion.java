@@ -27,6 +27,7 @@ import javax.persistence.TypedQuery;
 import javax.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.Version;
+import ec.gob.firmadigital.servicio.util.PropertiesUtils;
 import io.rubrica.utils.OsUtils;
 import javax.ejb.EJB;
 
@@ -39,13 +40,13 @@ import javax.ejb.EJB;
  */
 @Stateless
 public class ServicioVersion {
-
+    
     @EJB
     private ServicioLog servicioLog;
-
+    
     @PersistenceContext
     private EntityManager em;
-
+    
     private static final Logger logger = Logger.getLogger(ServicioVersion.class.getName());
 
     /**
@@ -60,6 +61,7 @@ public class ServicioVersion {
      */
     public String validarVersion(@NotNull String sistemaOperativo, @NotNull String aplicacion, @NotNull String versionApp, @NotNull String sha) throws VersionException {
         String retorno = "";
+        com.google.gson.JsonObject gsonObject = null;
         try {
             TypedQuery<Version> query = em.createNamedQuery("Version.validarVersion", Version.class);
             query.setParameter("sistema_operativo", OsUtils.getNameOs(sistemaOperativo));
@@ -95,7 +97,12 @@ public class ServicioVersion {
                     "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } finally {
-            return retorno;
+            gsonObject = new com.google.gson.JsonObject();
+            gsonObject.addProperty("resultado", retorno);
+            if (aplicacion.equals("MOBILE") || aplicacion.equals("LIBRERIA")) {
+                gsonObject.addProperty("documentoKB", PropertiesUtils.getDocumentoKB());
+            }
+            return gsonObject.toString();
         }
     }
 }

@@ -16,6 +16,7 @@
 package ec.gob.firmadigital.servicio.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -44,6 +45,9 @@ public class Version implements Serializable {
     private String version;
     private String sha;
     private Boolean status;
+    private String descripcion;
+    private Date fechaLiberacion;
+    private Date fechaObsoleto;
 
     public long getId() {
         return id;
@@ -93,8 +97,32 @@ public class Version implements Serializable {
         this.status = status;
     }
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public Date getFechaLiberacion() {
+        return fechaLiberacion;
+    }
+
+    public void setFechaLiberacion(Date fechaLiberacion) {
+        this.fechaLiberacion = fechaLiberacion;
+    }
+
+    public Date getFechaObsoleto() {
+        return fechaObsoleto;
+    }
+
+    public void setFechaObsoleto(Date fechaObsoleto) {
+        this.fechaObsoleto = fechaObsoleto;
+    }
+
     @Override
     public String toString() {
-        return "Version{" + "id=" + id + ", sistemaOperativo=" + sistemaOperativo + ", aplicacion=" + aplicacion + ", version=" + version + ", sha=" + sha + ", status=" + status + '}';
+        return "Version{" + "id=" + id + ", sistemaOperativo=" + sistemaOperativo + ", aplicacion=" + aplicacion + ", version=" + version + ", sha=" + sha + ", status=" + status + ", descripcion=" + descripcion + ", fechaLiberacion=" + fechaLiberacion + ", fechaObsoleto=" + fechaObsoleto + '}';
     }
 }
