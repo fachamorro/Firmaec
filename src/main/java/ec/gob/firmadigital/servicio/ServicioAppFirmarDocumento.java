@@ -77,7 +77,7 @@ public class ServicioAppFirmarDocumento {
                 byteDocumentoSigned = firmador.firmarXML(keyStore, alias, byteDocumento, password.toCharArray(), null, null, base64);
             }
             if ("pdf".equalsIgnoreCase(formatoDocumento)) {
-                Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora, base64);
+                Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, razon, null, fechaHora, base64);
                 byteDocumentoSigned = firmador.firmarPDF(keyStore, alias, byteDocumento, password.toCharArray(), properties, null, base64);
             }
         } catch (BadPasswordException bpe) {

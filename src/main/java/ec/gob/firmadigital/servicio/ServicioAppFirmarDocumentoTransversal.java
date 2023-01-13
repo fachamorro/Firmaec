@@ -77,6 +77,7 @@ public class ServicioAppFirmarDocumentoTransversal {
     private String llx = null;
     private String lly = null;
     private String tipoEstampado = null;
+    private String razon = null;
     private String pagina = null;
     private boolean pre = false;
     private boolean des = false;
@@ -96,6 +97,7 @@ public class ServicioAppFirmarDocumentoTransversal {
         this.llx = llx;
         this.lly = lly;
         this.tipoEstampado = tipoEstampado;
+        this.razon = razon;
         this.pagina = pagina;
         this.url = url;
         this.pre = pre;
@@ -154,7 +156,7 @@ public class ServicioAppFirmarDocumentoTransversal {
                     documentoFirmado = firmador.firmarXML(keyStore, alias, documento, password.toCharArray(), null, url, base64);
                 }
                 if ("pdf".equalsIgnoreCase(formatoDocumento)) {
-                    Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, null, fechaHora, base64);
+                    Properties properties = Propiedades.propiedades(versionFirmaEC, llx, lly, pagina, tipoEstampado, razon, null, fechaHora, base64);
                     documentoFirmado = firmador.firmarPDF(keyStore, alias, documento, password.toCharArray(), properties, url, base64);
                 }
             } catch (ConexionException ce) {

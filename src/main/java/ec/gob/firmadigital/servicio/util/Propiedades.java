@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.util;
 
 import io.rubrica.exceptions.HoraServidorException;
@@ -25,19 +24,30 @@ import java.util.Properties;
 import io.rubrica.sign.pdf.PDFSignerItext;
 import io.rubrica.sign.pdf.RectanguloUtil;
 import io.rubrica.utils.TiempoUtils;
+import java.io.StringReader;
+import java.net.URLDecoder;
+import java.util.Base64;
+import javax.json.Json;
+import javax.json.JsonReader;
 
 public class Propiedades {
 
-    public static Properties propiedades(String version, String llx, String lly, String pagina, String tipoEstampa, String url, String fechaHora, String base64) throws IOException, HoraServidorException {
+    public static Properties propiedades(String version, String llx, String lly, String pagina, String tipoEstampa, String razon, String url, String fechaHora, String base64) throws IOException, HoraServidorException {
         Properties properties = new Properties();
         properties.setProperty(PDFSignerItext.SIGNING_LOCATION, "");
-        properties.setProperty(PDFSignerItext.SIGNING_REASON, "Firmado digitalmente con FirmaEC mobile " + version);
         if (fechaHora == null) {
             properties.setProperty(PDFSignerItext.SIGN_TIME, TiempoUtils.getFechaHoraServidor(url != null ? url + "/fecha-hora" : null, base64));
         } else {
             properties.setProperty(PDFSignerItext.SIGN_TIME, fechaHora);
         }
-        properties.setProperty(PDFSignerItext.INFO_QR, "VALIDAR CON: www.firmadigital.gob.ec\n" + "version");
+        String jsonParameter = new String(Base64.getDecoder().decode(base64));
+        javax.json.JsonObject json;
+        JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
+        json = (javax.json.JsonObject) jsonReader.read();
+        String sistemaOperativo;
+        sistemaOperativo = json.getString("sistemaOperativo");
+
+        properties.setProperty(PDFSignerItext.INFO_QR, "VALIDAR CON: www.firmadigital.gob.ec\n" + "Firmado digitalmente con FirmaEC mobile " + version + " " +sistemaOperativo);
         if (llx != null) {
             properties.setProperty(RectanguloUtil.POSITION_ON_PAGE_LOWER_LEFT_X, llx);
         }
@@ -47,10 +57,13 @@ public class Propiedades {
         if (pagina != null) {
             properties.setProperty(PDFSignerItext.LAST_PAGE, pagina);
         }
-        if (pagina != null) {
+        if (tipoEstampa != null) {
             properties.setProperty(PDFSignerItext.TYPE_SIG, tipoEstampa);
-        } else {
-            properties.setProperty(PDFSignerItext.TYPE_SIG, "information2"); //no funciona con QR
+        }else{
+            properties.setProperty(PDFSignerItext.TYPE_SIG, "QR");
+        }
+        if (razon != null) {
+            properties.setProperty(PDFSignerItext.SIGNING_REASON, URLDecoder.decode(razon, "UTF-8"));
         }
         return properties;
     }

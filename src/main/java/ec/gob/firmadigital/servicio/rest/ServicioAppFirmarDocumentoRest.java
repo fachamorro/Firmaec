@@ -121,6 +121,13 @@ public class ServicioAppFirmarDocumentoRest {
         } catch (ClassCastException cce) {
             return "Error al decodificar JSON: No coincide el tipo de dato \"tipoEstampado\"";
         }
+        try {
+            if (jsonObject.get("razon") != null) {
+                razon = jsonObject.get("razon").getAsString();
+            }
+        } catch (ClassCastException cce) {
+            return "Error al decodificar JSON: No coincide el tipo de dato \"razon\"";
+        }
         
         if (base64 == null || base64.isEmpty()) {
             return "Se debe incluir el parametro base64";
