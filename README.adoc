@@ -7,7 +7,7 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 ==== WildFly
 Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 11*.
-Se debe utilizar _WildFly Application Server 20.0.0_, disponible en http://www.wildfly.org[wildfly.org]
+Se debe utilizar _WildFly Application Server 26.1.1_, disponible en http://www.wildfly.org[wildfly.org]
 
 ==== Maven
 Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].

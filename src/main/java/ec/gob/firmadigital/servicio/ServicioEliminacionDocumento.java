@@ -37,7 +37,9 @@ import javax.sql.DataSource;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton
+//GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
 @Startup
+//GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
 public class ServicioEliminacionDocumento {
 
     @Resource
@@ -51,12 +53,14 @@ public class ServicioEliminacionDocumento {
 
     private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
 
+    //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
     @PostConstruct
     public void init() {
         borrarDocumentos();
     }
-
     @Schedule(hour = "*", minute = "*/" + TIMEOUT, persistent = false)
+    //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
+    
     public void borrarDocumentos() {
         Connection conn = null;
         Statement st = null;
