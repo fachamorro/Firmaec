@@ -56,7 +56,7 @@ public class ServicioVersionRest {
         if (base64 == null || base64.isEmpty()) {
             return "Se debe generar en Base64";
         }
-        logger.info("base64=" + base64);
+//        logger.info("base64=" + base64);
         String jsonParameter;
         try {
             jsonParameter = new String(Base64.getDecoder().decode(base64));
