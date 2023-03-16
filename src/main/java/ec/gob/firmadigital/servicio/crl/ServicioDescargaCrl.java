@@ -100,8 +100,11 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de CJ...");
         X509CRL cjCrl = downloadCrl(ServicioCRL.CJ_CRL);
 
-        logger.info("Descargando CRL de ANFAC...");
-        X509CRL anfAcCrl = downloadCrl(ServicioCRL.ANFAC_CRL);
+        logger.info("Descargando CRL de ANFAC1...");
+        X509CRL anfAcCrl1 = downloadCrl(ServicioCRL.ANFAC_CRL1);
+        
+        logger.info("Descargando CRL de ANFAC2...");
+        X509CRL anfAcCrl2 = downloadCrl(ServicioCRL.ANFAC_CRL2);
 
         logger.info("Descargando CRL de DIGERCIC...");
         X509CRL digercicCrl = downloadCrl(ServicioCRL.DIGERCIC_CRL);
@@ -132,7 +135,8 @@ public class ServicioDescargaCrl {
             int contadorBCE = 0;
             int contadorSD1 = 0, contadorSD2 = 0, contadorSD3 = 0, contadorSD4 = 0, contadorSD5 = 0;
             int contadorCJ = 0;
-            int contadorANFAC = 0;
+            int contadorANFAC1 = 0;
+            int contadorANFAC2 = 0;
             int contadorDIGERCIC = 0;
             int contadorUANATACA1 = 0, contadorUANATACA2 = 0;
             int contadorDATIL = 0;
@@ -141,103 +145,110 @@ public class ServicioDescargaCrl {
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
-                logger.info("Registros insertados/actualizados BCE: " + contadorBCE);
+                logger.info("Registros insertados/actualizados BCE (1): " + contadorBCE);
             } else {
-                logger.info("No se inserta BCE");
+                logger.info("No se inserta BCE (1)");
             }
 
             if (sdCrl1 != null) {
                 contadorSD1 = insertarCrl(sdCrl1, 2, ps);
-                logger.info("Registros insertados/actualizados Security Data 1: " + contadorSD1);
+                logger.info("Registros insertados/actualizados Security Data 1 (2): " + contadorSD1);
             } else {
-                logger.info("No se inserta Security Data 1");
+                logger.info("No se inserta Security Data 1 (2)");
             }
 
             if (sdCrl2 != null) {
                 contadorSD2 = insertarCrl(sdCrl2, 2, ps);
-                logger.info("Registros insertados/actualizados Security Data 2: " + contadorSD2);
+                logger.info("Registros insertados/actualizados Security Data 2 (2): " + contadorSD2);
             } else {
-                logger.info("No se inserta Security Data 2");
+                logger.info("No se inserta Security Data 2 (2)");
             }
 
             if (sdCrl3 != null) {
                 contadorSD3 = insertarCrl(sdCrl3, 2, ps);
-                logger.info("Registros insertados/actualizados Security Data 3: " + contadorSD3);
+                logger.info("Registros insertados/actualizados Security Data 3 (2): " + contadorSD3);
             } else {
-                logger.info("No se inserta Security Data 3");
+                logger.info("No se inserta Security Data 3 (2)");
             }
 
             if (sdCrl4 != null) {
                 contadorSD4 = insertarCrl(sdCrl4, 2, ps);
-                logger.info("Registros insertados/actualizados Security Data 4: " + contadorSD4);
+                logger.info("Registros insertados/actualizados Security Data 4 (2): " + contadorSD4);
             } else {
-                logger.info("No se inserta Security Data 4");
+                logger.info("No se inserta Security Data 4 (2)");
             }
 
             if (sdCrl5 != null) {
                 contadorSD5 = insertarCrl(sdCrl5, 2, ps);
-                logger.info("Registros insertados/actualizados Security Data 5: " + contadorSD5);
+                logger.info("Registros insertados/actualizados Security Data 5 (2): " + contadorSD5);
             } else {
-                logger.info("No se inserta Security Data 5");
+                logger.info("No se inserta Security Data 5 (2)");
             }
 
             if (cjCrl != null) {
                 contadorCJ = insertarCrl(cjCrl, 3, ps);
-                logger.info("Registros insertados/actualizados CJ: " + contadorCJ);
+                logger.info("Registros insertados/actualizados CJ (3): " + contadorCJ);
             } else {
-                logger.info("No se inserta CJ");
+                logger.info("No se inserta CJ (3)");
             }
 
-            if (anfAcCrl != null) {
-                contadorANFAC = insertarCrl(anfAcCrl, 4, ps);
-                logger.info("Registros insertados/actualizados ANFAC: " + contadorANFAC);
+            if (anfAcCrl1 != null) {
+                contadorANFAC1 = insertarCrl(anfAcCrl1, 4, ps);
+                logger.info("Registros insertados/actualizados ANFAC1 (4): " + contadorANFAC1);
             } else {
-                logger.info("No se inserta ANFAC");
+                logger.info("No se inserta ANFAC1 (4)");
+            }
+            
+            if (anfAcCrl2 != null) {
+                contadorANFAC2 = insertarCrl(anfAcCrl2, 4, ps);
+                logger.info("Registros insertados/actualizados ANFAC2 (4): " + contadorANFAC2);
+            } else {
+                logger.info("No se inserta ANFAC2 (4)");
             }
 
             if (uanatacaCrl1 != null) {
                 contadorUANATACA1 = insertarCrl(uanatacaCrl1, 5, ps);
-                logger.info("Registros insertados/actualizados UANATACA 1: " + contadorUANATACA1);
+                logger.info("Registros insertados/actualizados UANATACA 1 (5): " + contadorUANATACA1);
             } else {
-                logger.info("No se inserta UANATACA 1");
+                logger.info("No se inserta UANATACA 1 (5)");
             }
 
             if (uanatacaCrl2 != null) {
                 contadorUANATACA2 = insertarCrl(uanatacaCrl2, 6, ps);
-                logger.info("Registros insertados/actualizados UANATACA 2: " + contadorUANATACA2);
+                logger.info("Registros insertados/actualizados UANATACA 2 (6): " + contadorUANATACA2);
             } else {
-                logger.info("No se inserta UANATACA 2");
+                logger.info("No se inserta UANATACA 2 (6)");
             }
 
             if (digercicCrl != null) {
                 contadorDIGERCIC = insertarCrl(digercicCrl, 7, ps);
-                logger.info("Registros insertados/actualizados DIGERCIC: " + contadorDIGERCIC);
+                logger.info("Registros insertados/actualizados DIGERCIC (7): " + contadorDIGERCIC);
             } else {
-                logger.info("No se inserta DIGERCIC");
+                logger.info("No se inserta DIGERCIC (7)");
             }
 
             if (datilCrl != null) {
                 contadorDATIL = insertarCrl(datilCrl, 8, ps);
-                logger.info("Registros insertados/actualizados DATIL: " + contadorDATIL);
+                logger.info("Registros insertados/actualizados DATIL (8): " + contadorDATIL);
             } else {
-                logger.info("No se inserta DATIL");
+                logger.info("No se inserta DATIL (8)");
             }
 
             if (argosDataCrl != null) {
                 contadorARGOSDATA = insertarCrl(argosDataCrl, 9, ps);
-                logger.info("Registros insertados/actualizados ARGOSDATA: " + contadorARGOSDATA);
+                logger.info("Registros insertados/actualizados ARGOSDATA (9): " + contadorARGOSDATA);
             } else {
-                logger.info("No se inserta ARGOSDATA");
+                logger.info("No se inserta ARGOSDATA (9)");
             }
 
             if (lazzateCrl != null) {
                 contadorLAZZATE = insertarCrl(lazzateCrl, 10, ps);
-                logger.info("Registros insertados/actualizados ARGOSDATA: " + contadorLAZZATE);
+                logger.info("Registros insertados/actualizados LAZZATE (10): " + contadorLAZZATE);
             } else {
-                logger.info("No se inserta LAZZATE");
+                logger.info("No se inserta LAZZATE (10)");
             }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE;
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1 + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE;
             logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");
@@ -246,7 +257,7 @@ public class ServicioDescargaCrl {
             throw new EJBException(e);
         }
     }
-    
+
     private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
         // Existen CRLs?
         if (crl.getRevokedCertificates() == null) {

@@ -4,7 +4,7 @@
 
     <groupId>ec.gob.firmadigital</groupId>
     <artifactId>servicio</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>firmadigital-servicio</name>
@@ -40,13 +40,19 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.rubrica</groupId>
+            <artifactId>rubrica</artifactId>
+            <version>3.0.1-SNAPSHOT</version>
+        </dependency>
         <!--consumo de servicios web-->
         <dependency>
             <groupId>javax</groupId>
@@ -89,11 +95,6 @@
             <version>1.21</version>
         </dependency>
         <!--MSP-->
-        <dependency>
-            <groupId>io.rubrica</groupId>
-            <artifactId>rubrica</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
