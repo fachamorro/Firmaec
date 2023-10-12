@@ -45,8 +45,8 @@ import java.util.Date;
 import java.util.List;
 import io.rubrica.utils.Json;
 
-import javax.ejb.Stateless;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Stateless;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite

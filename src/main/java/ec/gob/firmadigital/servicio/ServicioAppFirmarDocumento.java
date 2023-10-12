@@ -45,8 +45,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Properties;
-import javax.ejb.Stateless;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Stateless;
+import jakarta.validation.constraints.NotNull;
 
 /**
  *
@@ -82,7 +82,7 @@ public class ServicioAppFirmarDocumento {
             }
         } catch (BadPasswordException bpe) {
 
-            //2022-08-19 11:38:00,549 ERROR [org.jboss.as.ejb3.invocation] (default task-1) WFLYEJB0034: Jakarta Enterprise Beans Invocation failed on component ServicioAppFirmarDocumento for method public java.lang.String ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento.firmarDocumento(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String): javax.ejb.EJBTransactionRolledbackException: PdfReader is not opened with owner password
+            //2022-08-19 11:38:00,549 ERROR [org.jboss.as.ejb3.invocation] (default task-1) WFLYEJB0034: Jakarta Enterprise Beans Invocation failed on component ServicioAppFirmarDocumento for method public java.lang.String ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento.firmarDocumento(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String): jakarta.ejb.EJBTransactionRolledbackException: PdfReader is not opened with owner password
 //        Caused by: com.itextpdf.kernel.crypto.BadPasswordException: PdfReader is not opened with owner password
 //        at deployment.servicio.war//com.itextpdf.kernel.pdf.PdfDocument.open(PdfDocument.java:1943)
 //        at deployment.servicio.war//com.itextpdf.kernel.pdf.PdfDocument.<init>(PdfDocument.java:325)

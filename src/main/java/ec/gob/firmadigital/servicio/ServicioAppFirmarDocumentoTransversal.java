@@ -39,16 +39,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.Stateless;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -60,13 +60,21 @@ import javax.ws.rs.core.Response;
  */
 @Stateless
 public class ServicioAppFirmarDocumentoTransversal {
+//    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/servicio/appfirmardocumento";
+//    private final String REST_SERVICE_URL_DESARROLLO = "http://impwsmobile.firmadigital.gob.ec:8181/servicio/appfirmardocumento";
+//    private final String REST_SERVICE_URL_PRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";   
 
-    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
-//    private final String REST_SERVICE_URL_PREPRODUCCION = "http://impapi.firmadigital.gob.ec:8080/api";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8080/api";
-    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8181/api";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8080/api";
+//    private final String REST_SERVICE_URL_PRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";
+//    private final String REST_SERVICE_URL_PREPRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";
+//    private final String REST_SERVICE_URL_DESARROLLO = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";
+    
+//    private final String REST_SERVICE_URL_PRODUCCION = "https://ws.firmadigital.gob.ec/servicio";
+//    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impws.firmadigital.gob.ec/servicio";
+//    private final String REST_SERVICE_URL_DESARROLLO = "http://testws.firmadigital.gob.ec:8080/servicio";
     private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
+    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
+    private final String REST_SERVICE_URL_DESARROLLO = "http://testapi.firmadigital.gob.ec:8080/api";
+
     private String restServiceUrl;
     private static final Logger logger = Logger.getLogger(ServicioAppFirmarDocumentoTransversal.class.getName());
 
@@ -104,6 +112,7 @@ public class ServicioAppFirmarDocumentoTransversal {
         this.des = des;
         this.base64 = base64;
         ambiente();
+        System.out.println("restServiceUrl:  " + restServiceUrl);
         //en caso de ser firma descentralizada
         if (url != null) {
             restServiceUrl = url;

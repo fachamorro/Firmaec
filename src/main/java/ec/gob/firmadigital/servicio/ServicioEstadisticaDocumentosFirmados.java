@@ -20,15 +20,15 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.validation.constraints.NotNull;
 
-import javax.ejb.EJB;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.ejb.EJB;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -105,7 +105,7 @@ public class ServicioEstadisticaDocumentosFirmados {
             logger.severe(retorno);
             servicioLog.error("ServicioApiUrl::buscarPorFechaDesdeFechaHasta", retorno);
             throw new ApiEstadisticaException(retorno);
-        } catch (javax.persistence.PersistenceException e) {
+        } catch (jakarta.persistence.PersistenceException e) {
             retorno = "Problema con el formato fecha";
             logger.severe(retorno + ": " + "fecha desde: " + fechaDesde + " | fecha hasta: " + fechaHasta);
             servicioLog.error("ServicioApiUrl::buscarPorFechaDesdeFechaHasta", retorno + ": " + "fecha desde: " + fechaDesde + " | fecha hasta: " + fechaHasta);

@@ -56,26 +56,30 @@ public class FirmaDigital {
     public byte[] firmarPDF(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api, String base64) throws
             BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, DocumentoException, ConexionException {
         byte[] signed = null;
-        PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
-        Certificate[] certChain = keyStore.getCertificateChain(alias);
-        X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
-        if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), api, base64)) {//validación de firmaEC
-            Document document = new InMemoryDocument(docByteArry);
-            try (InputStream is = document.openStream()) {
-                // Crear un RubricaSigner para firmar el MessageDigest del documento
-                PrivateKeySigner signer = new PrivateKeySigner(key, DigestAlgorithm.forName(hashAlgorithm));
-                // Crear un PdfSigner para firmar el documento
-                PadesBasicSigner pdfSigner = new PadesBasicSigner(signer);
-                // Firmar el documento
-                signed = pdfSigner.sign(is, signer, certChain, properties);
-            } catch (com.itextpdf.io.IOException ioe) {
-                throw new DocumentoException("El archivo no es PDF");
+        try {
+            PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyStorePassword);
+            Certificate[] certChain = keyStore.getCertificateChain(alias);
+            X509CertificateUtils x509CertificateUtils = new X509CertificateUtils();
+            if (x509CertificateUtils.validarX509Certificate((X509Certificate) keyStore.getCertificate(alias), api, base64)) {//validación de firmaEC
+                Document document = new InMemoryDocument(docByteArry);
+                try (InputStream is = document.openStream()) {
+                    // Crear un RubricaSigner para firmar el MessageDigest del documento
+                    PrivateKeySigner signer = new PrivateKeySigner(key, DigestAlgorithm.forName(hashAlgorithm));
+                    // Crear un PdfSigner para firmar el documento
+                    PadesBasicSigner pdfSigner = new PadesBasicSigner(signer);
+                    // Firmar el documento
+                    signed = pdfSigner.sign(is, signer, certChain, properties);
+                } catch (com.itextpdf.io.IOException ioe) {
+                    throw new DocumentoException("El archivo no es PDF");
+                }
+            } else {
+                throw new CertificadoInvalidoException(x509CertificateUtils.getError());
             }
-        } else {
-            throw new CertificadoInvalidoException(x509CertificateUtils.getError());
-        }
-        if (x509CertificateUtils.getError() != null) {
-            throw new SignatureVerificationException(x509CertificateUtils.getError());
+            if (x509CertificateUtils.getError() != null) {
+                throw new SignatureVerificationException(x509CertificateUtils.getError());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return signed;
     }

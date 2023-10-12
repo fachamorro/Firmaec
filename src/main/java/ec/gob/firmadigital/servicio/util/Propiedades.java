@@ -27,8 +27,8 @@ import io.rubrica.utils.TiempoUtils;
 import java.io.StringReader;
 import java.net.URLDecoder;
 import java.util.Base64;
-import javax.json.Json;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
 
 public class Propiedades {
 
@@ -41,9 +41,9 @@ public class Propiedades {
             properties.setProperty(PDFSignerItext.SIGN_TIME, fechaHora);
         }
         String jsonParameter = new String(Base64.getDecoder().decode(base64));
-        javax.json.JsonObject json;
+        jakarta.json.JsonObject json;
         JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
-        json = (javax.json.JsonObject) jsonReader.read();
+        json = (jakarta.json.JsonObject) jsonReader.read();
         String sistemaOperativo;
         sistemaOperativo = json.getString("sistemaOperativo");
 

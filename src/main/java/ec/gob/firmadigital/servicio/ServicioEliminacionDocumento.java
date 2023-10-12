@@ -21,13 +21,13 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.EJBException;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.TimerService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.Schedule;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.ejb.TimerService;
 import javax.sql.DataSource;
 
 /**
@@ -38,7 +38,7 @@ import javax.sql.DataSource;
  */
 @Singleton
 //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
-@Startup
+//@Startup
 //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
 public class ServicioEliminacionDocumento {
 
@@ -54,11 +54,11 @@ public class ServicioEliminacionDocumento {
     private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
 
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
-    @PostConstruct
-    public void init() {
-        borrarDocumentos();
-    }
-    @Schedule(hour = "*", minute = "*/" + TIMEOUT, persistent = false)
+//    @PostConstruct
+//    public void init() {
+//        borrarDocumentos();
+//    }
+//    @Schedule(hour = "*", minute = "*/" + TIMEOUT, persistent = false)
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
     
     public void borrarDocumentos() {
