@@ -1,12 +1,18 @@
 = FirmaEC: firmadigital-servicio
 
+Este proyecto implementa los servicios REST para recibir documentos desde sistemas transversales.
+
 == Introducción
 
 Los siguientes pasos le permitirán obtener una copia del proyecto para correrla en la máquina local para propósitos de desarrollo y pruebas.
 
-=== Prerequisitos
+== Prerequisitos
 
-==== Java
+=== NetBeans
+
+Se utilizó NetBeans como entorno de desarrollo http://netbeans.org[Netbeans].
+
+=== Java
 
 Se necesita instalar _Java Development Kit (JDK) 11_ para compilar y correr la aplicación.
 
@@ -24,13 +30,29 @@ En Ubuntu se debe instalar el paquete _openjdk-11-jdk_.
 $ sudo apt-get install openjdk-11-jdk
 ----
 
-==== WildFly
-
-Se puede utilizar desde la versión _WildFly Application Server 28.0.0_, disponible en http://www.wildfly.org[wildfly.org]
-
-==== Maven
+=== Maven
 
 Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
+
+En _Microsoft Windows_ se debe descargar e instalar siguiendo las instrucciones de instalación de https://maven.apache.org/install.html[Apache Maven].
+
+En _Fedora_ se debe instalar el paquete  `maven`:
+
+[source,bash]
+----
+$ sudo dnf install maven
+----
+
+En _Ubuntu_ se debe instalar el paquete `maven`:
+
+[source,bash]
+----
+$ sudo apt-get install maven
+----
+
+== Dependencias
+
+Esta aplicación utiliza la librería https://minka.gob.ec/mintel/ge/firmaec/firmadigital-libreria[firmadigital-libreria] para realizar las operaciones de firma digital.
 
 == Compilar
 
@@ -87,11 +109,11 @@ run-batch
 
 == Colaborar
 
-Para colaborar se puede enviar un Merge Request utilizando la plataforma https://minka.gob.ec[Minka].
+Para colaborar se puede enviar un _Merge Request_ utilizando la plataforma https://minka.gob.ec/mintel/ge/firmaec[Minka].
 
 == Versiones
 
-Usamos http://semver.org[SemVer] para versionar.
+Usamos https://minka.gob.ec/mintel/ge/estandares/-/blob/master/versionamiento.md[Estandares] para versionar.
 
 == Autores
 
@@ -100,4 +122,4 @@ Usamos http://semver.org[SemVer] para versionar.
 
 == Licencia
 
-https://www.gnu.org/licenses/agpl-3.0.txt[GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (AGPL-3.0)]
+Esta aplicación se distribuye con una licencia https://www.gnu.org/licenses/gpl.html[GPLv3].

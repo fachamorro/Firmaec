@@ -47,8 +47,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.rubrica</groupId>
-            <artifactId>rubrica</artifactId>
+            <groupId>ec.gob.firmadigital</groupId>
+            <artifactId>libreria</artifactId>
             <version>3.0.3-SNAPSHOT</version>
         </dependency>
         <!--consumo de servicios web-->
@@ -86,13 +86,11 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
-        <!--MSP-->
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
             <version>2.9.0</version>
         </dependency>
-        <!--MSP-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
