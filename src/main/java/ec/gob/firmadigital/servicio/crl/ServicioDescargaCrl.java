@@ -40,8 +40,8 @@ import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import javax.sql.DataSource;
-import io.rubrica.crl.ServicioCRL;
-import io.rubrica.utils.HttpClient;
+import ec.gob.firmadigital.crl.ServicioCRL;
+import ec.gob.firmadigital.utils.HttpClient;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

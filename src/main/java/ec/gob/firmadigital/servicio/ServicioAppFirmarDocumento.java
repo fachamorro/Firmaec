@@ -21,20 +21,20 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import ec.gob.firmadigital.servicio.util.Pkcs12;
 import ec.gob.firmadigital.servicio.util.FirmaDigital;
 import ec.gob.firmadigital.servicio.util.Propiedades;
-import io.rubrica.certificate.to.Documento;
-import io.rubrica.exceptions.CertificadoInvalidoException;
-import io.rubrica.exceptions.ConexionException;
-import io.rubrica.exceptions.DocumentoException;
-import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
-import io.rubrica.exceptions.HoraServidorException;
-import io.rubrica.exceptions.RubricaException;
-import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.sign.SignInfo;
-import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSignerItext;
-import io.rubrica.utils.Json;
-import io.rubrica.utils.TiempoUtils;
-import static io.rubrica.utils.Utils.pdfToDocumento;
+import ec.gob.firmadigital.certificate.to.Documento;
+import ec.gob.firmadigital.exceptions.CertificadoInvalidoException;
+import ec.gob.firmadigital.exceptions.ConexionException;
+import ec.gob.firmadigital.exceptions.DocumentoException;
+import ec.gob.firmadigital.exceptions.EntidadCertificadoraNoValidaException;
+import ec.gob.firmadigital.exceptions.HoraServidorException;
+import ec.gob.firmadigital.exceptions.RubricaException;
+import ec.gob.firmadigital.exceptions.SignatureVerificationException;
+import ec.gob.firmadigital.sign.SignInfo;
+import ec.gob.firmadigital.sign.Signer;
+import ec.gob.firmadigital.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.utils.Json;
+import ec.gob.firmadigital.utils.TiempoUtils;
+import static ec.gob.firmadigital.utils.Utils.pdfToDocumento;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +89,7 @@ public class ServicioAppFirmarDocumento {
 //        at deployment.servicio.war//com.itextpdf.signatures.PdfSigner.initDocument(PdfSigner.java:306)
 //        at deployment.servicio.war//com.itextpdf.signatures.PdfSigner.<init>(PdfSigner.java:288)
 //        at deployment.servicio.war//com.itextpdf.signatures.PdfSigner.<init>(PdfSigner.java:271)
-//        at deployment.servicio.war//io.rubrica.sign.pdf.BasePdfSigner.sign(BasePdfSigner.java:86)
+//        at deployment.servicio.war//ec.gob.firmadigital.sign.pdf.BasePdfSigner.sign(BasePdfSigner.java:86)
 //        at deployment.servicio.war//ec.gob.firmadigital.servicio.util.FirmaDigital.firmarPDF(FirmaDigital.java:69)
 //        at deployment.servicio.war//ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento.firmarDocumento(ServicioAppFirmarDocumento.java:80)
             retorno = "Documento protegido con contraseña";

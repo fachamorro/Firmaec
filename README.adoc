@@ -8,10 +8,6 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 == Prerequisitos
 
-=== NetBeans
-
-Se utilizó NetBeans como entorno de desarrollo http://netbeans.org[Netbeans].
-
 === Java
 
 Se necesita instalar _Java Development Kit (JDK) 11_ para compilar y correr la aplicación.
@@ -50,6 +46,14 @@ En _Ubuntu_ se debe instalar el paquete `maven`:
 $ sudo apt-get install maven
 ----
 
+=== NetBeans
+
+Se utilizó como entorno de desarrollo el IDE http://netbeans.org[Netbeans].
+
+=== WildFly
+
+Se utilizó el servidor de aplicación https://www.wildfly.org/downloads/[Wildfly].
+
 == Dependencias
 
 Esta aplicación utiliza la librería https://minka.gob.ec/mintel/ge/firmaec/firmadigital-libreria[firmadigital-libreria] para realizar las operaciones de firma digital.
@@ -64,6 +68,8 @@ $ mvn clean package
 ----
 
 == Desplegar
+
+Para desplegar el proyecto _firmadigital-servicio_, se debe utilizar el servidor de aplicación Wildfly en la versión 29.
 
 Se debe copiar el archivo `target/servicio.war` a la carpeta `standalone/deploy` de un servidor de aplicaciones WildFly
 

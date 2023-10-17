@@ -20,14 +20,14 @@ package ec.gob.firmadigital.servicio.rest;
 import com.google.gson.Gson;
 
 import com.google.gson.JsonArray;
-import io.rubrica.certificate.to.Certificado;
-import io.rubrica.certificate.to.Documento;
-import io.rubrica.utils.Utils;
+import ec.gob.firmadigital.certificate.to.Certificado;
+import ec.gob.firmadigital.certificate.to.Documento;
+import ec.gob.firmadigital.utils.Utils;
 import com.google.gson.JsonObject;
 import com.itextpdf.kernel.pdf.PdfReader;
-import io.rubrica.sign.SignInfo;
-import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.sign.SignInfo;
+import ec.gob.firmadigital.sign.Signer;
+import ec.gob.firmadigital.sign.pdf.PDFSignerItext;
 import java.io.ByteArrayInputStream;
 
 import jakarta.ejb.Stateless;

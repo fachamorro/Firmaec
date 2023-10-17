@@ -1,13 +1,13 @@
 package ec.gob.firmadigital.servicio.util;
 
 import com.itextpdf.kernel.crypto.BadPasswordException;
-import io.rubrica.exceptions.CertificadoInvalidoException;
-import io.rubrica.exceptions.ConexionException;
-import io.rubrica.exceptions.DocumentoException;
-import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
-import io.rubrica.exceptions.HoraServidorException;
-import io.rubrica.exceptions.RubricaException;
-import io.rubrica.exceptions.SignatureVerificationException;
+import ec.gob.firmadigital.exceptions.CertificadoInvalidoException;
+import ec.gob.firmadigital.exceptions.ConexionException;
+import ec.gob.firmadigital.exceptions.DocumentoException;
+import ec.gob.firmadigital.exceptions.EntidadCertificadoraNoValidaException;
+import ec.gob.firmadigital.exceptions.HoraServidorException;
+import ec.gob.firmadigital.exceptions.RubricaException;
+import ec.gob.firmadigital.exceptions.SignatureVerificationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -15,14 +15,14 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import io.rubrica.model.Document;
-import io.rubrica.model.InMemoryDocument;
-import io.rubrica.sign.DigestAlgorithm;
-import io.rubrica.sign.PrivateKeySigner;
-import io.rubrica.sign.SignConstants;
-import io.rubrica.sign.pdf.PadesBasicSigner;
-import io.rubrica.sign.xades.XAdESSigner;
-import io.rubrica.utils.X509CertificateUtils;
+import ec.gob.firmadigital.model.Document;
+import ec.gob.firmadigital.model.InMemoryDocument;
+import ec.gob.firmadigital.sign.DigestAlgorithm;
+import ec.gob.firmadigital.sign.PrivateKeySigner;
+import ec.gob.firmadigital.sign.SignConstants;
+import ec.gob.firmadigital.sign.pdf.PadesBasicSigner;
+import ec.gob.firmadigital.sign.xades.XAdESSigner;
+import ec.gob.firmadigital.utils.X509CertificateUtils;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -42,14 +42,14 @@ public class FirmaDigital {
      * @param base64
      * @return
      * @throws java.security.InvalidKeyException
-     * @throws io.rubrica.exceptions.EntidadCertificadoraNoValidaException
-     * @throws io.rubrica.exceptions.HoraServidorException
+     * @throws ec.gob.firmadigital.exceptions.EntidadCertificadoraNoValidaException
+     * @throws ec.gob.firmadigital.exceptions.HoraServidorException
      * @throws java.security.UnrecoverableKeyException
      * @throws java.security.KeyStoreException
-     * @throws io.rubrica.exceptions.CertificadoInvalidoException
+     * @throws ec.gob.firmadigital.exceptions.CertificadoInvalidoException
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
-     * @throws io.rubrica.exceptions.RubricaException
+     * @throws ec.gob.firmadigital.exceptions.RubricaException
      */
     final private String hashAlgorithm = "SHA512";
 
@@ -96,15 +96,15 @@ public class FirmaDigital {
      * @param base64
      * @return
      * @throws java.security.InvalidKeyException
-     * @throws io.rubrica.exceptions.EntidadCertificadoraNoValidaException
-     * @throws io.rubrica.exceptions.HoraServidorException
+     * @throws ec.gob.firmadigital.exceptions.EntidadCertificadoraNoValidaException
+     * @throws ec.gob.firmadigital.exceptions.HoraServidorException
      * @throws java.security.UnrecoverableKeyException
      * @throws java.security.KeyStoreException
-     * @throws io.rubrica.exceptions.CertificadoInvalidoException
+     * @throws ec.gob.firmadigital.exceptions.CertificadoInvalidoException
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
-     * @throws io.rubrica.exceptions.RubricaException
-     * @throws io.rubrica.exceptions.SignatureVerificationException
+     * @throws ec.gob.firmadigital.exceptions.RubricaException
+     * @throws ec.gob.firmadigital.exceptions.SignatureVerificationException
      */
     public byte[] firmarXML(KeyStore keyStore, String alias, byte[] docByteArry, char[] keyStorePassword, Properties properties, String api, String base64) throws
             BadPasswordException, InvalidKeyException, EntidadCertificadoraNoValidaException, HoraServidorException, UnrecoverableKeyException, KeyStoreException, CertificadoInvalidoException, IOException, NoSuchAlgorithmException, RubricaException, CertificadoInvalidoException, SignatureVerificationException, ConexionException {

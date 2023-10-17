@@ -31,9 +31,9 @@ import jakarta.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
-import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.certificate.to.DatosUsuario;
-import io.rubrica.sign.cms.VerificadorCMS;
+import ec.gob.firmadigital.exceptions.SignatureVerificationException;
+import ec.gob.firmadigital.certificate.to.DatosUsuario;
+import ec.gob.firmadigital.sign.cms.VerificadorCMS;
 
 /**
  * Servicio de validacion de archivos CMS (P7M).

@@ -52,7 +52,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
-import io.rubrica.certificate.to.Certificado;
+import ec.gob.firmadigital.certificate.to.Certificado;
 import java.text.DateFormat;
 import java.util.Calendar;
 import jakarta.ws.rs.client.Client;
@@ -139,7 +139,7 @@ public class ServicioSistemaTransversal {
      * @param apiKeyRest
      * @throws SistemaTransversalException
      */
-    public void almacenarDocumentoREST(io.rubrica.certificate.to.Documento documento, String cedula, String nombreDocumento, String archivoBase64, URL url, String apiKeyRest
+    public void almacenarDocumentoREST(ec.gob.firmadigital.certificate.to.Documento documento, String cedula, String nombreDocumento, String archivoBase64, URL url, String apiKeyRest
     ) throws SistemaTransversalException {
         JsonObject jsonDoc = new JsonObject();
         jsonDoc.addProperty("cedula", cedula);
