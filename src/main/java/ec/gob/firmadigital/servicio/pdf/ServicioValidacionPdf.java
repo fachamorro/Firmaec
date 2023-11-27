@@ -41,14 +41,14 @@ import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
 import ec.gob.firmadigital.servicio.crl.ServicioConsultaCrl;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
-import ec.gob.firmadigital.certificate.CertEcUtils;
-import ec.gob.firmadigital.exceptions.OcspValidationException;
-import ec.gob.firmadigital.exceptions.InvalidFormatException;
-import ec.gob.firmadigital.sign.SignInfo;
-import ec.gob.firmadigital.sign.Signer;
-import ec.gob.firmadigital.certificate.to.DatosUsuario;
-import ec.gob.firmadigital.sign.pdf.PDFSignerItext;
-import ec.gob.firmadigital.utils.Utils;
+import ec.gob.firmadigital.libreria.certificate.CertEcUtils;
+import ec.gob.firmadigital.libreria.exceptions.OcspValidationException;
+import ec.gob.firmadigital.libreria.exceptions.InvalidFormatException;
+import ec.gob.firmadigital.libreria.sign.SignInfo;
+import ec.gob.firmadigital.libreria.sign.Signer;
+import ec.gob.firmadigital.libreria.certificate.to.DatosUsuario;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.utils.Utils;
 
 /**
  * Servicio de verificacion de archivos PDF.

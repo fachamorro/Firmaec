@@ -28,7 +28,7 @@ import jakarta.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.Version;
 import ec.gob.firmadigital.servicio.util.PropertiesUtils;
-import ec.gob.firmadigital.utils.OsUtils;
+import ec.gob.firmadigital.libreria.utils.OsUtils;
 import jakarta.ejb.EJB;
 
 /**

@@ -17,13 +17,13 @@
  */
 package ec.gob.firmadigital.servicio.util;
 
-import ec.gob.firmadigital.exceptions.HoraServidorException;
+import ec.gob.firmadigital.libreria.exceptions.HoraServidorException;
 import java.io.IOException;
 import java.util.Properties;
 
-import ec.gob.firmadigital.sign.pdf.PDFSignerItext;
-import ec.gob.firmadigital.sign.pdf.RectanguloUtil;
-import ec.gob.firmadigital.utils.TiempoUtils;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.sign.pdf.RectanguloUtil;
+import ec.gob.firmadigital.libreria.utils.TiempoUtils;
 import java.io.StringReader;
 import java.net.URLDecoder;
 import java.util.Base64;

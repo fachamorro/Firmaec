@@ -5,10 +5,10 @@
  */
 package ec.gob.firmadigital.servicio.util;
 
-import ec.gob.firmadigital.keystore.Alias;
-import ec.gob.firmadigital.keystore.FileKeyStoreProvider;
-import ec.gob.firmadigital.keystore.KeyStoreProvider;
-import ec.gob.firmadigital.keystore.KeyStoreUtilities;
+import ec.gob.firmadigital.libreria.keystore.Alias;
+import ec.gob.firmadigital.libreria.keystore.FileKeyStoreProvider;
+import ec.gob.firmadigital.libreria.keystore.KeyStoreProvider;
+import ec.gob.firmadigital.libreria.keystore.KeyStoreUtilities;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;

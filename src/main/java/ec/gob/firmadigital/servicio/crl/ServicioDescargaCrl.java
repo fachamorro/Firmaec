@@ -40,8 +40,8 @@ import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import javax.sql.DataSource;
-import ec.gob.firmadigital.crl.ServicioCRL;
-import ec.gob.firmadigital.utils.HttpClient;
+import ec.gob.firmadigital.libreria.crl.ServicioCRL;
+import ec.gob.firmadigital.libreria.utils.HttpClient;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,6 +124,12 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de LAZZATE...");
         X509CRL lazzateCrl = downloadCrl(ServicioCRL.LAZZATE_CRL);
 
+        logger.info("Descargando CRL de ALPHATECHNOLOGIES...");
+        X509CRL alphaTechnologiesCrl = downloadCrl(ServicioCRL.ALPHATECHNOLOGIES_CRL);
+
+        logger.info("Descargando CRL de CORPNEWBEST...");
+        X509CRL corpNewBestCrl = downloadCrl(ServicioCRL.CORPNEWBEST_CRL);
+
         try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?) "
                 + "ON CONFLICT (serial) "
@@ -141,6 +147,8 @@ public class ServicioDescargaCrl {
             int contadorDATIL = 0;
             int contadorARGOSDATA = 0;
             int contadorLAZZATE = 0;
+            int contadorALPHATECHNOLOGIES = 0;
+            int contadorCorpNewBest = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -247,7 +255,21 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta LAZZATE (10)");
             }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1 + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE;
+            if (alphaTechnologiesCrl != null) {
+                contadorALPHATECHNOLOGIES = insertarCrl(alphaTechnologiesCrl, 11, ps);
+                logger.info("Registros insertados/actualizados ALPHATECHNOLOGIES (11): " + contadorALPHATECHNOLOGIES);
+            } else {
+                logger.info("No se inserta ALPHATECHNOLOGIES (11)");
+            }
+
+            if (corpNewBestCrl != null) {
+                contadorCorpNewBest = insertarCrl(corpNewBestCrl, 12, ps);
+                logger.info("Registros insertados/actualizados CORPNEWBEST (12): " + contadorCorpNewBest);
+            } else {
+                logger.info("No se inserta CORPNEWBEST (12)");
+            }
+
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1 + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE + contadorALPHATECHNOLOGIES + contadorCorpNewBest;
             logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");
@@ -294,7 +316,7 @@ public class ServicioDescargaCrl {
             HttpClient http = new HttpClient();
             content = http.download(url);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error al descargar CRL de " + url, e);
+            logger.log(Level.SEVERE, "Error al descargar CRL de " + url + ": " + e.getMessage());
             return null;
         }
 

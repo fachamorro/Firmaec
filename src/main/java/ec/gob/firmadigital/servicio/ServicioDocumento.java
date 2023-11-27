@@ -41,14 +41,14 @@ import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.FileUtil;
-import ec.gob.firmadigital.exceptions.CertificadoInvalidoException;
-import ec.gob.firmadigital.exceptions.DocumentoException;
-import ec.gob.firmadigital.exceptions.InvalidFormatException;
-import ec.gob.firmadigital.sign.SignInfo;
-import ec.gob.firmadigital.sign.Signer;
-import ec.gob.firmadigital.sign.pdf.PDFSignerItext;
-import ec.gob.firmadigital.sign.xades.XAdESSigner;
-import ec.gob.firmadigital.utils.Utils;
+import ec.gob.firmadigital.libreria.exceptions.CertificadoInvalidoException;
+import ec.gob.firmadigital.libreria.exceptions.DocumentoException;
+import ec.gob.firmadigital.libreria.exceptions.InvalidFormatException;
+import ec.gob.firmadigital.libreria.sign.SignInfo;
+import ec.gob.firmadigital.libreria.sign.Signer;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.sign.xades.XAdESSigner;
+import ec.gob.firmadigital.libreria.utils.Utils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -224,7 +224,7 @@ public class ServicioDocumento {
             // sistema transversal
             String datosFirmante = "";
             try {
-                ec.gob.firmadigital.certificate.to.Documento documentoTo = null;
+                ec.gob.firmadigital.libreria.certificate.to.Documento documentoTo = null;
                 try {
                     // Se valida la extension del archivo
                     String mimeTypeRest = FileUtil.getMimeType(byteDocumento);
