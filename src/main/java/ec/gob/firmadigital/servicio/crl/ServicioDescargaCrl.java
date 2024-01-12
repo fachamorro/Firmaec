@@ -130,6 +130,9 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de CORPNEWBEST...");
         X509CRL corpNewBestCrl = downloadCrl(ServicioCRL.CORPNEWBEST_CRL);
 
+        logger.info("Descargando CRL de FIRMA SEGURA...");
+        X509CRL firmaSeguraCrl = downloadCrl(ServicioCRL.FIRMASEGURA_CRL);
+
         try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?) "
                 + "ON CONFLICT (serial) "
@@ -149,6 +152,7 @@ public class ServicioDescargaCrl {
             int contadorLAZZATE = 0;
             int contadorALPHATECHNOLOGIES = 0;
             int contadorCorpNewBest = 0;
+            int contadorFirmaSegura = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -268,8 +272,15 @@ public class ServicioDescargaCrl {
             } else {
                 logger.info("No se inserta CORPNEWBEST (12)");
             }
+            
+            if (firmaSeguraCrl != null) {
+                contadorFirmaSegura = insertarCrl(firmaSeguraCrl, 13, ps);
+                logger.info("Registros insertados/actualizados FIRMA SEGURA (13): " + contadorFirmaSegura);
+            } else {
+                logger.info("No se inserta FIRMA SEGURA (13)");
+            }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1 + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE + contadorALPHATECHNOLOGIES + contadorCorpNewBest;
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1 + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE + contadorALPHATECHNOLOGIES + contadorCorpNewBest + contadorFirmaSegura;
             logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");

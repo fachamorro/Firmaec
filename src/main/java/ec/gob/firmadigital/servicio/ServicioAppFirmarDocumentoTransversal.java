@@ -60,17 +60,7 @@ import jakarta.ws.rs.core.Response;
  */
 @Stateless
 public class ServicioAppFirmarDocumentoTransversal {
-//    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/servicio/appfirmardocumento";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://impwsmobile.firmadigital.gob.ec:8181/servicio/appfirmardocumento";
-//    private final String REST_SERVICE_URL_PRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";   
 
-//    private final String REST_SERVICE_URL_PRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";
-//    private final String REST_SERVICE_URL_PREPRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://wsmobile.firmadigital.gob.ec:8080/servicio/appfirmardocumento";
-    
-//    private final String REST_SERVICE_URL_PRODUCCION = "https://ws.firmadigital.gob.ec/servicio";
-//    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impws.firmadigital.gob.ec/servicio";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://testws.firmadigital.gob.ec:8080/servicio";
     private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
     private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
     private final String REST_SERVICE_URL_DESARROLLO = "http://testapi.firmadigital.gob.ec:8080/api";
@@ -115,7 +105,7 @@ public class ServicioAppFirmarDocumentoTransversal {
         System.out.println("restServiceUrl:  " + restServiceUrl);
         //en caso de ser firma descentralizada
         if (url != null) {
-            restServiceUrl = url;
+            this.restServiceUrl = url;
         }
         Map<Long, byte[]> documentosFirmados;
         try {
