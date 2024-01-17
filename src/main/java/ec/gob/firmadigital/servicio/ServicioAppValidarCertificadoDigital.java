@@ -114,6 +114,7 @@ public class ServicioAppValidarCertificadoDigital {
                     Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
                     caducado,
                     datosUsuario);
+            certificado.setKeyUsages(Utils.validacionKeyUsages(x509Certificate));
         } catch (KeyStoreException kse) {
             if (kse.getCause().toString().contains("Invalid keystore format")) {
                 retorno = "Certificado digital es inválido.";

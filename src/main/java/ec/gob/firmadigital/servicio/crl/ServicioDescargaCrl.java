@@ -133,6 +133,15 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de FIRMA SEGURA...");
         X509CRL firmaSeguraCrl = downloadCrl(ServicioCRL.FIRMASEGURA_CRL);
 
+        logger.info("Descargando CRL de LAZZATECA1...");
+        X509CRL lazzateCa1Crl = downloadCrl(ServicioCRL.LAZZATECA1_CRL);
+
+        logger.info("Descargando CRL de LAZZATECA2...");
+        X509CRL lazzateCa2Crl = downloadCrl(ServicioCRL.LAZZATECA2_CRL);
+
+        logger.info("Descargando CRL de LAZZATEWEGO...");
+        X509CRL lazzateCaWeGoCrl = downloadCrl(ServicioCRL.LAZZATE_WE_GO_CRL);
+
         try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO crl (serial, fecharevocacion, razonrevocacion, entidadcertificadora) VALUES (?,?,?,?) "
                 + "ON CONFLICT (serial) "
@@ -153,6 +162,9 @@ public class ServicioDescargaCrl {
             int contadorALPHATECHNOLOGIES = 0;
             int contadorCorpNewBest = 0;
             int contadorFirmaSegura = 0;
+            int contadorLazzateCa1 = 0;
+            int contadorLazzateCa2 = 0;
+            int contadorLazzateCaWeGo = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -272,7 +284,7 @@ public class ServicioDescargaCrl {
             } else {
                 logger.info("No se inserta CORPNEWBEST (12)");
             }
-            
+
             if (firmaSeguraCrl != null) {
                 contadorFirmaSegura = insertarCrl(firmaSeguraCrl, 13, ps);
                 logger.info("Registros insertados/actualizados FIRMA SEGURA (13): " + contadorFirmaSegura);
@@ -280,7 +292,34 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta FIRMA SEGURA (13)");
             }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1 + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA + contadorLAZZATE + contadorALPHATECHNOLOGIES + contadorCorpNewBest + contadorFirmaSegura;
+            if (lazzateCa1Crl != null) {
+                contadorLazzateCa1 = insertarCrl(lazzateCa1Crl, 14, ps);
+                logger.info("Registros insertados/actualizados LAZZATECA1 (14): " + contadorLazzateCa1);
+            } else {
+                logger.info("No se inserta LAZZATECA1 (14)");
+            }
+
+            if (lazzateCa2Crl != null) {
+                contadorLazzateCa2 = insertarCrl(lazzateCa2Crl, 15, ps);
+                logger.info("Registros insertados/actualizados LAZZATECA2 (15): " + contadorLazzateCa2);
+            } else {
+                logger.info("No se inserta LAZZATECA2 (15)");
+            }
+
+            if (lazzateCaWeGoCrl != null) {
+                contadorLazzateCaWeGo = insertarCrl(lazzateCaWeGoCrl, 16, ps);
+                logger.info("Registros insertados/actualizados LAZZATECAWEGO (16): " + contadorLazzateCaWeGo);
+            } else {
+                logger.info("No se inserta LAZZATECAWEGO (16)");
+            }
+
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3
+                    + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1
+                    + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2
+                    + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA
+                    + contadorLAZZATE + contadorALPHATECHNOLOGIES + contadorCorpNewBest
+                    + contadorFirmaSegura + contadorLazzateCa1 + contadorLazzateCa2
+                    + contadorLazzateCaWeGo;
             logger.info("Registros insertados/actualizados Total: " + total);
 
             logger.info("Finalizado!");
