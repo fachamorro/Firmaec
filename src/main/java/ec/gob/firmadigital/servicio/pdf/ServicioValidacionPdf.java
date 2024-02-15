@@ -47,8 +47,11 @@ import ec.gob.firmadigital.libreria.exceptions.InvalidFormatException;
 import ec.gob.firmadigital.libreria.sign.SignInfo;
 import ec.gob.firmadigital.libreria.sign.Signer;
 import ec.gob.firmadigital.libreria.certificate.to.DatosUsuario;
+import ec.gob.firmadigital.libreria.exceptions.EntidadCertificadoraNoValidaException;
+import ec.gob.firmadigital.libreria.sign.pdf.BasePdfSigner;
 import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
 import ec.gob.firmadigital.libreria.utils.Utils;
+import java.util.logging.Level;
 
 /**
  * Servicio de verificacion de archivos PDF.
@@ -112,21 +115,23 @@ public class ServicioValidacionPdf {
 
         // Para construir un array de firmantes
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-        for (SignInfo firma : firmas) {
-            //arreglar certificados invalidos
-            JsonObjectBuilder builder = Json.createObjectBuilder();
-            X509Certificate certificado = firma.getCerts()[0];
-            DatosUsuario datosUsuario = CertEcUtils.getDatosUsuarios(certificado);
+            for (SignInfo firma : firmas) {
+                //arreglar certificados invalidos
+                JsonObjectBuilder builder = Json.createObjectBuilder();
+                X509Certificate certificado = firma.getCerts()[0];
+                DatosUsuario datosUsuario = CertEcUtils.getDatosUsuarios(certificado);
 
-            builder.add("fecha", sdf.format(firma.getSigningTime()));
-            builder.add("cedula", datosUsuario.getCedula());
-            builder.add("nombre", datosUsuario.getNombre() + " " + datosUsuario.getApellido());
-            builder.add("cargo", datosUsuario.getCargo());
-            builder.add("institucion", datosUsuario.getInstitucion());
-            arrayBuilder.add(builder);
-        }
+                builder.add("fecha", sdf.format(firma.getSigningTime()));
+                builder.add("cedula", datosUsuario.getCedula());
+                builder.add("nombre", datosUsuario.getNombre() + " " + datosUsuario.getApellido());
+                builder.add("cargo", datosUsuario.getCargo());
+                builder.add("institucion", datosUsuario.getInstitucion());
+                arrayBuilder.add(builder);
+            }
 
 //        List<Certificado> certificados = Utils.verificarDocumento(pdf);
 //        certificados.forEach((certificado) -> {
@@ -156,9 +161,12 @@ public class ServicioValidacionPdf {
 //            dataCert[3] = certificado.getDatosUsuario().getEntidadCertificadora();
 //            dataCert[5] = validarFirma;
 //        });
+        } catch (EntidadCertificadoraNoValidaException ex) {
+            Logger.getLogger(BasePdfSigner.class.getName()).log(Level.SEVERE, null, ex);
+            objectBuilder.add("error", "Entidad Certificadora no reconocida");
+        }
         // Construir JSON
         JsonArray jsonArray = arrayBuilder.build();
-        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
         String json = objectBuilder.add("firmantes", jsonArray).build().toString();
 
         return Response.ok(json, MediaType.APPLICATION_JSON).build();

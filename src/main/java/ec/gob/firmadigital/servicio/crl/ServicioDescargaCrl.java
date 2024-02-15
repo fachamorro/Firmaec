@@ -127,8 +127,14 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de ALPHATECHNOLOGIES...");
         X509CRL alphaTechnologiesCrl = downloadCrl(ServicioCRL.ALPHATECHNOLOGIES_CRL);
 
-        logger.info("Descargando CRL de CORPNEWBEST...");
-        X509CRL corpNewBestCrl = downloadCrl(ServicioCRL.CORPNEWBEST_CRL);
+        logger.info("Descargando CRL de CORPNEWBEST 1...");
+        X509CRL corpNewBestCrl1 = downloadCrl(ServicioCRL.CORPNEWBEST_CRL1);
+
+        logger.info("Descargando CRL de CORPNEWBEST 2...");
+        X509CRL corpNewBestCrl2 = downloadCrl(ServicioCRL.CORPNEWBEST_CRL2);
+
+        logger.info("Descargando CRL de CORPNEWBEST 3...");
+        X509CRL corpNewBestCrl3 = downloadCrl(ServicioCRL.CORPNEWBEST_CRL3);
 
         logger.info("Descargando CRL de FIRMA SEGURA...");
         X509CRL firmaSeguraCrl = downloadCrl(ServicioCRL.FIRMASEGURA_CRL);
@@ -160,7 +166,9 @@ public class ServicioDescargaCrl {
             int contadorARGOSDATA = 0;
             int contadorLAZZATE = 0;
             int contadorALPHATECHNOLOGIES = 0;
-            int contadorCorpNewBest = 0;
+            int contadorCorpNewBest1 = 0;
+            int contadorCorpNewBest2 = 0;
+            int contadorCorpNewBest3 = 0;
             int contadorFirmaSegura = 0;
             int contadorLazzateCa1 = 0;
             int contadorLazzateCa2 = 0;
@@ -278,46 +286,61 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta ALPHATECHNOLOGIES (11)");
             }
 
-            if (corpNewBestCrl != null) {
-                contadorCorpNewBest = insertarCrl(corpNewBestCrl, 12, ps);
-                logger.info("Registros insertados/actualizados CORPNEWBEST (12): " + contadorCorpNewBest);
+            if (corpNewBestCrl1 != null) {
+                contadorCorpNewBest1 = insertarCrl(corpNewBestCrl1, 12, ps);
+                logger.info("Registros insertados/actualizados CORPNEWBEST 1 (12): " + contadorCorpNewBest1);
             } else {
-                logger.info("No se inserta CORPNEWBEST (12)");
+                logger.info("No se inserta CORPNEWBEST 1 (12)");
+            }
+
+            if (corpNewBestCrl2 != null) {
+                contadorCorpNewBest2 = insertarCrl(corpNewBestCrl2, 13, ps);
+                logger.info("Registros insertados/actualizados CORPNEWBEST 2 (13): " + contadorCorpNewBest2);
+            } else {
+                logger.info("No se inserta CORPNEWBEST 2 (13)");
+            }
+
+            if (corpNewBestCrl3 != null) {
+                contadorCorpNewBest3 = insertarCrl(corpNewBestCrl3, 14, ps);
+                logger.info("Registros insertados/actualizados CORPNEWBEST 3 (14): " + contadorCorpNewBest3);
+            } else {
+                logger.info("No se inserta CORPNEWBEST 3 (14)");
             }
 
             if (firmaSeguraCrl != null) {
-                contadorFirmaSegura = insertarCrl(firmaSeguraCrl, 13, ps);
-                logger.info("Registros insertados/actualizados FIRMA SEGURA (13): " + contadorFirmaSegura);
+                contadorFirmaSegura = insertarCrl(firmaSeguraCrl, 15, ps);
+                logger.info("Registros insertados/actualizados FIRMA SEGURA (15): " + contadorFirmaSegura);
             } else {
-                logger.info("No se inserta FIRMA SEGURA (13)");
+                logger.info("No se inserta FIRMA SEGURA (15)");
             }
 
             if (lazzateCa1Crl != null) {
-                contadorLazzateCa1 = insertarCrl(lazzateCa1Crl, 14, ps);
-                logger.info("Registros insertados/actualizados LAZZATECA1 (14): " + contadorLazzateCa1);
+                contadorLazzateCa1 = insertarCrl(lazzateCa1Crl, 16, ps);
+                logger.info("Registros insertados/actualizados LAZZATECA1 (16): " + contadorLazzateCa1);
             } else {
-                logger.info("No se inserta LAZZATECA1 (14)");
+                logger.info("No se inserta LAZZATECA1 (16)");
             }
 
             if (lazzateCa2Crl != null) {
-                contadorLazzateCa2 = insertarCrl(lazzateCa2Crl, 15, ps);
-                logger.info("Registros insertados/actualizados LAZZATECA2 (15): " + contadorLazzateCa2);
+                contadorLazzateCa2 = insertarCrl(lazzateCa2Crl, 17, ps);
+                logger.info("Registros insertados/actualizados LAZZATECA2 (17): " + contadorLazzateCa2);
             } else {
-                logger.info("No se inserta LAZZATECA2 (15)");
+                logger.info("No se inserta LAZZATECA2 (17)");
             }
 
             if (lazzateCaWeGoCrl != null) {
-                contadorLazzateCaWeGo = insertarCrl(lazzateCaWeGoCrl, 16, ps);
-                logger.info("Registros insertados/actualizados LAZZATECAWEGO (16): " + contadorLazzateCaWeGo);
+                contadorLazzateCaWeGo = insertarCrl(lazzateCaWeGoCrl, 18, ps);
+                logger.info("Registros insertados/actualizados LAZZATECAWEGO (18): " + contadorLazzateCaWeGo);
             } else {
-                logger.info("No se inserta LAZZATECAWEGO (16)");
+                logger.info("No se inserta LAZZATECAWEGO (18)");
             }
 
             int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3
                     + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC1
                     + contadorANFAC2 + contadorUANATACA1 + contadorUANATACA2
                     + contadorDIGERCIC + contadorDATIL + contadorARGOSDATA
-                    + contadorLAZZATE + contadorALPHATECHNOLOGIES + contadorCorpNewBest
+                    + contadorLAZZATE + contadorALPHATECHNOLOGIES
+                    + contadorCorpNewBest1 + contadorCorpNewBest2 + contadorCorpNewBest3
                     + contadorFirmaSegura + contadorLazzateCa1 + contadorLazzateCa2
                     + contadorLazzateCaWeGo;
             logger.info("Registros insertados/actualizados Total: " + total);

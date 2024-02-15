@@ -33,7 +33,11 @@ import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
 import ec.gob.firmadigital.libreria.exceptions.SignatureVerificationException;
 import ec.gob.firmadigital.libreria.certificate.to.DatosUsuario;
+import ec.gob.firmadigital.libreria.exceptions.EntidadCertificadoraNoValidaException;
 import ec.gob.firmadigital.libreria.sign.cms.VerificadorCMS;
+import ec.gob.firmadigital.libreria.sign.pdf.BasePdfSigner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servicio de validacion de archivos CMS (P7M).
@@ -58,31 +62,35 @@ public class ServicioValidacionCms {
         }
 
         VerificadorCMS verificador = new VerificadorCMS();
-        byte[] archivoOriginal = verificador.verify(archivo);
-        String archivoOriginalBase64 = Base64Util.encode(archivoOriginal);
-
         JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-        objectBuilder.add("archivo", archivoOriginalBase64);
+        try {
+            byte[] archivoOriginal = verificador.verify(archivo);
+            String archivoOriginalBase64 = Base64Util.encode(archivoOriginal);
+            
+            objectBuilder.add("archivo", archivoOriginalBase64);
 
-        // Para construir un array de firmantes
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            // Para construir un array de firmantes
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
-        // FIXME
-        List<DatosUsuario> listaDatosUsuario = verificador.listaDatosUsuario;
+            // FIXME
+            List<DatosUsuario> listaDatosUsuario = verificador.listaDatosUsuario;
 
-        for (DatosUsuario datosUsuario : listaDatosUsuario) {
-            JsonObjectBuilder builder = Json.createObjectBuilder();
-            builder.add("nombre", datosUsuario.getNombre());
-            builder.add("apellido", datosUsuario.getApellido());
-            builder.add("cargo", datosUsuario.getCargo());
-            builder.add("cedula", datosUsuario.getCedula());
-            builder.add("institucion", datosUsuario.getInstitucion());
-            arrayBuilder.add(builder);
+            for (DatosUsuario datosUsuario : listaDatosUsuario) {
+                JsonObjectBuilder builder = Json.createObjectBuilder();
+                builder.add("nombre", datosUsuario.getNombre());
+                builder.add("apellido", datosUsuario.getApellido());
+                builder.add("cargo", datosUsuario.getCargo());
+                builder.add("cedula", datosUsuario.getCedula());
+                builder.add("institucion", datosUsuario.getInstitucion());
+                arrayBuilder.add(builder);
+            }
+            
+            objectBuilder.add("firmantes", arrayBuilder.build());
+        } catch (EntidadCertificadoraNoValidaException ex) {
+            Logger.getLogger(BasePdfSigner.class.getName()).log(Level.SEVERE, null, ex);
+            objectBuilder.add("error", "Entidad Certificadora no reconocida");
         }
-
-        objectBuilder.add("firmantes", arrayBuilder.build());
         String json = objectBuilder.build().toString();
-
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 }
