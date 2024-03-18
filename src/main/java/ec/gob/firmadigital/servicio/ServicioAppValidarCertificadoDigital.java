@@ -19,18 +19,18 @@ package ec.gob.firmadigital.servicio;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.rubrica.certificate.CertEcUtils;
-import io.rubrica.certificate.to.Certificado;
-import io.rubrica.certificate.to.DatosUsuario;
-import io.rubrica.core.Util;
-import io.rubrica.exceptions.CertificadoInvalidoException;
-import io.rubrica.keystore.Alias;
-import io.rubrica.keystore.FileKeyStoreProvider;
-import io.rubrica.keystore.KeyStoreProvider;
-import io.rubrica.keystore.KeyStoreUtilities;
-import io.rubrica.utils.TiempoUtils;
-import io.rubrica.utils.Utils;
-import io.rubrica.utils.UtilsCrlOcsp;
+import ec.gob.firmadigital.libreria.certificate.CertEcUtils;
+import ec.gob.firmadigital.libreria.certificate.to.Certificado;
+import ec.gob.firmadigital.libreria.certificate.to.DatosUsuario;
+import ec.gob.firmadigital.libreria.core.Util;
+import ec.gob.firmadigital.libreria.exceptions.CertificadoInvalidoException;
+import ec.gob.firmadigital.libreria.keystore.Alias;
+import ec.gob.firmadigital.libreria.keystore.FileKeyStoreProvider;
+import ec.gob.firmadigital.libreria.keystore.KeyStoreProvider;
+import ec.gob.firmadigital.libreria.keystore.KeyStoreUtilities;
+import ec.gob.firmadigital.libreria.utils.TiempoUtils;
+import ec.gob.firmadigital.libreria.utils.Utils;
+import ec.gob.firmadigital.libreria.utils.UtilsCrlOcsp;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,10 +43,10 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import io.rubrica.utils.Json;
+import ec.gob.firmadigital.libreria.utils.Json;
 
-import javax.ejb.Stateless;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Stateless;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -114,6 +114,7 @@ public class ServicioAppValidarCertificadoDigital {
                     Utils.dateToCalendar(UtilsCrlOcsp.validarFechaRevocado(x509Certificate, null)),
                     caducado,
                     datosUsuario);
+            certificado.setKeyUsages(Utils.validacionKeyUsages(x509Certificate));
         } catch (KeyStoreException kse) {
             if (kse.getCause().toString().contains("Invalid keystore format")) {
                 retorno = "Certificado digital es inválido.";

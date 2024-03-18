@@ -1,61 +1,77 @@
-= FirmaEC: Servicio
+= FirmaEC: firmadigital-servicio
 
-_FirmaEC Servicio_ es una plataforma para recibir documentos desde sistemas transversales, para luego ser firmados digitalmente del lado del cliente.
+Este proyecto implementa los servicios REST para recibir documentos desde sistemas transversales.
 
 == Introducción
+
 Los siguientes pasos le permitirán obtener una copia del proyecto para correrla en la máquina local para propósitos de desarrollo y pruebas.
 
-==== WildFly
-Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 11*.
-Se debe utilizar _WildFly Application Server 26.1.1_, disponible en http://www.wildfly.org[wildfly.org]
+== Prerequisitos
 
-==== Maven
+=== Java
+
+Se necesita instalar _Java Development Kit (JDK) 11_ para compilar y correr la aplicación.
+
+En Fedora se debe instalar el paquete _java-11-openjdk-devel_:
+
+[source, bash]
+----
+$ sudo dnf -y install java-11-openjdk-devel
+----
+
+En Ubuntu se debe instalar el paquete _openjdk-11-jdk_.
+
+[source, bash]
+----
+$ sudo apt-get install openjdk-11-jdk
+----
+
+=== Maven
+
 Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
 
+En _Microsoft Windows_ se debe descargar e instalar siguiendo las instrucciones de instalación de https://maven.apache.org/install.html[Apache Maven].
 
-== Instalación
-Para compilar se utilizar Apache Maven:
+En _Fedora_ se debe instalar el paquete  `maven`:
+
+[source,bash]
+----
+$ sudo dnf install maven
+----
+
+En _Ubuntu_ se debe instalar el paquete `maven`:
+
+[source,bash]
+----
+$ sudo apt-get install maven
+----
+
+=== NetBeans
+
+Se utilizó como entorno de desarrollo el IDE http://netbeans.org[Netbeans].
+
+=== WildFly
+
+Se utilizó el servidor de aplicación https://www.wildfly.org/downloads/[Wildfly].
+
+== Dependencias
+
+Esta aplicación utiliza la librería https://minka.gob.ec/mintel/ge/firmaec/firmadigital-libreria[firmadigital-libreria] para realizar las operaciones de firma digital.
+
+== Compilar
+
+Se debe compilar usando el siguiente comando:
 
 [source, bash]
 ----
 $ mvn clean package
 ----
 
-Esto produce el JAR en _target/firmador-jar-with-dependencies.jar_
+== Desplegar
 
+Para desplegar el proyecto _firmadigital-servicio_, se debe utilizar el servidor de aplicación Wildfly en la versión 29.
 
-== Despliegue
-
-Para utilizar la aplicación se debe ejecutar
-
-[source,bash]
-----
-$ java -jar target/firmador-jar-with-dependencies.jar
-----
-
-== Balanceo de carga
-
-Se debe generar una llave a través de la clase ServicioTokenJwt.java y el resultado configurarlo dentro del archivo de configuración Wildfly en la siguiente sección
-
-----
-</extensions>
-<system-properties>
-	<property name="jwt.key" value="value="tYdX9if...=="/>
-</system-properties>
-<management>
-----
-
-Se debe comentar el siguiente código dentro de la clase ServicioDescargaCrl.java para generar el compilado que no realice descargas de CRL
-
-----
-@PostConstruct
-public void init() {
-	crearTablaSiNoExiste();
-	importarCrls();
-}
-----
-
-Después de este proceso, se descomentará y se generará otro compilado para el servidor que realice las descargas de CRL
+Se debe copiar el archivo `target/servicio.war` a la carpeta `standalone/deploy` de un servidor de aplicaciones WildFly
 
 == Desarrollo
 
@@ -97,29 +113,19 @@ data-source add --name=FirmaDigitalDS --jndi-name=java:/FirmaDigitalDS --driver-
 run-batch
 ----
 
-
-== Construido con
-
-* https://maven.apache.org/[Maven] - Dependency Management
-
-
 == Colaborar
 
-Para colaborar se puede enviar un Merge Request utilizando la plataforma https://minka.gob.ec[Minka].
-
+Para colaborar se puede enviar un _Merge Request_ utilizando la plataforma https://minka.gob.ec/mintel/ge/firmaec[Minka].
 
 == Versiones
 
-Usamos http://semver.org[SemVer] para versionar.
-
+Usamos https://minka.gob.ec/mintel/ge/estandares/-/blob/master/versionamiento.md[Estandares] para versionar.
 
 == Autores
 
-* *Juan Diego Calle* - *Desarrollo inicial* - http://www.soportelibre.com[Soporte Libre]
 * *Ricardo Arguello* - *Desarrollo* - http://www.soportelibre.com[Soporte Libre]
 * *Misael Fernández* - *Desarrollo* - misael.fernandez.correa@gmail.com
 
 == Licencia
 
-Este proyecto está licenciado bajo la licencia AGPL v3.
-Revisar LICENSE para detalles.
+Esta aplicación se distribuye con una licencia https://www.gnu.org/licenses/gpl.html[GPLv3].
