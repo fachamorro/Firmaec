@@ -29,7 +29,7 @@ import jakarta.persistence.NamedQuery;
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Entity
-@NamedQuery(name = "ApiUrl.findByUrl", query = "SELECT a FROM ApiUrl a WHERE lower(a.url) LIKE lower(a.url)")
+@NamedQuery(name = "ApiUrl.findByUrl", query = "SELECT a FROM ApiUrl a WHERE lower(a.url) LIKE lower(:url)")
 
 public class ApiUrl implements Serializable {
 
