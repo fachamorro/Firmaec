@@ -26,12 +26,12 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.xml.bind.DatatypeConverter;
 import jakarta.xml.soap.MessageFactory;
 import jakarta.xml.soap.Name;
 import jakarta.xml.soap.SOAPBody;
@@ -52,15 +52,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
-import io.rubrica.certificate.to.Certificado;
+import ec.gob.firmadigital.libreria.certificate.to.Certificado;
+import ec.gob.firmadigital.libreria.certificate.to.Documento;
 import java.text.DateFormat;
 import java.util.Calendar;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Servicio para invocar Web Services de los sistemas transaccionales, utilizado
@@ -139,7 +140,7 @@ public class ServicioSistemaTransversal {
      * @param apiKeyRest
      * @throws SistemaTransversalException
      */
-    public void almacenarDocumentoREST(io.rubrica.certificate.to.Documento documento, String cedula, String nombreDocumento, String archivoBase64, URL url, String apiKeyRest
+    public void almacenarDocumentoREST(Documento documento, String cedula, String nombreDocumento, String archivoBase64, URL url, String apiKeyRest
     ) throws SistemaTransversalException {
         JsonObject jsonDoc = new JsonObject();
         jsonDoc.addProperty("cedula", cedula);

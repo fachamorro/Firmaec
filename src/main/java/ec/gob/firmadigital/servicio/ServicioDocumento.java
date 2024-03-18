@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.validation.constraints.NotNull;
 import ec.gob.firmadigital.servicio.model.Documento;
 import ec.gob.firmadigital.servicio.token.ServicioToken;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
@@ -41,20 +41,20 @@ import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.FileUtil;
-import io.rubrica.exceptions.CertificadoInvalidoException;
-import io.rubrica.exceptions.DocumentoException;
-import io.rubrica.exceptions.InvalidFormatException;
-import io.rubrica.sign.SignInfo;
-import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSignerItext;
-import io.rubrica.sign.xades.XAdESSigner;
-import io.rubrica.utils.Utils;
+import ec.gob.firmadigital.libreria.exceptions.CertificadoInvalidoException;
+import ec.gob.firmadigital.libreria.exceptions.DocumentoException;
+import ec.gob.firmadigital.libreria.exceptions.InvalidFormatException;
+import ec.gob.firmadigital.libreria.sign.SignInfo;
+import ec.gob.firmadigital.libreria.sign.Signer;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.sign.xades.XAdESSigner;
+import ec.gob.firmadigital.libreria.utils.Utils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 /**
  * Servicio para almacenar, actualizar y obtener documentos desde los sistemas
@@ -224,7 +224,7 @@ public class ServicioDocumento {
             // sistema transversal
             String datosFirmante = "";
             try {
-                io.rubrica.certificate.to.Documento documentoTo = null;
+                ec.gob.firmadigital.libreria.certificate.to.Documento documentoTo = null;
                 try {
                     // Se valida la extension del archivo
                     String mimeTypeRest = FileUtil.getMimeType(byteDocumento);
