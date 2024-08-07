@@ -23,6 +23,7 @@ import jakarta.ejb.Stateless;
 import jakarta.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.token.TokenTimeout;
+import ec.gob.firmadigital.servicio.util.UtilsJson;
 import jakarta.ejb.EJB;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,21 +49,27 @@ public class ServicioJWT {
      * @param apiKey
      * @param sistemaTransversal
      * @return jwt
-     * @throws ec.gob.firmadigital.servicio.exception.ServicioSistemaTransversalException
+     * @throws
+     * ec.gob.firmadigital.servicio.exception.ServicioSistemaTransversalException
      */
     public String getJWT(@NotNull String apiKey, @NotNull String sistemaTransversal) throws ServicioSistemaTransversalException {
-        try {
-            // Verificar si existe el sistema
-            servicioSistemaTransversal.buscarApiKey(sistemaTransversal);
+        if (servicioSistemaTransversal.verificarApiKey(sistemaTransversal, apiKey)) {
             Map<String, Object> parametros = new HashMap<>();
-            parametros.put("sistema", sistemaTransversal);
+            if (apiKey.equals(apiKey)) {
+                parametros.put("sistema", sistemaTransversal);
+            }
             // Expiracion del Token
-            Date expiracion = TokenTimeout.addMinutes(new Date(), 1);//minutos
+            Date expiracion = TokenTimeout.addSeconds(new Date(), 5);//segundos
             // Retorna el Token
-            return servicioToken.generarToken(parametros, expiracion);
-        } catch (ServicioSistemaTransversalException e) {
-            System.out.println("Exception: " + e.getMessage());
-            throw new ServicioSistemaTransversalException("El sistema no se encunetra registrado");
+            return UtilsJson.generarJsonResponse(
+                    200, 
+                    null, 
+                    servicioToken.generarToken(parametros, expiracion));
+        } else {
+            return UtilsJson.generarJsonResponse(
+                    500, 
+                    "La información enviada no concuerda con la registrada en FirmaEC", 
+                    null);
         }
     }
 }

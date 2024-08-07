@@ -18,6 +18,7 @@ package ec.gob.firmadigital.servicio.rest;
 
 import ec.gob.firmadigital.servicio.ServicioJWT;
 import ec.gob.firmadigital.servicio.exception.ServicioSistemaTransversalException;
+import ec.gob.firmadigital.servicio.util.UtilsJson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.ws.rs.Path;
@@ -46,18 +47,18 @@ public class ServicioGetJWTRest {
 
     @EJB
     private ServicioJWT servicioJWT;
-    
+
     private static final String API_KEY_HEADER_PARAMETER = "X-API-KEY";
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
     public String getJWT(@HeaderParam(API_KEY_HEADER_PARAMETER) String apiKey, @FormParam("base64") String base64) {
-        
+
         if (apiKey == null) {
             return "Se debe incluir un apiKey";
         }
-        
+
         if (base64 == null || base64.isEmpty()) {
             return "Se debe generar en Base64";
         }
@@ -91,7 +92,7 @@ public class ServicioGetJWTRest {
         try {
             return servicioJWT.getJWT(apiKey, sistemaTransversal);
         } catch (ServicioSistemaTransversalException e) {
-            return e.getMessage();
+            return UtilsJson.generarJsonResponse(500, e.getMessage(), null);
         }
     }
 }

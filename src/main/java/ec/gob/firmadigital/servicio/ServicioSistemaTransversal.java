@@ -325,10 +325,10 @@ public class ServicioSistemaTransversal {
         String apiKeySistema = sistema.getApiKey().toUpperCase();
         logger.fine("apiKeySistema=" + apiKey);
 
-        // Si no tiene API Key dejar pasar la invocacion!
+        // Si no tiene API Key
         if (apiKeySistema == null) {
             logger.warning("API KEY is null, sistema=" + nombre);
-            return true;
+            return false;
         }
 
         String hash = hashSha256(apiKey).toUpperCase();
